@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/IntegradorAPP.PS.Servicios" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/IntegradorAPP.PS.Servicios" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="ArrayOfModulo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Modulo" nillable="true" type="tns:Modulo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfModulo" nillable="true" type="tns:ArrayOfModulo" />
+  <xs:complexType name="Modulo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="pApp" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pOid" type="xs:int" />
+      <xs:element minOccurs="0" name="pOrdenMostrado" type="xs:int" />
+      <xs:element minOccurs="0" name="pRutaPadre" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pTextoNodo" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pUrlNodo" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pValorModulo" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Modulo" nillable="true" type="tns:Modulo" />
+  <xs:complexType name="GrupoUsuario">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="pApp" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pEscribir" type="xs:boolean" />
+      <xs:element minOccurs="0" name="pLeer" type="xs:boolean" />
+      <xs:element minOccurs="0" name="pModificar" type="xs:boolean" />
+      <xs:element minOccurs="0" name="pNombre" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="pOid" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="GrupoUsuario" nillable="true" type="tns:GrupoUsuario" />
+</xs:schema>

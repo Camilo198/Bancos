@@ -1,0 +1,155 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Sitio.master.cs" Inherits="Bancos.PS.PaginaMaestra.Sitio" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <asp:ContentPlaceHolder ID="cphCabecera" runat="server">
+    </asp:ContentPlaceHolder>
+    <link href="~/MarcaVisual/estilos/estilos.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">
+        function capturarTecla(e) {
+            var evento = window.event || elEvento;
+
+            //if (evento.keyCode == 17)
+            //    alert('Favor Soltar la Tecla "Ctrl"');
+            //else if (evento.keyCode == 16)
+            //    alert('Favor Soltar la Tecla "Shift"');
+        }
+    </script>
+</head>
+<body onkeydown="capturarTecla(this)">
+    <form id="form1" runat="server">
+    <asp:ToolkitScriptManager ID="tsmAdminCodigo" runat="server" ScriptMode="Release"
+        EnableScriptGlobalization="true" EnableScriptLocalization="true">
+    </asp:ToolkitScriptManager>
+    <table class="FondoBarraHerramientas" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <asp:ContentPlaceHolder ID="cphBarraHerramientas" runat="server">
+                </asp:ContentPlaceHolder>
+            </td>
+        </tr>
+    </table>
+    <asp:UpdatePanel ID="upPadre" runat="server" UpdateMode="Always">
+        <ContentTemplate>
+            <table class="TablaContenido" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="MenuLateral">
+                        <table class="EstiloMenuLateral" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="EstiloCabezoteMenu">
+                                    Bancos
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ContenidoMenu">
+                                    <asp:Panel ID="pnlMenuArbol" BackColor="White" runat="server" ScrollBars="Auto" Width="219px"
+                                        Height="583px">
+                                        <asp:TreeView ID="tvMenu" runat="server" Width="210px" ExpandDepth="1" CollapseImageUrl="~/MarcaVisual/iconos/subnodo16.png"
+                                            ExpandImageUrl="~/MarcaVisual/iconos/nodo_abierto.png" NoExpandImageUrl="~/MarcaVisual/iconos/subnodo16.png"
+                                            ShowLines="True" NodeWrap="True">
+                                            <NodeStyle ImageUrl="~/MarcaVisual/iconos/subnodo16.png" />
+                                            <RootNodeStyle ImageUrl="~/MarcaVisual/iconos/nodo_padre.png" />
+                                        </asp:TreeView>
+                                    </asp:Panel>
+                                    <table class="EstiloMenuBase" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="SeparadorContenido">
+                    </td>
+                    <td style="width: 675px">
+                        <asp:ContentPlaceHolder ID="cphContenido" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </td>
+                </tr>
+            </table>
+            <div class="BarraEstado">
+                <table class="EstiloBarraEstado">
+                    <tr>
+                        <td>
+                            <asp:ContentPlaceHolder ID="cphBarraEstado" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </td>
+                        <td style="text-align: right">
+                            <asp:Image ID="imgUsuario" ImageUrl="~/MarcaVisual/iconos/usuario.png" Width="12px"
+                                runat="server" />
+                            <asp:Label ID="lbUsuario" runat="server"></asp:Label>
+                        </td>
+                        <td style="width: 3px">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <asp:Panel ID="pnlPermisos" runat="server">
+                <asp:Label ID="lbPermisos" runat="server" Text="Usted No Tiene<br/>Permisos Para Este Sistema!!!"
+                    ForeColor="White" Font-Bold="true"></asp:Label>
+            </asp:Panel>
+            <asp:ModalPopupExtender ID="mpPermisos" runat="server" PopupControlID="pnlPermisos"
+                TargetControlID="lbUsuario" BackgroundCssClass="VentanaModalSinPermisos">
+            </asp:ModalPopupExtender>
+            <asp:Panel ID="pnlLogin" BackColor="LightGray" runat="server" ScrollBars="none" Width="205px"
+                Height="90px">
+                <table style="width: 100%" cellpadding="0" cellspacing="2">
+                    <tr>
+                        <td colspan="4" style="height: 5px; background-color: Scrollbar">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="EspaciadoIntermedio">
+                        </td>
+                        <td>
+                            <asp:Image ID="imgUsuarioSOS" ImageUrl="~/MarcaVisual/iconos/usuario.png" Width="16px"
+                                runat="server" />
+                        </td>
+                        <td>
+                            <asp:Label ID="Label1" runat="server" Text="Usuario:"></asp:Label>
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txbUsuario" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                            <asp:Label ID="lbClave" runat="server" Text="Clave:"></asp:Label>
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txbClave" runat="server" TextMode="Password"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right">
+                            <table style="width: 100%" cellpadding="0" cellspacing="2">
+                                <tr>
+                                    <td style="font-size: 7pt; text-align: center">
+                                        <asp:Label ID="lbInforme" runat="server"></asp:Label>
+                                    </td>
+                                    <td>
+                                        <asp:Button ID="btnIngresar" runat="server" Text="Ingresar" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <asp:ModalPopupExtender TargetControlID="lbUsuario" ID="mpeLogin" runat="server"
+                PopupControlID="pnlLogin" BackgroundCssClass="VentanaModal">
+            </asp:ModalPopupExtender>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    </form>
+</body>
+</html>

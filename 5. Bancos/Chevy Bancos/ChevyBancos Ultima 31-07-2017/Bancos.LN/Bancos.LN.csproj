@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C88A8699-A7CC-4F12-AF53-3FD3BA4E2EAB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Bancos.LN</RootNamespace>
+    <AssemblyName>Bancos.LN</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Bancos.PS\Librerias\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Consultas\ArchivoAsobancariaLN.cs" />
+    <Compile Include="Consultas\ArchivoPlanoLN.cs" />
+    <Compile Include="Consultas\BancoDtlArchivosProcesadosLN.cs" />
+    <Compile Include="Consultas\BancoLN.cs" />
+    <Compile Include="Consultas\CamposEquivalenciasLN.cs" />
+    <Compile Include="Consultas\ConfiguracionLN.cs" />
+    <Compile Include="Consultas\BancoDtlArchivosProcesadosFactLN.cs" />
+    <Compile Include="Consultas\EquivalenciasLN.cs" />
+    <Compile Include="Consultas\EstructuraArchivoLN.cs" />
+    <Compile Include="Consultas\HistorialArchivosEntradaLN.cs" />
+    <Compile Include="Consultas\HistorialArchivosSalidaLN.cs" />
+    <Compile Include="Consultas\InterpreteArchivoLN.cs" />
+    <Compile Include="Consultas\LogsLN.cs" />
+    <Compile Include="Consultas\LupaLN.cs" />
+    <Compile Include="Consultas\PagosOnlineLN.cs" />
+    <Compile Include="Consultas\RespuestaTransaccionLN.cs" />
+    <Compile Include="Consultas\RutaLN.cs" />
+    <Compile Include="Consultas\TablaLN.cs" />
+    <Compile Include="Consultas\TablasEquivalenciasLN.cs" />
+    <Compile Include="Consultas\TipoArchivoLN.cs" />
+    <Compile Include="Consultas\TipoDatoLN.cs" />
+    <Compile Include="Consultas\TipoLineaLN.cs" />
+    <Compile Include="Consultas\TransformarLN.cs" />
+    <Compile Include="Consultas\TransRespuestaLN.cs" />
+    <Compile Include="Consultas\ValorLN.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilidades\Convertidor.cs" />
+    <Compile Include="Utilidades\Encriptador.cs" />
+    <Compile Include="Utilidades\LectorXML.cs" />
+    <Compile Include="Utilidades\Mensajero.cs" />
+    <Compile Include="Utilidades\RevisorBD.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bancos.AD\Bancos.AD.csproj">
+      <Project>{5D36E17C-4A41-4BC0-B97C-AB6080EE8F84}</Project>
+      <Name>Bancos.AD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Bancos.EN\Bancos.EN.csproj">
+      <Project>{2FC4E37C-17B6-473F-8A2A-694F33BC57C2}</Project>
+      <Name>Bancos.EN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2FC4E37C-17B6-473F-8A2A-694F33BC57C2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Bancos.EN</RootNamespace>
+    <AssemblyName>Bancos.EN</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CamposXML.cs" />
+    <Compile Include="Definicion\ArchivoAsobancariaDEF.cs" />
+    <Compile Include="Definicion\ArchivoPlanoDEF.cs" />
+    <Compile Include="Definicion\BancoDEF.cs" />
+    <Compile Include="Definicion\BancoDtlArchivosProcesadosDEF.cs" />
+    <Compile Include="Definicion\CamposEquivalenciasDEF.cs" />
+    <Compile Include="Definicion\ConfiguracionDEF.cs" />
+    <Compile Include="Definicion\BancoDtlArchivosProcesadosFactDEF.cs" />
+    <Compile Include="Definicion\EquivalenciasDEF.cs" />
+    <Compile Include="Definicion\EstructuraArchivoDEF.cs" />
+    <Compile Include="Definicion\HistorialArchivosEntradaDEF.cs" />
+    <Compile Include="Definicion\HistorialArchivosSalidaDEF.cs" />
+    <Compile Include="Definicion\InterpreteArchivoDEF.cs" />
+    <Compile Include="Definicion\LogsDEF.cs" />
+    <Compile Include="Definicion\LupaDEF.cs" />
+    <Compile Include="Definicion\RespuestaTransaccionDEF.cs" />
+    <Compile Include="Definicion\RutaDEF.cs" />
+    <Compile Include="Definicion\TablaDEF.cs" />
+    <Compile Include="Definicion\TablasEquivalenciasDEF.cs" />
+    <Compile Include="Definicion\TipoArchivoDEF.cs" />
+    <Compile Include="Definicion\TipoDatoDEF.cs" />
+    <Compile Include="Definicion\TipoLineaDEF.cs" />
+    <Compile Include="Definicion\TransformarDEF.cs" />
+    <Compile Include="Definicion\TransRespuestaDEF.cs" />
+    <Compile Include="Definicion\ValorDEF.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tablas\ArchivoAsobancaria.cs" />
+    <Compile Include="Tablas\ArchivoPlano.cs" />
+    <Compile Include="Tablas\BancoDtlArchivosProcesados.cs" />
+    <Compile Include="Tablas\BancoDtlArchivosProcesadosFact.cs" />
+    <Compile Include="Tablas\CamposEquivalencias.cs" />
+    <Compile Include="Tablas\Equivalencias.cs" />
+    <Compile Include="Tablas\HistorialArchivosEntrada.cs" />
+    <Compile Include="Tablas\HistorialArchivosSalida.cs" />
+    <Compile Include="Tablas\Banco.cs" />
+    <Compile Include="Tablas\Configuracion.cs" />
+    <Compile Include="Tablas\EstructuraArchivo.cs" />
+    <Compile Include="Tablas\InterpreteArchivo.cs" />
+    <Compile Include="Tablas\Logs.cs" />
+    <Compile Include="Tablas\Lupa.cs" />
+    <Compile Include="Tablas\PagosOnline.cs" />
+    <Compile Include="Tablas\RespuestaTransaccion.cs" />
+    <Compile Include="Tablas\Ruta.cs" />
+    <Compile Include="Tablas\Tabla.cs" />
+    <Compile Include="Tablas\TablasEquivalencias.cs" />
+    <Compile Include="Tablas\TipoArchivo.cs" />
+    <Compile Include="Tablas\TipoDato.cs" />
+    <Compile Include="Tablas\TipoLinea.cs" />
+    <Compile Include="Tablas\Transformar.cs" />
+    <Compile Include="Tablas\TransRespuesta.cs" />
+    <Compile Include="Tablas\Valor.cs" />
+    <Compile Include="TipoMensaje.cs" />
+    <Compile Include="TiposConsultas.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Procesos.PS.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Procesos_PS_ServicioAsoBancaria_AsoBancaria" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_MoverArchivosFTP_moverArchivosFTP" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche016v/AdministracionFtp/Servicios/moverArchivosFTP.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioPagosOnline_PagosOnline" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche010f/Bancos/Servicios/PagosOnline.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioRecaudo_Recaudo" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche016v/Bancos/Servicios/Recaudo.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioTarjetaCredito_TarjetasCredito" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioBancos_WsBancos" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche010f:8084/WsBancos.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://sbogche010f/Administracionftp/Servicios/moverArchivosFTP.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_wsenviocorreos_Service" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://wsenviocorreos.chevyplan.col/service.asmx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
