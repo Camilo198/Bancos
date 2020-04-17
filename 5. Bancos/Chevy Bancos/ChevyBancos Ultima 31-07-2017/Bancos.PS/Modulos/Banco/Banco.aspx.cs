@@ -143,10 +143,10 @@ namespace Bancos.PS.Modulos.Banco
            {
              ArrayList CorreosControl = new ArrayList();
             //    //CorreosControl.Add("marina.ramirez@Chevyplan.com.co");
-            //    //Bancos.PS.Servicios.PagosOnline procesoPayOnline = new Bancos.PS.Servicios.PagosOnline();
-            //    //mens = procesoPayOnline.ServicioPagosOnline("NombreCuenta", "00015", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Recaudo\\PagosOnline\\Recibidos\\", CorreosControl,
-            //    //                                            "00", "16525785990", "00", "Sistemas@chevyplan.com.co",
-            //    //                                            "TAREA PROGRAMADA", "POL1");
+             Bancos.PS.Servicios.PagosOnline procesoPayOnline = new Bancos.PS.Servicios.PagosOnline();
+             mens = procesoPayOnline.ServicioPagosOnline("NombreCuenta", "00015", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Recaudo\\PagosOnline\\Recibidos\\", CorreosControl,
+                                                         "00", "16525785990", "00", "Sistemas@chevyplan.com.co",
+                                                         "TAREA PROGRAMADA", "POL1");
 
 
              //Bancos.PS.Servicios.TarjetasCredito TajetasCredito = new Bancos.PS.Servicios.TarjetasCredito();
@@ -154,10 +154,10 @@ namespace Bancos.PS.Modulos.Banco
              //                                        "Sistemas@chevyplan.com.co", "00", "0", "00", "marina.ramirez", @"\\sbogche016v\ARCHPLANOS\Pagos\TC\Falabella\Procesados\", "TCR1");
 
 
-
-             Bancos.PS.Servicios.TarjetasCredito TajetasCredito = new Bancos.PS.Servicios.TarjetasCredito();
-             mens = TajetasCredito.ServicioTarjetasCredito("NombreCuenta", "00018", "00018", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Recibidos\\", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Procesados\\", CorreosControl,
-                                                     "Sistemas@chevyplan.com.co", "00018", "16525785990", "1", "marina.ramirez", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Procesados\\", "TCR1");
+//Linea Principal Descomentariar con paso a produccion
+             //Bancos.PS.Servicios.TarjetasCredito TajetasCredito = new Bancos.PS.Servicios.TarjetasCredito();
+             //mens = TajetasCredito.ServicioTarjetasCredito("NombreCuenta", "00018", "00018", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Recibidos\\", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Procesados\\", CorreosControl,
+             //                                        "Sistemas@chevyplan.com.co", "00018", "16525785990", "1", "marina.ramirez", "\\\\sbogche020v\\ARCHPLANOS\\Pagos\\TC\\Exito\\Procesados\\", "TCR1");
 
              //Bancos.PS.Servicios.Recaudo Recaudo = new Bancos.PS.Servicios.Recaudo();
              //mens = Recaudo.ServicioRecaudoDiario("Lugar Pago 20", "49", "00012", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Recaudo\\Bogota\\Parciales\\", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Recaudo\\Bogota\\Recibidos\\", CorreosControl,

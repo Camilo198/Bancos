@@ -126,6 +126,9 @@ namespace Bancos.PS.Servicios
             dt1.Columns.Add("valor");
             dt1.Columns.Add("fecha");
             dt1.Columns.Add("contratofisico");// se usaba para EPICOR
+            dt1.Columns.Add("medioPagoAplicaSico");//Tarjeta Credito
+            dt1.Columns.Add("medioPagoAplicaVentas");//Tarjeta Credito
+            dt1.Columns.Add("CodigoAutorizacion");//Tarjeta Credito
 
             foreach (DataRow row in tablaContratos.Tables[0].Rows)
             {
@@ -138,6 +141,9 @@ namespace Bancos.PS.Servicios
                     dr1["valor"] = row[2].ToString();
                     dr1["fecha"] = row[3].ToString();
                     dr1["contratofisico"] = row[4].ToString();
+                    dr1["medioPagoAplicaSico"] = row[5].ToString();//Tarjeta Credito
+                    dr1["medioPagoAplicaVentas"] = row[6].ToString();//Tarjeta Credito
+                    dr1["CodigoAutorizacion"] = row[7].ToString();//Tarjeta Credito
                     dt1.Rows.Add(dr1);
                 }
             }
@@ -197,7 +203,9 @@ namespace Bancos.PS.Servicios
                        
                         //AQUI MRT
 
-                        CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
+                        // CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
+// Cambiar al pasar a produccion
+                        CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
                             Correo.enviarNotificaciones(Directorio, CorreosNoti , nombreArchivo, Remitente,
                                                      registrosLote, tipoArchivo);
 
@@ -225,7 +233,8 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                 CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
+                CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
+ // Cambiar paso produccion            //CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
                 Correo.enviarNotificacionesError(NombreCuenta,CorreosNoti, Remitente, ex.Message, tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
@@ -366,6 +375,30 @@ namespace Bancos.PS.Servicios
                     {
                         line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[2].ToString().Trim());//SERVICIO PRINCIPAL                    
                     }
+
+                    //Tarjeta Credito
+
+                    if (String.IsNullOrEmpty(tabla.Tables[0].Rows[i].ItemArray[5].ToString().Trim())) { }
+                    //Nada
+                    else
+                    {
+                        line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[5].ToString().Trim());//Medio Pago Aplica Sico
+                    }
+
+                    if (String.IsNullOrEmpty(tabla.Tables[0].Rows[i].ItemArray[6].ToString().Trim())) { }
+                    //Nada
+                    else
+                    {
+                        line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[6].ToString().Trim());//Medio Pago Aplica Ventas
+                    }
+
+                    if (String.IsNullOrEmpty(tabla.Tables[0].Rows[i].ItemArray[7].ToString().Trim())) { }
+                    //Nada
+                    else
+                    {
+                        line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[7].ToString().Trim());//Codigo Autorizacion
+                    }
+//---------------------------------
                     
                     LineaArmada3DT = armarLineas(line3DT, ListaLinea3DT);
                     sw.WriteLine(LineaArmada3DT);
@@ -521,7 +554,17 @@ namespace Bancos.PS.Servicios
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
                             else if (objAso.pNombreCampo.Equals("Valor recaudado"))
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
+                            //Tarjeta Credito       
+                            else if (objAso.pNombreCampo.Equals("Codigo de la sucursal"))
+                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[3]));//Medio PAgo Aplica Sico
+                            else if (objAso.pNombreCampo.Equals("Codigo de la entidad financiera debitada"))
+                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[4]));//Medio PAgo Aplica Ventas
+                            else if (objAso.pNombreCampo.Equals("No. de Autorizacion"))
+                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[5]));//Codigo Autorizacion
+                            //-------
                             break;
+                        
+
                         case "4CL":
                             if (objAso.pNombreCampo.Equals("Total registros en lote"))
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
