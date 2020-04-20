@@ -284,19 +284,23 @@ namespace WebServiceBancos
 
                 String[] RangoCont = RutaArchivo.ToString().Split('\\');
                 DataTable parametro = new DataTable(); //VALFEC
-                switch (RangoCont[5].ToString())
-                {
-                    case "Fiducia1":
-                        Fiducia = "F1";
-                        Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
-                        break;
-                    case "Fiducia3":
-                        Fiducia = "F3";
-                        Directorio = Repositorio + @"\Fiducia3\Procesos\" + año + "\\" + mes + "\\";
-                        break;
-                    default:
-                        break;
-                }
+
+                Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
+
+                //Se comentaria porque ya no se manajera la fiducia 3
+                //switch (RangoCont[5].ToString())
+                //{
+                //    case "Fiducia1":
+                //        Fiducia = "F1";
+                //        Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
+                //        break;
+                //    case "Fiducia3":
+                //        Fiducia = "F3";
+                //        Directorio = Repositorio + @"\Fiducia3\Procesos\" + año + "\\" + mes + "\\";
+                //        break;
+                //    default:
+                //        break;
+                //}
 
                 int nregistrosprocesados = 0;
                 int nreferenciadesconocida = 0;
@@ -319,15 +323,16 @@ namespace WebServiceBancos
                     System.IO.Directory.CreateDirectory(Directorio);
                 }
 
-                //Se encarga de validar a que fiducia pertenece
-                ObjetoTablas ObjPara = new ObjetoTablas();
-                ObjPara.pParametro = "Contratos Fiducia 3";
-                ObjPara.pVigente = "S";
+                //Se comentaria porque ya no se manajera la fiducia 3
+                ////Se encarga de validar a que fiducia pertenece
+                //ObjetoTablas ObjPara = new ObjetoTablas();
+                //ObjPara.pParametro = "Contratos Fiducia 3";
+                //ObjPara.pVigente = "S";
 
-                List<ObjetoTablas> listaParametro = new PagosLN().ConsultaEstadoParametro(ObjPara, "ConsultaParametroEstado");
+                //List<ObjetoTablas> listaParametro = new PagosLN().ConsultaEstadoParametro(ObjPara, "ConsultaParametroEstado");
 
-                if (listaParametro.Count == 0)
-                    return "OCURRIO UN ERROR EN LA PARAMETRIZACIÓN DE FIDUCIA 3";
+                //if (listaParametro.Count == 0)
+                //    return "OCURRIO UN ERROR EN LA PARAMETRIZACIÓN DE FIDUCIA 3";
 
                 /// <summary>
                 /// Trae el lote maximo que existe y lo aumenta en 1
@@ -674,54 +679,56 @@ namespace WebServiceBancos
                                     ExisteRegstro = true;
                                 }
                             }
+                            
+                            
+                            //Se comentarea porque ya no se utilizaa la fiducia 3
+                            //if (ExisteRegstro)
+                            //{
+                            //    ObjetoTablas objParaResul = new ObjetoTablas();
+                            //    objParaResul = listaParametro[0];
+                            //    String[] RangoContrato = objParaResul.pValor.ToString().Split('-');
+                            //    int fiduciaerrada = 0;
 
-                            if (ExisteRegstro)
-                            {
-                                ObjetoTablas objParaResul = new ObjetoTablas();
-                                objParaResul = listaParametro[0];
-                                String[] RangoContrato = objParaResul.pValor.ToString().Split('-');
-                                int fiduciaerrada = 0;
+                            //    switch (LupaFiducia.Trim())
+                            //    {
+                            //        case "1":
+                            //            if (Convert.ToInt32(ContratoValida) >= Convert.ToInt32(RangoContrato[0].ToString()) && Convert.ToInt32(ContratoValida) <= Convert.ToInt32(RangoContrato[1].ToString()))
+                            //            {
+                            //                fiduciaerrada++;
+                            //            }
+                            //            break;
+                            //        case "3":
+                            //            if (Convert.ToInt32(ContratoValida) < Convert.ToInt32(RangoContrato[0].ToString()) || Convert.ToInt32(ContratoValida) > Convert.ToInt32(RangoContrato[1].ToString()))
+                            //            {
+                            //                fiduciaerrada++;
+                            //            }
+                            //            break;
+                            //        default:
+                            //            break;
+                            //    }
 
-                                switch (LupaFiducia.Trim())
-                                {
-                                    case "1":
-                                        if (Convert.ToInt32(ContratoValida) >= Convert.ToInt32(RangoContrato[0].ToString()) && Convert.ToInt32(ContratoValida) <= Convert.ToInt32(RangoContrato[1].ToString()))
-                                        {
-                                            fiduciaerrada++;
-                                        }
-                                        break;
-                                    case "3":
-                                        if (Convert.ToInt32(ContratoValida) < Convert.ToInt32(RangoContrato[0].ToString()) || Convert.ToInt32(ContratoValida) > Convert.ToInt32(RangoContrato[1].ToString()))
-                                        {
-                                            fiduciaerrada++;
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
+                            //    if (fiduciaerrada > 0)
+                            //    {
 
-                                if (fiduciaerrada > 0)
-                                {
-
-                                    ObjetoTablas objParaErrados = new ObjetoTablas();
-                                    objParaErrados.pProcesoErr = "PA";
-                                    objParaErrados.pReferenciaErr = ContratoValida;
-                                    objParaErrados.pCodBancoErr = ValdObjetos.pCodBanco;
-                                    objParaErrados.pValorPagoErr = ValdObjetos.pValPago;
-                                    objParaErrados.pFechaErr = Convert.ToDateTime(ValdObjetos.pFecPago).ToString("dd/MM/yyyy");
-                                    objParaErrados.pForPagoErr = ValdObjetos.pForPago;
-                                    objParaErrados.pUsuarioProcesoErr = "AUTOMATICO";
+                            //        ObjetoTablas objParaErrados = new ObjetoTablas();
+                            //        objParaErrados.pProcesoErr = "PA";
+                            //        objParaErrados.pReferenciaErr = ContratoValida;
+                            //        objParaErrados.pCodBancoErr = ValdObjetos.pCodBanco;
+                            //        objParaErrados.pValorPagoErr = ValdObjetos.pValPago;
+                            //        objParaErrados.pFechaErr = Convert.ToDateTime(ValdObjetos.pFecPago).ToString("dd/MM/yyyy");
+                            //        objParaErrados.pForPagoErr = ValdObjetos.pForPago;
+                            //        objParaErrados.pUsuarioProcesoErr = "AUTOMATICO";
 
 
-                                    List<string[,]> ConsultPagosErrados = new PagosErradosLN().ValidaExistePagoErrado(objParaErrados, "ConsultaExistePagoErrado");
+                            //        List<string[,]> ConsultPagosErrados = new PagosErradosLN().ValidaExistePagoErrado(objParaErrados, "ConsultaExistePagoErrado");
 
-                                    if (ConsultPagosErrados.Count == 0)
-                                    {
-                                        string GuardaPagoErrado = new PagosErradosLN().InsertPagosErrados(objParaErrados, "InsertPagosErrados");
-                                    }
+                            //        if (ConsultPagosErrados.Count == 0)
+                            //        {
+                            //            string GuardaPagoErrado = new PagosErradosLN().InsertPagosErrados(objParaErrados, "InsertPagosErrados");
+                            //        }
 
-                                }
-                            }
+                            //    }
+                            //}
 
 
 
@@ -1595,7 +1602,9 @@ namespace WebServiceBancos
                 RegistrosProcesados.Close();
                 sr.Close();
                 string legalizados = (PagoValdLN.Legalizacionpagos("UpdateLegalizaciones"));
-                legalizados =legalizados + (PagoValdLN.Legalizacionpagos("UpdateLegalizacionesPagoCuota"));
+                String legalizados2 =(PagoValdLN.Legalizacionpagos("UpdateLegalizacionesPagoCuota"));
+
+                int legalizacionFinal = Convert.ToInt32(legalizados) + Convert.ToInt32(legalizados2);
 
                 #endregion
 
@@ -1616,7 +1625,7 @@ namespace WebServiceBancos
                 + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
                 "1. Registros nuevos a tarjeta de credito: " + npagosguardados + " registros. \n" +
                 "2. Registros existentes en ventas: " + nregistrosexistentes + " registros. \n" +
-                "3. Registros legalizados: " + legalizados + " registros. \n" +
+                "3. Registros legalizados: " + legalizacionFinal + " registros. \n" +
                 "4. Errores presentados: " + error + " registros. \n\n" +
                 "Total Valor $ " + resultsuma + "\n\n" +
                 "Total registros procesados: " + nregistrosprocesados + " registros. \n\n" +
