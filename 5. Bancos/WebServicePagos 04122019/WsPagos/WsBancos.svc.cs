@@ -285,6 +285,7 @@ namespace WebServiceBancos
                 String[] RangoCont = RutaArchivo.ToString().Split('\\');
                 DataTable parametro = new DataTable(); //VALFEC
 
+                Fiducia = "F1";
                 Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
 
                 //Se comentaria porque ya no se manajera la fiducia 3
@@ -477,6 +478,7 @@ namespace WebServiceBancos
                             sr.Close();
                             File.Delete(RutaArchivo + NombreArchivo);
                             
+                            objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");// habilita de nuevo la disponibilidad
                             //registroDuplicado = true;
                             //pagosConError += ValdObjetos.pCodBanco + " " + ValdObjetos.pFecPago + " " + ValdObjetos.pContrato + " " + ValdObjetos.pValPago + " . \n ";
                             return "EL ARCHIVO YA SE ENCUENTRA PROCESADO"; /*REGREP*/
@@ -542,7 +544,7 @@ namespace WebServiceBancos
 
                             //Pago Tarjeta
                             ValdObjetos.pNumAutorizacion = linea.Substring(74, 6);
-                            if (ValdObjetos.pNumAutorizacion != "000000")
+                            if (ValdObjetos.pNumAutorizacion != "000000" && PagosOnline=="S")
                             {
                                 ValdObjetos.pCodBanco = linea.Substring(80, 3);
                                 ValdObjetos.pFecPago = FechaRecaudo.Trim() + " " + HoraArchivo + ":" + MinutosArchivo;
@@ -629,7 +631,7 @@ namespace WebServiceBancos
 
                                 
                                 //PAGO TARJETA
-                                 if (ValdObjetos.pNumAutorizacion != "0")
+                                if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
                                  {
                                      ValdObjetos.pCodBanco = linea.Substring(83, 4);
                                      string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
@@ -901,7 +903,7 @@ namespace WebServiceBancos
                                     }
                                     RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
                                      //PAGO TARJETA
-                                    if (ValdObjetos.pNumAutorizacion != "0")
+                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
                                     {
                                         string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagosCuotas");
                                         CrearArchivoSicoTarjeta(NombreArchivo,ValdObjetos.pCodBanco);
@@ -1153,6 +1155,12 @@ namespace WebServiceBancos
                         {
                             CountEfectivo++;
                         }
+
+                        if (CountEfectivo == 0)
+                        {
+                            File.Delete(RutaDestino);
+
+                        }
                         
                         //PAgos Tarjeta Contadores
                         RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
@@ -1167,6 +1175,11 @@ namespace WebServiceBancos
                             CountVisaMarterCard++;
                         }
 
+                        if (CountVisaMarterCard == 0)
+                        {
+                            File.Delete(RutaDestino);
+                        }
+
                         //Amex
                         RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
                         RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoAmexSICO);
@@ -1178,6 +1191,11 @@ namespace WebServiceBancos
                         foreach (string line in linesAmex)
                         {
                             CountAmex++;
+                        }
+
+                        if (CountAmex == 0)
+                        {
+                            File.Delete(RutaDestino);
                         }
                         //Dinners
                         RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
@@ -1192,6 +1210,10 @@ namespace WebServiceBancos
                             CountDinners++;
                         }
 
+                        if (CountDinners == 0)
+                        {
+                            File.Delete(RutaDestino);
+                        }
                         //Elimina los archivos de Cache
                         File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
                         File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
@@ -1253,11 +1275,20 @@ namespace WebServiceBancos
                             System.IO.File.Copy(RutaOrigen, RutaDestino, true);
                             File.Delete(RutaArchivo + archi);
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
-                            informacion = "Nombre archivo para SICO: " + NombreArchivoSico + "\n\n";
-                            /*PAGOS*/
-                            //Se encarga de aplicar directamente en SICO
-                            string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
-                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            if(exporasico=="OK"){
+
+                                informacion = "Nombre archivo para SICO: " + NombreArchivoSico + " \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+                                string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
+                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            }
+                            else{
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO AL FTP DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar.",
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                         }
                     }
                 }
@@ -1269,73 +1300,108 @@ namespace WebServiceBancos
                     /// </summary>
                     if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC")) { }
                     else
-                    { // Pagos Efectivo
+                    {
+                        string comando;
+                        if (CountEfectivo>0){
+                        // Pagos Efectivo
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
-                        informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + "\n";
+                        informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + " \n";
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
-                        string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
+                        comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
-
-
+                        }
+                        else if(CountVisaMarterCard>0){
                         //Pagos Tarjeta
                         //Visa y MAster Card
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoVisaMAstercardSICO, RutaSico, UsuFTP, PassFTP);
-                        informacion =informacion+ "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + "\n";
+                        informacion = informacion + "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + ". \n";
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
-
-                        //Dinners
-                        exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
-                        informacion =informacion+ "Nombre archivo Tarjeta Dinners para SICO: " + NombreArchivoDinnersSICO + "\n";
-                        /*PAGOS*/
-                        //Se encarga de aplicar directamente en SICO
-                        comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
-                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
-
-                        //Amex
-                        exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
-                        informacion =informacion+ "Nombre archivo Tarjeta Amex para SICO: " + NombreArchivoAmexSICO + "\n\n";
-                        /*PAGOS*/
-                        //Se encarga de aplicar directamente en SICO
-                        comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
-                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
-
+                        }
+                        else if (CountDinners > 0)
+                        {
+                            //Dinners
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
+                            informacion = informacion + "Nombre archivo Tarjeta Dinners para SICO: " + NombreArchivoDinnersSICO + ". \n";
+                            /*PAGOS*/
+                            //Se encarga de aplicar directamente en SICO
+                            comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
+                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        }
+                        else if (CountAmex > 0)
+                        {
+                            //Amex
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
+                            informacion = informacion + "Nombre archivo Tarjeta Amex para SICO: " + NombreArchivoAmexSICO + ". \n";
+                            /*PAGOS*/
+                            //Se encarga de aplicar directamente en SICO
+                            comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
+                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        }
                     }
                 }
 
-                Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
-                "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
-                + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
-                + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
-                "1. Pagos aplicados a primera inversión: " + npagosguardados + " registros. \n" +
-                "2. Cupos para pagos a cuotas: " + ncupos + " registros. \n" +
-                "3. Referencias ya existentes en ventas: " + nregistrosexistentes + " registros. \n" +
-                "4. Referencias erradas: " + totnreferenciaerrada + " registros. \n" +
-                "5. Referencias notas debito: " + totnotasdebito + " registros. \n" +
-                "6. Referencias notas credito: " + totnotascredito + " registros. \n" +
-                "7. Referencias desconocidas: " + nreferenciadesconocida + " registros. \n" +
-                "8. Pagos en Efectivo: " + CountEfectivo + " registros. \n" +
-                "9. Pagos en Visa + Mastercard: " + CountVisaMarterCard + " registros. \n" +
-                "10. Pagos en Dinners: " + CountDinners + " registros. \n" +
-                "11. Pagos en Amex: " + CountAmex + " registros. \n" +
-                "12. Total Pagos: " + CountSico + " registros. \n" +
-                "13. Total Valor Efectivo + Cheques $ " + sumaEfectivo + "\n" +
-                "14. Total Valor Tarjetas Visa y MasterCard $ " + sumaVisaMastercard + "\n" +
-                "15. Total Valor Tarjeta Dinners $ " + sumaDinners + "\n" +
-                "16. Total Valor Tarjeta Amex $ " + sumaAmex + "\n" +
-                "Total Valor $ " + resultsuma + "\n" +
-                "Total registros procesados: " + nregistrosprocesados + " registros. \n" +
-                informacion +
-                "Número de lote: " + LoteMaximo + ".\n\n" +
-                "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
-                "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
-                "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
-                "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
-                "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                if (CountAmex > 0 || CountDinners > 0 || CountVisaMarterCard > 0)
+                {
+                    Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                    "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
+                    + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
+                    + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
+                    "1. Pagos aplicados a primera inversión: " + npagosguardados + " registros. \n" +
+                    "2. Cupos para pagos a cuotas: " + ncupos + " registros. \n" +
+                    "3. Referencias ya existentes en ventas: " + nregistrosexistentes + " registros. \n" +
+                    "4. Referencias erradas: " + totnreferenciaerrada + " registros. \n" +
+                    "5. Referencias notas debito: " + totnotasdebito + " registros. \n" +
+                    "6. Referencias notas credito: " + totnotascredito + " registros. \n" +
+                    "7. Referencias desconocidas: " + nreferenciadesconocida + " registros. \n" +
+                    "8. Pagos en Efectivo: " + CountEfectivo + " registros. \n" +
+                    "9. Pagos en Visa + Mastercard: " + CountVisaMarterCard + " registros. \n" +
+                    "10. Pagos en Dinners: " + CountDinners + " registros. \n" +
+                    "11. Pagos en Amex: " + CountAmex + " registros. \n" +
+                    "12. Total Pagos: " + CountSico + " registros. \n" +
+                    "13. Total Valor Efectivo + Cheques $ " + sumaEfectivo + ". \n" +
+                    "14. Total Valor Tarjetas Visa y MasterCard $ " + sumaVisaMastercard + ". \n" +
+                    "15. Total Valor Tarjeta Dinners $ " + sumaDinners + ". \n" +
+                    "16. Total Valor Tarjeta Amex $ " + sumaAmex + ". \n" +
+                    "Total Valor $ " + resultsuma + ". \n" +
+                    "Total registros procesados: " + nregistrosprocesados + " registros. \n" +
+                    informacion +
+                    "Número de lote: " + LoteMaximo + ".\n\n" +
+                    "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
+                    "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
+                    "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
+                    "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
+                    "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                }
 
+                else {
+                    Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+               "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
+               + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
+               + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
+               "1. Pagos aplicados a primera inversión: " + npagosguardados + " registros. \n" +
+               "2. Cupos para pagos a cuotas: " + ncupos + " registros. \n" +
+               "3. Referencias ya existentes en ventas: " + nregistrosexistentes + " registros. \n" +
+               "4. Referencias erradas: " + totnreferenciaerrada + " registros. \n" +
+               "5. Referencias notas debito: " + totnotasdebito + " registros. \n" +
+               "6. Referencias notas credito: " + totnotascredito + " registros. \n" +
+               "7. Referencias desconocidas: " + nreferenciadesconocida + " registros. \n" +
+               "8. Total Pagos: " + CountSico + " registros. \n" +
+               "Total Valor $ " + resultsuma + ". \n" +
+               "Total registros procesados: " + nregistrosprocesados + " registros. \n" +
+               informacion +
+               "Número de lote: " + LoteMaximo + ".\n\n" +
+               "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
+               "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
+               "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
+               "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
+               "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                
+                
+                }
                 string respue = objRecaudo.updateDisponibilidad(CodBanco,partefija, "0");
                 if (!respue.Equals("1"))
                 {

@@ -82,7 +82,8 @@ namespace Procesos.PS.Procesos
 
                     foreach (System.IO.FileInfo archivos in fileNames)
                     {
-                        mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
+                         mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
+                      //   mensaje = ProcesoPagos.LecturaPagos("", "", ArchivoSalida, archivos.Name, "S");
                         RespuestaProceso.Add("PagosOnline: " + mensaje);
                     }
 

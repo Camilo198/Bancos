@@ -261,7 +261,6 @@
     <Content Include="MarcaVisual\Iconos\Pause.png" />
     <Content Include="MarcaVisual\Iconos\Play.png" />
     <None Include="Web References\wsenviocorreos\service.disco" />
-    <None Include="Web References\ServicioBancos\WsBancos.disco" />
     <Content Include="XML\Configuracion.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -293,10 +292,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche010F/Bancos/Servicios/PagosOnline.svc%3fwsdl">
+    <WebReferenceUrl Include="http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
-      <UpdateFromURL>http://sbogche010F/Bancos/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -315,10 +314,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioRecaudo_Recaudo</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl">
+    <WebReferenceUrl Include="http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -326,10 +325,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche010f:8084/WsBancos.svc">
+    <WebReferenceUrl Include="http://172.16.29.16:8084/WsBancos.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://sbogche010f:8084/WsBancos.svc</UpdateFromURL>
+      <UpdateFromURL>http://172.16.29.16:8084/WsBancos.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -352,7 +351,7 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 y x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
