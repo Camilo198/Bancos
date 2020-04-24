@@ -550,17 +550,26 @@ namespace Bancos.PS.Servicios
                         case "2EL":
                             break;
                         case "3DT":
+                            if (lineaDatos.Count==3){
                             if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
                             else if (objAso.pNombreCampo.Equals("Valor recaudado"))
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
+                            }
+                           
                             //Tarjeta Credito       
+                              else{
+                                  if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
+                                      valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
+                                  else if (objAso.pNombreCampo.Equals("Valor recaudado"))
+                                      valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
                             else if (objAso.pNombreCampo.Equals("Codigo de la sucursal"))
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[3]));//Medio PAgo Aplica Sico
-                            else if (objAso.pNombreCampo.Equals("Codigo de la entidad financiera debitada"))
+                            else if (objAso.pNombreCampo.Equals("Codigo de la entidad financiera debitada") )
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[4]));//Medio PAgo Aplica Ventas
-                            else if (objAso.pNombreCampo.Equals("No. de Autorizacion"))
+                            else if (objAso.pNombreCampo.Equals("No. de Autorizacion") )
                                 valor = armarCampo(objAso, Convert.ToString(lineaDatos[5]));//Codigo Autorizacion
+                            }
                             //-------
                             break;
                         

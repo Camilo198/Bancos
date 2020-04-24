@@ -1305,13 +1305,13 @@ namespace WebServiceBancos
                         if (CountEfectivo>0){
                         // Pagos Efectivo
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
-                        informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + " \n";
+                        informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + ". \n";
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                         }
-                        else if(CountVisaMarterCard>0){
+                        if(CountVisaMarterCard>0){
                         //Pagos Tarjeta
                         //Visa y MAster Card
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoVisaMAstercardSICO, RutaSico, UsuFTP, PassFTP);
@@ -1321,7 +1321,7 @@ namespace WebServiceBancos
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                         }
-                        else if (CountDinners > 0)
+                        if (CountDinners > 0)
                         {
                             //Dinners
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
@@ -1331,7 +1331,7 @@ namespace WebServiceBancos
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
                             Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                         }
-                        else if (CountAmex > 0)
+                        if (CountAmex > 0)
                         {
                             //Amex
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
