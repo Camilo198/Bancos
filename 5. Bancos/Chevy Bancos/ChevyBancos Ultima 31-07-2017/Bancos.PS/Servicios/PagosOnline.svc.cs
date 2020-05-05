@@ -203,9 +203,9 @@ namespace Bancos.PS.Servicios
                        
                         //AQUI MRT
 
-                        // CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
-// Cambiar al pasar a produccion
-                        CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
+                         CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
+                        // Cambiar al pasar a produccion
+                        //CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
                             Correo.enviarNotificaciones(Directorio, CorreosNoti , nombreArchivo, Remitente,
                                                      registrosLote, tipoArchivo);
 
@@ -233,8 +233,9 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
- // Cambiar paso produccion            //CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
+                //CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
+                // Cambiar paso produccion            
+                CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
                 Correo.enviarNotificacionesError(NombreCuenta,CorreosNoti, Remitente, ex.Message, tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
