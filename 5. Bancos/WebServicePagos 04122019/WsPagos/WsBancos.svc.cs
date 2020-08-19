@@ -153,6 +153,7 @@ namespace WebServiceBancos
         int sumaDinners=0;
         int sumaAmex = 0;
         int sumaEfectivo = 0;
+        String ultimoCodigoBancoOnline;
 
 
 
@@ -1301,45 +1302,109 @@ namespace WebServiceBancos
                     if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC")) { }
                     else
                     {
+                        if (CodBanco == "66") {
+                            System.Threading.Thread.Sleep(120000);//2 minutos para que no se aplique a las 00:00
+                        }
                         string comando;
                         if (CountEfectivo>0){
                         // Pagos Efectivo
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
+                        if(exporasico=="OK"){
                         informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + ". \n";
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        ultimoCodigoBancoOnline = CodBanco;
                         }
+                        else
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoSico +" AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                              "Se presento un error al crear el archivo a SICO. Por favor validar. "+exporasico,
+                             ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                             ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                        }
+                        }
+
                         if(CountVisaMarterCard>0){
+                            if (ultimoCodigoBancoOnline == "66")
+                            {
+                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
+                            }
+                            else {
+                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
+                            }
                         //Pagos Tarjeta
                         //Visa y MAster Card
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoVisaMAstercardSICO, RutaSico, UsuFTP, PassFTP);
-                        informacion = informacion + "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + ". \n";
+                        if(exporasico=="OK"){
+                            informacion = informacion + "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + ". \n";
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        ultimoCodigoBancoOnline = CodBancoVisaMarterCardSICO;
+                         }
+                            else{
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoVisaMAstercardSICO+" AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar."+exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                         }
                         if (CountDinners > 0)
                         {
+                            if (ultimoCodigoBancoOnline == "66")
+                            {
+                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
+                            }
+                            else
+                            {
+                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
+                            }
                             //Dinners
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
+                            if(exporasico=="OK"){
                             informacion = informacion + "Nombre archivo Tarjeta Dinners para SICO: " + NombreArchivoDinnersSICO + ". \n";
                             /*PAGOS*/
                             //Se encarga de aplicar directamente en SICO
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
                             Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            ultimoCodigoBancoOnline = CodBancoDinnersSico;
+                             }
+                            else{
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoDinnersSICO+" AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar."+exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                         }
                         if (CountAmex > 0)
                         {
+                            if (ultimoCodigoBancoOnline == "66")
+                            {
+                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
+                            }
+                            else
+                            {
+                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
+                            }
                             //Amex
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK"){
                             informacion = informacion + "Nombre archivo Tarjeta Amex para SICO: " + NombreArchivoAmexSICO + ". \n";
                             /*PAGOS*/
                             //Se encarga de aplicar directamente en SICO
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
                             Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            ultimoCodigoBancoOnline = CodBancoAmexSICO;
+                             }
+                            else{
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoAmexSICO+" AL FTP DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar."+exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                         }
                     }
                 }
@@ -1362,7 +1427,7 @@ namespace WebServiceBancos
                     "10. Pagos en Dinners: " + CountDinners + " registros. \n" +
                     "11. Pagos en Amex: " + CountAmex + " registros. \n" +
                     "12. Total Pagos: " + CountSico + " registros. \n" +
-                    "13. Total Valor Efectivo + Cheques $ " + sumaEfectivo + ". \n" +
+                    "13. Total Valor Efectivo y Chekes PSE $ " + sumaEfectivo + ". \n" +
                     "14. Total Valor Tarjetas Visa y MasterCard $ " + sumaVisaMastercard + ". \n" +
                     "15. Total Valor Tarjeta Dinners $ " + sumaDinners + ". \n" +
                     "16. Total Valor Tarjeta Amex $ " + sumaAmex + ". \n" +
