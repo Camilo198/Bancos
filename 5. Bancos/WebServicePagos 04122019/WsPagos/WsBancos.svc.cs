@@ -154,6 +154,9 @@ namespace WebServiceBancos
         int sumaAmex = 0;
         int sumaEfectivo = 0;
         String ultimoCodigoBancoOnline;
+        DateTime horaBanco;
+        DateTime horaSistema;
+        TimeSpan sleep;
 
 
 
@@ -396,6 +399,7 @@ namespace WebServiceBancos
                         }
 
 
+
                         if (PagosOnline == "S")
                             partefija = NombreArchivo; //Nombre del archivo del banco para pagos PSE
                         else
@@ -431,7 +435,30 @@ namespace WebServiceBancos
                         {
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
+                        //--------------
+                        
+                        
+                        TiemposLN tln = new TiemposLN();
+                        ObjetoTablas objt = new ObjetoTablas();
+                        objt.pCodBanco = this.CodBanco;
+                        IList < ObjetoTablas > listaHorasBancos = tln.ConsultarHoraAplicacionBancoLN(objt);
+                        // Validacion Hora Banco 
+                        if (listaHorasBancos.Count > 0)
+                        {
+                            this.horaSistema = Convert.ToDateTime(DateTime.Now.ToString("HH:mm"));
+                            this.horaBanco = Convert.ToDateTime(listaHorasBancos[0].pHoraBancoAplicacion);
 
+                            if (horaSistema< horaBanco)
+                            {
+
+                                sr.Close();
+
+                                    File.Delete(RutaArchivo + NombreArchivo);
+                                    return " ARCHIVO ELIMINADO PORQUE EL BANCO "+this.CodBanco+" AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
+                             }
+                        }
+
+                        //------
 
                         List<string[,]> res = objRecaudo.consultarDisponibilidad(CodBanco, partefija);/*DisponibilidadArchivos*/
 
@@ -1302,9 +1329,24 @@ namespace WebServiceBancos
                     if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC")) { }
                     else
                     {
-                        if (CodBanco == "66") {
-                            System.Threading.Thread.Sleep(120000);//2 minutos para que no se aplique a las 00:00
-                        }
+
+                       ///
+                            
+                      
+                          
+                    ////
+
+                        
+                            TiemposLN tln = new TiemposLN();
+                            ObjetoTablas objt = new ObjetoTablas();
+                            objt.pCodBanco = this.CodBanco;
+                            IList<ObjetoTablas> listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {               
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
+                        
                         string comando;
                         if (CountEfectivo>0){
                         // Pagos Efectivo
@@ -1316,6 +1358,13 @@ namespace WebServiceBancos
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                         ultimoCodigoBancoOnline = CodBanco;
+                        objt.pCodBanco = ultimoCodigoBancoOnline;
+                        listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                        if (listaSleepBancos.Count > 0)
+                        {
+                            this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                            System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                        }
                         }
                         else
                         {
@@ -1327,13 +1376,15 @@ namespace WebServiceBancos
                         }
 
                         if(CountVisaMarterCard>0){
-                            if (ultimoCodigoBancoOnline == "66")
+
+                            objt.pCodBanco = this.CodBancoVisaMarterCardSICO; ;
+                           listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
                             {
-                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                             }
-                            else {
-                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
-                            }
+
                         //Pagos Tarjeta
                         //Visa y MAster Card
                         exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoVisaMAstercardSICO, RutaSico, UsuFTP, PassFTP);
@@ -1344,6 +1395,13 @@ namespace WebServiceBancos
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
                         Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                         ultimoCodigoBancoOnline = CodBancoVisaMarterCardSICO;
+                        objt.pCodBanco = ultimoCodigoBancoOnline;
+                        listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                        if (listaSleepBancos.Count > 0)
+                        {
+                            this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                            System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                        }
                          }
                             else{
                                 Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoVisaMAstercardSICO+" AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
@@ -1354,13 +1412,12 @@ namespace WebServiceBancos
                         }
                         if (CountDinners > 0)
                         {
-                            if (ultimoCodigoBancoOnline == "66")
+                            objt.pCodBanco = this.CodBancoDinnersSico;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
                             {
-                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
-                            }
-                            else
-                            {
-                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                             }
                             //Dinners
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
@@ -1371,6 +1428,13 @@ namespace WebServiceBancos
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
                             Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                             ultimoCodigoBancoOnline = CodBancoDinnersSico;
+                            objt.pCodBanco = ultimoCodigoBancoOnline;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
                              }
                             else{
                                 Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoDinnersSICO+" AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
@@ -1381,13 +1445,12 @@ namespace WebServiceBancos
                         }
                         if (CountAmex > 0)
                         {
-                            if (ultimoCodigoBancoOnline == "66")
+                            objt.pCodBanco = this.CodBancoAmexSICO;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
                             {
-                                System.Threading.Thread.Sleep(240000);//4 minutos de diferencia entre proceso de PSE
-                            }
-                            else
-                            {
-                                System.Threading.Thread.Sleep(60000);//1 minutos de diferencia entre proceso si es tarjetas
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                             }
                             //Amex
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
@@ -1398,6 +1461,13 @@ namespace WebServiceBancos
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
                             Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
                             ultimoCodigoBancoOnline = CodBancoAmexSICO;
+                            objt.pCodBanco = ultimoCodigoBancoOnline;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
                              }
                             else{
                                 Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO "+NombreArchivoAmexSICO+" AL FTP DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
