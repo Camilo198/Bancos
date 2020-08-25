@@ -1356,7 +1356,17 @@ namespace WebServiceBancos
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
-                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        try
+                        {
+                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        }
+                        catch (Exception ex)
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBanco + "\n\n",
+                                  "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                        }
                         ultimoCodigoBancoOnline = CodBanco;
                         objt.pCodBanco = ultimoCodigoBancoOnline;
                         listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
@@ -1393,7 +1403,17 @@ namespace WebServiceBancos
                         /*PAGOS*/
                         //Se encarga de aplicar directamente en SICO
                         comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
-                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        try
+                        {
+                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        }
+                        catch (Exception ex)
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBancoVisaMarterCardSICO + "\n\n",
+                                  "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                        }
                         ultimoCodigoBancoOnline = CodBancoVisaMarterCardSICO;
                         objt.pCodBanco = ultimoCodigoBancoOnline;
                         listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
@@ -1426,7 +1446,17 @@ namespace WebServiceBancos
                             /*PAGOS*/
                             //Se encarga de aplicar directamente en SICO
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
-                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            try
+                            {
+                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            }
+                            catch (Exception ex)
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBancoDinnersSico + "\n\n",
+                                      "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                     ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                     ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                             ultimoCodigoBancoOnline = CodBancoDinnersSico;
                             objt.pCodBanco = ultimoCodigoBancoOnline;
                             listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
@@ -1459,7 +1489,16 @@ namespace WebServiceBancos
                             /*PAGOS*/
                             //Se encarga de aplicar directamente en SICO
                             comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
-                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            try
+                            {
+                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            }
+                            catch (Exception ex) {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " +CodBancoAmexSICO + "\n\n",
+                                      "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                     ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                     ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            }
                             ultimoCodigoBancoOnline = CodBancoAmexSICO;
                             objt.pCodBanco = ultimoCodigoBancoOnline;
                             listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
