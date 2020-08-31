@@ -453,8 +453,7 @@ namespace WebServiceBancos
 
                                 sr.Close();
 
-                                    File.Delete(RutaArchivo + NombreArchivo);
-                                    return " ARCHIVO ELIMINADO PORQUE EL BANCO "+this.CodBanco+" AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
+                                 return " ARCHIVO ELIMINADO PORQUE EL BANCO "+this.CodBanco+" AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
                              }
                         }
 
