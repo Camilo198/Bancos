@@ -11,7 +11,7 @@ namespace Pagos.EN.Tablas
         public string codigoBanco {get; set;}
         public string fechaPago { get; set; }
         public DateTime fechaProceso { get; set; }
-        public string cantPagosArchivo { get; set; }
+        public int cantPagosArchivo { get; set; }
         public double valorMontoArchivo { get; set; }
         public int cantPagosReacudo { get; set; }
         public int cantPagosSicoCon { get; set; }
