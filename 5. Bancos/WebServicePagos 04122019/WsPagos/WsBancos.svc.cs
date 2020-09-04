@@ -158,7 +158,7 @@ namespace WebServiceBancos
         DateTime horaSistema;
         TimeSpan sleep;
 
-
+        int contPagoRecaudo = 0;
 
         System.IO.StreamReader sr= null;
         string respu="";
@@ -365,8 +365,9 @@ namespace WebServiceBancos
                     npagosguardadosPI = 0; /*PAGOPI*/
                     
 
-                    if (Convert.ToInt32(linea.Substring(0, 2)) == 01)
+                    if (Convert.ToInt32(linea.Substring(0, 2)) == 01)// Obtener fecha recaudo SAU
                     {
+                        // Fecha de recaudo para insertar en la tbl format date
                         FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
                         FechaSico = linea.Substring(14, 6);
                         HoraArchivo = linea.Substring(48, 2);
@@ -456,7 +457,39 @@ namespace WebServiceBancos
                                  return " ARCHIVO ELIMINADO PORQUE EL BANCO "+this.CodBanco+" AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
                              }
                         }
+                        // SAU
+                        /* Consultar si existe un banco con esa fecha de pago
+                         * si existe, retornar cantidad de pagos que tiene, cant_pagos = query SP
+                        Si no existe Insert a tabla cod banco, fecha de pago, fecha proceso por SP(get date)
+                        */
+                        RptPagosEN pagosEN = new RptPagosEN();
+                        pagosEN.codigoBanco = this.CodBanco;
+                        pagosEN.fechaPago   = this.FechaRecaudo;
 
+                        RptPagosLN pagosLN = new RptPagosLN();
+
+                        IList<RptPagosEN> arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
+                        if (arrPagos.Count > 0) //Si existe
+                        {
+                            contPagoRecaudo = arrPagos[0].cantPagosReacudo;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
+                                if (resultado == 0)
+                                {
+                                    return "Ha ocurrido un error insertando la base de datos";
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                                return ex.Message.ToString();
+                            }
+                        }
+                        //    
                         //------
 
                         List<string[,]> res = objRecaudo.consultarDisponibilidad(CodBanco, partefija);/*DisponibilidadArchivos*/
@@ -633,7 +666,8 @@ namespace WebServiceBancos
                                     sumaEfectivo = sumaEfectivo + Valor;
                                 }
                             }
-
+                            // SAU Monto insertado 2
+                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
 
                             if (insertarRecaudo)
                             {

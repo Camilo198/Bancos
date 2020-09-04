@@ -52,6 +52,7 @@
     <Compile Include="Consulta\PagosTarjetaLN.cs" />
     <Compile Include="Consulta\ParaLN.cs" />
     <Compile Include="Consulta\RecaudoLN.cs" />
+    <Compile Include="Consulta\RptPagosLN.cs" />
     <Compile Include="Consulta\TiemposLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
