@@ -11,7 +11,7 @@ namespace Pagos.LN.Consulta
     public class RptPagosLN
     {
         private String SP_ConsultarPagosBanco = "pa_BAN_CON_RPT_BANCO_PAGOS";
-        private String SP_ConsultarPagosPSE   = "pa_BAN_CON_PSE_BANCO_PAGOS";
+        private String SP_ConsultarPagosPSE   = "pa_BAN_CON_RPT_BANCO_PAGOS_PSE";
         public IList<RptPagosEN> ConsultarBancoFechaLN(RptPagosEN objEntidad)
         {
 

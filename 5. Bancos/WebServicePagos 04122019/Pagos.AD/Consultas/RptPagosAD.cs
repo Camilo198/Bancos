@@ -137,11 +137,20 @@ namespace Pagos.AD.Consultas
         {
             try
             {
-                string[,,] Param = new string[1, 3, 1];
+                string[,,] Param = new string[3, 3, 1];
 
                 Param[0, 0, 0] = objEntidad.fechaPago.ToString();
                 Param[0, 1, 0] = "@inFechPago";
                 Param[0, 2, 0] = "date";
+
+                Param[1, 0, 0] = objEntidad.codigoBanco.ToString();
+                Param[1, 1, 0] = "@inCodBanco";
+                Param[1, 2, 0] = "varchar(10)";
+
+                Param[2, 0, 0] = objEntidad.cantPagosArchivo.ToString();
+                Param[2, 1, 0] = "@inCantPagosArch";
+                Param[2, 2, 0] = "int";
+
 
                 return wsc.Ejecutar(Param, procedimiento, "SQLBancos");
             }

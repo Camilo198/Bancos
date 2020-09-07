@@ -1212,7 +1212,6 @@ namespace WebServiceBancos
                     {
                         RptPagosEN pagosEN = new RptPagosEN();
 
-
                         RptPagosLN pagosLN = new RptPagosLN();
 
                         IList<RptPagosEN> arrPagos = null;
@@ -1231,9 +1230,10 @@ namespace WebServiceBancos
                         {
                             // Monto archivo, SP sin parámetros UPDATE
                             pagosEN.fechaPago = this.FechaRecaudo;
+                            pagosEN.codigoBanco = ValdObjetos.pCodBanco;
                             try
                             {
-                                int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
+                                int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
                                 if (result == 0)
                                 {
                                     return "Error en la actualización";
@@ -1251,6 +1251,7 @@ namespace WebServiceBancos
                             pagosEN.fechaPago = this.FechaRecaudo;
                             pagosEN.cantPagosArchivo = CantArchivoOrigen;
                             arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
+
                             if (arrPagos.Count > 0) //Si existe
                             {
                                 try
@@ -1283,6 +1284,19 @@ namespace WebServiceBancos
                                     return ex.Message.ToString();
                                 }
                             }
+                            try
+                            {   
+                                int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
+                                if (result == 0)
+                                {
+                                    return "Error en la actualización";
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                return e.Message.ToString();
+                            }
+
                         }
 
                         break;
