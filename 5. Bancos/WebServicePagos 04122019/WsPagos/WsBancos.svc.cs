@@ -102,6 +102,8 @@ namespace WebServiceBancos
         string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS*/
         string PasswordSico = ConfigurationManager.AppSettings["password"].ToString();          /*PAGOS*/
 
+        string PathSystem = ConfigurationManager.AppSettings["PathSystem"].ToString(); // SAU 08.09.2020
+
         string grupo, numero, nivel;
         bool validacion;
         bool validacionCupo;
@@ -159,7 +161,8 @@ namespace WebServiceBancos
         DateTime horaSistema;
         TimeSpan sleep;
 
-        int contPagoRecaudo = 0;
+        DateTime FeCreacion;
+        DateTime FeModificacion;
 
         System.IO.StreamReader sr = null;
         string respu = "";
@@ -368,6 +371,9 @@ namespace WebServiceBancos
 
                     if (Convert.ToInt32(linea.Substring(0, 2)) == 01)// Obtener fecha recaudo SAU
                     {
+                        // Fecha de creacion y modificacion del archivo  SAU
+                        FeCreacion     = File.GetCreationTime(RutaArchivo + NombreArchivo);
+                        FeModificacion = File.GetLastWriteTime(RutaArchivo + NombreArchivo);
                         // Fecha de recaudo para insertar en la tbl format date
                         FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
                         FechaSico = linea.Substring(14, 6);
@@ -639,8 +645,7 @@ namespace WebServiceBancos
                                     sumaEfectivo = sumaEfectivo + Valor;
                                 }
                             }
-                            // SAU Monto insertado
-                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
+                            
 
                             if (insertarRecaudo)
                             {
@@ -667,9 +672,12 @@ namespace WebServiceBancos
                                 /* Consultar si existe un banco con esa fecha de pago
                                  * si existe, retornar cantidad de pagos que tiene, cant_pagos = query SP
                                 Si no existe Insert a tabla cod banco, fecha de pago, fecha proceso por SP(get date)
+                                // SAU Monto insertado
+                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
                                 */
                                 RptPagosEN pagosEN = new RptPagosEN();
 
+                                pagosEN.fechaModificacionArch = FeModificacion;
 
                                 RptPagosLN pagosLN = new RptPagosLN();
 
@@ -716,8 +724,6 @@ namespace WebServiceBancos
                                         {
                                             return e.Message.ToString();
                                         }
-
-
                                     }
                                     else
                                     {
@@ -1207,7 +1213,7 @@ namespace WebServiceBancos
         String CodBancoVisaMarterCardVentas = "043";
         String CodBancoAmexVentas = "045";
         String CodBancoDinnersVentas = "044";
-                     * */
+                     * SAU PAGOS 09 */
                     if (Convert.ToInt32(linea.Substring(0, 2)) == 09)
                     {
                         RptPagosEN pagosEN = new RptPagosEN();
@@ -1218,8 +1224,10 @@ namespace WebServiceBancos
 
                         CantArchivoOrigen = 0;
                         CantArchivoOrigen = Convert.ToInt32(linea.Substring(3, 8));
+
                         pagosEN.fechaPago = this.FechaRecaudo;
                         pagosEN.codigoBanco = ValdObjetos.pCodBanco;
+                        pagosEN.fechaModificacionArch = FeModificacion;
 
                         if (pagosEN.codigoBanco == CodBancoVisaMarterCardVentas || pagosEN.codigoBanco == CodBancoDinnersVentas
                             || pagosEN.codigoBanco == CodBancoAmexVentas)
@@ -1557,6 +1565,24 @@ namespace WebServiceBancos
                                     this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
                                     System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                                 }
+                                //SAU Revisar fichero en SICO
+                                
+                                // Leo los resultados consistentes de System
+                                List<String> consistentes =  Util.ConectaSSH(ServidorSico, "R"+NombreArchivoSico, PathSystem, UsuFTP, PassFTP).ToList();
+                                // Leo los resultados inconsistentes de System
+                                List<String> inconsistentes = Util.ConectaSSH(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP).ToList();
+
+                                if (consistentes.Count > 0 || inconsistentes.Count > 0)
+                                {
+                                    string textoConsistentes   = consistentes.Find(x => x.Contains("Total Registros"));
+                                    string textoInconsistentes = inconsistentes.Find(x => x.Contains("Total Registros"));
+                                    //Separar en array sacar lo que necesito y con la llave de la tabla actualizar
+                                    string[] stringSeparators = new string[] { @"\tab" };
+                                    IList<String> saldoConsis    = textoConsistentes.Split(' ');
+                                    IList<String> saldosInconsis = textoInconsistentes.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                                    
+
+                                }
                             }
                             else
                             {
@@ -1872,6 +1898,7 @@ namespace WebServiceBancos
                         }
 
                         RegistrosProcesados = new StreamWriter(CarpetaBanco + NombreBanco + fecha + ".txt", false, Encoding.GetEncoding(1252));
+                        //////DateTime fecreacionarch = 
                     }
                     else
                     {

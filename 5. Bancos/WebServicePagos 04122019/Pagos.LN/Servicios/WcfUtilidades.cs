@@ -8,7 +8,8 @@ using System.IO;
 using System.Data.Sql;
 using System.Net;
 using System.Data;
-
+using Renci.SshNet;
+using Renci.SshNet.Sftp;
 
 namespace Pagos.LN
 {
@@ -125,7 +126,7 @@ namespace Pagos.LN
             try
             {
 
-             //   string Fecha = System.Text.RegularExpressions.Regex.Replace(Fecha, "\\b(?<day>\\d{1,2})/(?<month>\\d{1,2})/(?<year>\\d{2,4})\\b", "${month}/${day}/${year}");
+                //   string Fecha = System.Text.RegularExpressions.Regex.Replace(Fecha, "\\b(?<day>\\d{1,2})/(?<month>\\d{1,2})/(?<year>\\d{2,4})\\b", "${month}/${day}/${year}");
                 if (Convert.ToDateTime(Fecha) < DateTime.Now.Date)
                 {
                     return "Inferior";
@@ -250,23 +251,32 @@ namespace Pagos.LN
                             cientos = cientos + "00";
                             switch (cientos)
                             {
-                                case "100": letras = letras + "CIENTO ";
+                                case "100":
+                                    letras = letras + "CIENTO ";
                                     break;
-                                case "200": letras = letras + "DOSCIENTOS ";
+                                case "200":
+                                    letras = letras + "DOSCIENTOS ";
                                     break;
-                                case "300": letras = letras + "TRESCIENTOS ";
+                                case "300":
+                                    letras = letras + "TRESCIENTOS ";
                                     break;
-                                case "400": letras = letras + "CUATROCIENTOS ";
+                                case "400":
+                                    letras = letras + "CUATROCIENTOS ";
                                     break;
-                                case "500": letras = letras + "QUINIENTOS ";
+                                case "500":
+                                    letras = letras + "QUINIENTOS ";
                                     break;
-                                case "600": letras = letras + "SEISCIENTOS ";
+                                case "600":
+                                    letras = letras + "SEISCIENTOS ";
                                     break;
-                                case "700": letras = letras + "SETECIENTOS ";
+                                case "700":
+                                    letras = letras + "SETECIENTOS ";
                                     break;
-                                case "800": letras = letras + "OCHOCIENTOS ";
+                                case "800":
+                                    letras = letras + "OCHOCIENTOS ";
                                     break;
-                                case "900": letras = letras + "NOVECIENTOS ";
+                                case "900":
+                                    letras = letras + "NOVECIENTOS ";
                                     break;
                             };
 
@@ -284,27 +294,38 @@ namespace Pagos.LN
                         {
                             switch (dieces)
                             {
-                                case "10": letras = letras + "DIEZ ";
+                                case "10":
+                                    letras = letras + "DIEZ ";
                                     break;
-                                case "11": letras = letras + "ONCE ";
+                                case "11":
+                                    letras = letras + "ONCE ";
                                     break;
-                                case "12": letras = letras + "DOCE ";
+                                case "12":
+                                    letras = letras + "DOCE ";
                                     break;
-                                case "13": letras = letras + "TRECE  ";
+                                case "13":
+                                    letras = letras + "TRECE  ";
                                     break;
-                                case "14": letras = letras + "CATORCE ";
+                                case "14":
+                                    letras = letras + "CATORCE ";
                                     break;
-                                case "15": letras = letras + "QUINCE ";
+                                case "15":
+                                    letras = letras + "QUINCE ";
                                     break;
-                                case "16": letras = letras + "DIECISEIS ";
+                                case "16":
+                                    letras = letras + "DIECISEIS ";
                                     break;
-                                case "17": letras = letras + "DIECISIETE ";
+                                case "17":
+                                    letras = letras + "DIECISIETE ";
                                     break;
-                                case "18": letras = letras + "DIECIOCHO ";
+                                case "18":
+                                    letras = letras + "DIECIOCHO ";
                                     break;
-                                case "19": letras = letras + "DIECINUEVE ";
+                                case "19":
+                                    letras = letras + "DIECINUEVE ";
                                     break;
-                                case "20": letras = letras + "VEINTE ";
+                                case "20":
+                                    letras = letras + "VEINTE ";
                                     break;
                             };
                         }
@@ -313,42 +334,59 @@ namespace Pagos.LN
                             dieces = dieces.Substring(0, 1) + "0";
                             switch (dieces)
                             {
-                                case "20": letras = letras + "VEINTI ";
+                                case "20":
+                                    letras = letras + "VEINTI ";
                                     break;
-                                case "30": letras = letras + "TREINTA Y ";
+                                case "30":
+                                    letras = letras + "TREINTA Y ";
                                     break;
-                                case "40": letras = letras + "CUARENTA Y ";
+                                case "40":
+                                    letras = letras + "CUARENTA Y ";
                                     break;
-                                case "50": letras = letras + "CINCUENTA Y  ";
+                                case "50":
+                                    letras = letras + "CINCUENTA Y  ";
                                     break;
-                                case "60": letras = letras + "SESENTA Y ";
+                                case "60":
+                                    letras = letras + "SESENTA Y ";
                                     break;
-                                case "70": letras = letras + "SETENTA Y ";
+                                case "70":
+                                    letras = letras + "SETENTA Y ";
                                     break;
-                                case "80": letras = letras + "OCHENTA Y ";
+                                case "80":
+                                    letras = letras + "OCHENTA Y ";
                                     break;
-                                case "90": letras = letras + "NOVENTA Y ";
+                                case "90":
+                                    letras = letras + "NOVENTA Y ";
                                     break;
                             };
                             switch (unidad)
                             {
-                                case "1": letras = letras + "UN ";
+                                case "1":
+                                    letras = letras + "UN ";
                                     break;
-                                case "2": letras = letras + "DOS ";
+                                case "2":
+                                    letras = letras + "DOS ";
                                     break;
-                                case "3": letras = letras + "TRES ";
+                                case "3":
+                                    letras = letras + "TRES ";
                                     break;
-                                case "4": letras = letras + "CUATRO ";
+                                case "4":
+                                    letras = letras + "CUATRO ";
                                     break;
-                                case "5": letras = letras + "CINCO ";
+                                case "5":
+                                    letras = letras + "CINCO ";
                                     break;
-                                case "6": letras = letras + "SEIS ";
+                                case "6":
+                                    letras = letras + "SEIS ";
                                     break;
-                                case "7": letras = letras + "SIETE ";
+                                case "7":
+                                    letras = letras + "SIETE ";
                                     break;
-                                case "8": letras = letras + "OCHO ";
+                                case "8":
+                                    letras = letras + "OCHO ";
                                     break;
-                                case "9": letras = letras + "NUEVE ";
+                                case "9":
+                                    letras = letras + "NUEVE ";
                                     break;
                             };
                         }
@@ -358,23 +396,32 @@ namespace Pagos.LN
                         {
                             switch (unidad)
                             {
-                                case "1": letras = letras + "UN ";
+                                case "1":
+                                    letras = letras + "UN ";
                                     break;
-                                case "2": letras = letras + "DOS ";
+                                case "2":
+                                    letras = letras + "DOS ";
                                     break;
-                                case "3": letras = letras + "TRES ";
+                                case "3":
+                                    letras = letras + "TRES ";
                                     break;
-                                case "4": letras = letras + "CUATRO ";
+                                case "4":
+                                    letras = letras + "CUATRO ";
                                     break;
-                                case "5": letras = letras + "CINCO ";
+                                case "5":
+                                    letras = letras + "CINCO ";
                                     break;
-                                case "6": letras = letras + "SEIS ";
+                                case "6":
+                                    letras = letras + "SEIS ";
                                     break;
-                                case "7": letras = letras + "SIETE ";
+                                case "7":
+                                    letras = letras + "SIETE ";
                                     break;
-                                case "8": letras = letras + "OCHO ";
+                                case "8":
+                                    letras = letras + "OCHO ";
                                     break;
-                                case "9": letras = letras + "NUEVE ";
+                                case "9":
+                                    letras = letras + "NUEVE ";
                                     break;
                             };
                         }
@@ -487,9 +534,9 @@ namespace Pagos.LN
             try
             {
                 if (Convert.ToDateTime(Fecha) > DateTime.Now.Date)
-                  return "Superior";
+                    return "Superior";
                 else
-                  return "Igual";
+                    return "Igual";
             }
             catch (Exception)
             {
@@ -524,6 +571,25 @@ namespace Pagos.LN
             {
                 return exc.Message;
             }
+        }
+
+        public IList<String> ConectaSSH(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password)
+        {
+            IList<String> texto = null;
+            try
+            {
+                SftpClient cliente = new SftpClient(Ip, Login, Password);
+                cliente.Connect();
+                texto = cliente.ReadAllLines(RutaFTP + NombreArchivo);
+
+                cliente.Disconnect();
+               
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return texto;
         }
     }
 }

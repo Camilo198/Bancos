@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
 using System.Data;
+using Renci.SshNet;
 
 namespace Pagos.LN
 {
@@ -51,5 +52,8 @@ namespace Pagos.LN
 
         [OperationContract]
         string EnvioMail(string _Adjunto, string _Asunto, string _Mensaje, string _Para, string _Desde, string _Copia);
+
+        [OperationContract]
+        IList<String> ConectaSSH(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password);
     }
 }

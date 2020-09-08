@@ -20,7 +20,7 @@ namespace Pagos.AD.Consultas
 
             try
             {
-                string[,,] Param = new string[5, 3, 1]; // solo cuando el procedimiento almacenado tiene parametros
+                string[,,] Param = new string[6, 3, 1]; // solo cuando el procedimiento almacenado tiene parametros
 
 
                 Param[0, 0, 0] = objEntidad.codigoBanco.ToString();
@@ -42,6 +42,10 @@ namespace Pagos.AD.Consultas
                 Param[4, 0, 0] = objEntidad.cantPagosArchivo.ToString();
                 Param[4, 1, 0] = "@inPagosArchivo";
                 Param[4, 2, 0] = "int";
+
+                Param[5, 0, 0] = objEntidad.fechaModificacionArch.ToString();
+                Param[5, 1, 0] = "@inFecModArch";
+                Param[5, 2, 0] = "datetime";
 
                 lista = wsc.LlenarLista(Param, Procedimiento, "SQLBancos", "SP", "Sql");
                 string[,] Valida;
@@ -71,7 +75,7 @@ namespace Pagos.AD.Consultas
         {
             try
             {
-                string[,,] Param = new string[5, 3, 1];
+                string[,,] Param = new string[6, 3, 1];
 
                 Param[0, 0, 0] = objEntidad.codigoBanco.ToString();
                 Param[0, 1, 0] = "@inCodBanco";
@@ -93,6 +97,10 @@ namespace Pagos.AD.Consultas
                 Param[4, 1, 0] = "@inPagosArchivo";
                 Param[4, 2, 0] = "int";
 
+                Param[5, 0, 0] = objEntidad.fechaModificacionArch.ToString();
+                Param[5, 1, 0] = "@inFecModArch";
+                Param[5, 2, 0] = "datetime";
+
                 return wsc.Ejecutar(Param, procedimiento, "SQLBancos");
             }
             catch (Exception ex)
@@ -104,7 +112,7 @@ namespace Pagos.AD.Consultas
         {
             try
             {
-                string[,,] Param = new string[5, 3, 1];
+                string[,,] Param = new string[6, 3, 1];
 
                 Param[0, 0, 0] = objEntidad.codigoBanco.ToString();
                 Param[0, 1, 0] = "@inCodBanco";
@@ -125,6 +133,10 @@ namespace Pagos.AD.Consultas
                 Param[4, 0, 0] = objEntidad.cantPagosArchivo.ToString();
                 Param[4, 1, 0] = "@inPagosArchivo";
                 Param[4, 2, 0] = "int";
+
+                Param[5, 0, 0] = objEntidad.fechaModificacionArch.ToString();
+                Param[5, 1, 0] = "@inFecModArch";
+                Param[5, 2, 0] = "datetime";
 
                 return wsc.Ejecutar(Param, procedimiento, "SQLBancos");
             }
