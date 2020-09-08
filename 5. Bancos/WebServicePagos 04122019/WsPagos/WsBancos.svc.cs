@@ -681,18 +681,18 @@ namespace WebServiceBancos
                                     ValdObjetos.pCodBanco = linea.Substring(83, 4);
                                     string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
 
-                                    pagosEN.codigoBanco = this.CodBanco;
+                                    pagosEN.codigoBanco = ValdObjetos.pCodBanco;
                                     pagosEN.fechaPago = this.FechaRecaudo;
 
-                                    if (ValdObjetos.pCodBanco == CodBancoVisaMarterCardSICO)
+                                    if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoVisaMarterCardSICO))
                                     {
                                         pagosEN.valorMontoArchivo = sumaVisaMastercard;
                                     }
-                                    else if (ValdObjetos.pCodBanco == CodBancoDinnersSico)
+                                    else if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoDinnersSico))
                                     {
                                         pagosEN.valorMontoArchivo = sumaDinners;
                                     }
-                                    else if (ValdObjetos.pCodBanco == CodBancoAmexSICO)
+                                    else if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoAmexSICO))
                                     {
                                         pagosEN.valorMontoArchivo = sumaAmex;
                                     }
@@ -1218,19 +1218,19 @@ namespace WebServiceBancos
 
                         CantArchivoOrigen = 0;
                         CantArchivoOrigen = Convert.ToInt32(linea.Substring(3, 8));
+                        pagosEN.fechaPago = this.FechaRecaudo;
+                        pagosEN.codigoBanco = ValdObjetos.pCodBanco;
 
-
-                        if (ValdObjetos.pCodBanco == CodBancoVisaMarterCardVentas || ValdObjetos.pCodBanco == CodBancoDinnersVentas
-                            || ValdObjetos.pCodBanco == CodBancoAmexVentas)
+                        if (pagosEN.codigoBanco == CodBancoVisaMarterCardVentas || pagosEN.codigoBanco == CodBancoDinnersVentas
+                            || pagosEN.codigoBanco == CodBancoAmexVentas)
                         {
-                            ValdObjetos.pCodBanco = CodBancoPSE;
+                            pagosEN.codigoBanco = CodBancoPSE;
                         }
 
-                        if (ValdObjetos.pCodBanco == CodBancoPSE)
+                        if (pagosEN.codigoBanco == CodBancoPSE)
                         {
                             // Monto archivo, SP sin parámetros UPDATE
-                            pagosEN.fechaPago = this.FechaRecaudo;
-                            pagosEN.codigoBanco = ValdObjetos.pCodBanco;
+                            
                             try
                             {
                                 int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
@@ -1256,7 +1256,7 @@ namespace WebServiceBancos
                             {
                                 try
                                 {
-                                    int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
+                                    int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
                                     if (result == 0)
                                     {
                                         return "Error en la actualización";
@@ -1269,33 +1269,7 @@ namespace WebServiceBancos
 
 
                             }
-                            else
-                            {
-                                try
-                                {
-                                    int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
-                                    if (resultado == 0)
-                                    {
-                                        return "Ha ocurrido un error insertando la base de datos";
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    return ex.Message.ToString();
-                                }
-                            }
-                            try
-                            {   
-                                int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
-                                if (result == 0)
-                                {
-                                    return "Error en la actualización";
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return e.Message.ToString();
-                            }
+                            
 
                         }
 
