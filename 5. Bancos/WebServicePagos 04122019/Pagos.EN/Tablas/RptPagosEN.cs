@@ -8,7 +8,7 @@ namespace Pagos.EN.Tablas
 {
     public class RptPagosEN
     {
-        public string codigoBanco {get; set;}
+        public int codigoBanco {get; set;}
         public string fechaPago { get; set; }
         public DateTime fechaProceso { get; set; }
         public int cantPagosArchivo { get; set; }

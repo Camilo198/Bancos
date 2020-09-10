@@ -54,6 +54,6 @@ namespace Pagos.LN
         string EnvioMail(string _Adjunto, string _Asunto, string _Mensaje, string _Para, string _Desde, string _Copia);
 
         [OperationContract]
-        IList<String> ConectaSSH(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password);
+        IList<String> LeerFicheroFTP(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password, string param1);
     }
 }

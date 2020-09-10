@@ -10,6 +10,7 @@ using System.Net;
 using System.Data;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
+using Pagos.LN.Consulta;
 
 namespace Pagos.LN
 {
@@ -573,7 +574,7 @@ namespace Pagos.LN
             }
         }
 
-        public IList<String> ConectaSSH(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password)
+        public IList<String> LeerFicheroFTP(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password, string param1 = "")
         {
             IList<String> texto = null;
             try
@@ -587,7 +588,9 @@ namespace Pagos.LN
             }
             catch (Exception ex)
             {
-
+                RptPagosLN pagosLN = new RptPagosLN();
+                pagosLN.insertaLogErroresLN(ex.Message.ToString(), Convert.ToInt32(param1));
+                texto = new List<string>();
             }
             return texto;
         }

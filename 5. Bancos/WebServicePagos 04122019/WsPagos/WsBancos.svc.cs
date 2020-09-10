@@ -164,6 +164,8 @@ namespace WebServiceBancos
         DateTime FeCreacion;
         DateTime FeModificacion;
 
+        String error_mensaje;
+
         System.IO.StreamReader sr = null;
         string respu = "";
         /// <summary>
@@ -372,7 +374,7 @@ namespace WebServiceBancos
                     if (Convert.ToInt32(linea.Substring(0, 2)) == 01)// Obtener fecha recaudo SAU
                     {
                         // Fecha de creacion y modificacion del archivo  SAU
-                        FeCreacion     = File.GetCreationTime(RutaArchivo + NombreArchivo);
+                        FeCreacion = File.GetCreationTime(RutaArchivo + NombreArchivo);
                         FeModificacion = File.GetLastWriteTime(RutaArchivo + NombreArchivo);
                         // Fecha de recaudo para insertar en la tbl format date
                         FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
@@ -645,7 +647,7 @@ namespace WebServiceBancos
                                     sumaEfectivo = sumaEfectivo + Valor;
                                 }
                             }
-                            
+
 
                             if (insertarRecaudo)
                             {
@@ -689,7 +691,7 @@ namespace WebServiceBancos
                                     ValdObjetos.pCodBanco = linea.Substring(83, 4);
                                     string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
 
-                                    pagosEN.codigoBanco = ValdObjetos.pCodBanco;
+                                    pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
                                     pagosEN.fechaPago = this.FechaRecaudo;
 
                                     if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoVisaMarterCardSICO))
@@ -717,12 +719,15 @@ namespace WebServiceBancos
                                             int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
                                             if (result == 0)
                                             {
-                                                return "Error en la actualización";
+                                                error_mensaje = "Error en la actualización Monto Archivo banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            return e.Message.ToString();
+                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
                                         }
                                     }
                                     else
@@ -732,12 +737,15 @@ namespace WebServiceBancos
                                             int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
                                             if (resultado == 0)
                                             {
-                                                return "Ha ocurrido un error insertando la base de datos";
+                                                error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            return ex.Message.ToString();
+                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.codigoBanco);
                                         }
                                     }
 
@@ -753,7 +761,7 @@ namespace WebServiceBancos
                                 {
                                     string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
 
-                                    pagosEN.codigoBanco = this.CodBanco;
+                                    pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
                                     pagosEN.fechaPago = this.FechaRecaudo;
                                     pagosEN.valorMontoArchivo = sumaEfectivo;
 
@@ -765,12 +773,15 @@ namespace WebServiceBancos
                                             int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
                                             if (result == 0)
                                             {
-                                                return "Error en la actualización";
+                                                error_mensaje = "Error en la actualización Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            return e.Message.ToString();
+                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
                                         }
                                     }
                                     else
@@ -780,12 +791,15 @@ namespace WebServiceBancos
                                             int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
                                             if (resultado == 0)
                                             {
-                                                return "Ha ocurrido un error insertando la base de datos";
+                                                error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            return ex.Message.ToString();
+                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.codigoBanco);
                                         }
                                     }
 
@@ -1226,36 +1240,39 @@ namespace WebServiceBancos
                         CantArchivoOrigen = Convert.ToInt32(linea.Substring(3, 8));
 
                         pagosEN.fechaPago = this.FechaRecaudo;
-                        pagosEN.codigoBanco = ValdObjetos.pCodBanco;
+                        pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
                         pagosEN.fechaModificacionArch = FeModificacion;
 
-                        if (pagosEN.codigoBanco == CodBancoVisaMarterCardVentas || pagosEN.codigoBanco == CodBancoDinnersVentas
-                            || pagosEN.codigoBanco == CodBancoAmexVentas)
+                        if (Convert.ToString(pagosEN.codigoBanco) == CodBancoVisaMarterCardVentas || Convert.ToString(pagosEN.codigoBanco) == CodBancoDinnersVentas
+                            || Convert.ToString(pagosEN.codigoBanco) == CodBancoAmexVentas)
                         {
-                            pagosEN.codigoBanco = CodBancoPSE;
+                            pagosEN.codigoBanco = Convert.ToInt32(CodBancoPSE);
                         }
 
-                        if (pagosEN.codigoBanco == CodBancoPSE)
+                        if (pagosEN.codigoBanco == Convert.ToInt32(CodBancoPSE))
                         {
                             // Monto archivo, SP sin parámetros UPDATE
-                            
+
                             try
                             {
                                 int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
                                 if (result == 0)
                                 {
-                                    return "Error en la actualización";
+                                    error_mensaje = "Error en la actualización Codigo PSE banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                    error_mensaje = String.Empty;
                                 }
                             }
                             catch (Exception e)
                             {
-                                return e.Message.ToString();
+                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
                             }
 
                         }
                         else
                         {
-                            pagosEN.codigoBanco = this.CodBanco;
+                            pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
                             pagosEN.fechaPago = this.FechaRecaudo;
                             pagosEN.cantPagosArchivo = CantArchivoOrigen;
                             arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
@@ -1267,17 +1284,20 @@ namespace WebServiceBancos
                                     int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
                                     if (result == 0)
                                     {
-                                        return "Error en la actualización";
+                                        error_mensaje = "Error en la actualización cantidad pagos Arch Origen banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                        error_mensaje = string.Empty;
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    return e.Message.ToString();
+                                    pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
                                 }
 
 
                             }
-                            
+
 
                         }
 
@@ -1565,24 +1585,11 @@ namespace WebServiceBancos
                                     this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
                                     System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                                 }
-                                //SAU Revisar fichero en SICO
-                                
-                                // Leo los resultados consistentes de System
-                                List<String> consistentes =  Util.ConectaSSH(ServidorSico, "R"+NombreArchivoSico, PathSystem, UsuFTP, PassFTP).ToList();
-                                // Leo los resultados inconsistentes de System
-                                List<String> inconsistentes = Util.ConectaSSH(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP).ToList();
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoSico, PathSystem, UsuFTP, PassFTP,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
 
-                                if (consistentes.Count > 0 || inconsistentes.Count > 0)
-                                {
-                                    string textoConsistentes   = consistentes.Find(x => x.Contains("Total Registros"));
-                                    string textoInconsistentes = inconsistentes.Find(x => x.Contains("Total Registros"));
-                                    //Separar en array sacar lo que necesito y con la llave de la tabla actualizar
-                                    string[] stringSeparators = new string[] { @"\tab" };
-                                    IList<String> saldoConsis    = textoConsistentes.Split(' ');
-                                    IList<String> saldosInconsis = textoInconsistentes.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-                                    
-
-                                }
                             }
                             else
                             {
@@ -1632,6 +1639,10 @@ namespace WebServiceBancos
                                     this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
                                     System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                                 }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoVisaMAstercardSICO, PathSystem, UsuFTP, PassFTP,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
                             }
                             else
                             {
@@ -1677,6 +1688,10 @@ namespace WebServiceBancos
                                     this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
                                     System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                                 }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoDinnersSICO, PathSystem, UsuFTP, PassFTP,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
                             }
                             else
                             {
@@ -1722,6 +1737,10 @@ namespace WebServiceBancos
                                     this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
                                     System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                                 }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoAmexSICO, PathSystem, UsuFTP, PassFTP,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
                             }
                             else
                             {
