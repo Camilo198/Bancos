@@ -721,13 +721,13 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la actualización Monto Archivo banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                                         }
                                     }
                                     else
@@ -739,13 +739,13 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.codigoBanco);
+                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                                         }
                                     }
 
@@ -775,13 +775,13 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la actualización Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                                         }
                                     }
                                     else
@@ -793,13 +793,13 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.codigoBanco);
+                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                                         }
                                     }
 
@@ -1260,13 +1260,13 @@ namespace WebServiceBancos
                                 {
                                     error_mensaje = "Error en la actualización Codigo PSE banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                     error_mensaje = String.Empty;
                                 }
                             }
                             catch (Exception e)
                             {
-                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                             }
 
                         }
@@ -1286,21 +1286,16 @@ namespace WebServiceBancos
                                     {
                                         error_mensaje = "Error en la actualización cantidad pagos Arch Origen banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                                         error_mensaje = string.Empty;
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                                    pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                                 }
-
-
                             }
-
-
                         }
-
                         break;
                     }
 
@@ -1741,6 +1736,7 @@ namespace WebServiceBancos
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoAmexSICO, PathSystem, UsuFTP, PassFTP,
                                                             Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
+                                
                             }
                             else
                             {

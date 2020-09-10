@@ -66,7 +66,7 @@ namespace Pagos.LN.Consulta
             // Leo los resultados consistentes e inconsistentes de System
             try
             {
-                inconsistentes = Util.LeerFicheroFTP(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP);
+                inconsistentes = Util.LeerFicheroFTP(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
                 if (inconsistentes.Count > 0)
                 {
                     try
@@ -81,12 +81,12 @@ namespace Pagos.LN.Consulta
                         }
                         else
                         {
-                            this.insertaLogErroresLN("Archivo cortado o vacío", pagosEN.codigoBanco);
+                            this.insertaLogErroresLN("Archivo cortado o vacío", pagosEN.fechaPago, pagosEN.codigoBanco);
                         }
                     }
                     catch (Exception e)
                     {
-                        this.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                        this.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                     }
 
                 }
@@ -94,13 +94,13 @@ namespace Pagos.LN.Consulta
             }
             catch (Exception ex)
             {
-                this.insertaLogErroresLN("Archivo " + NombreArchivoSico + " inexistente o cortado", codBanco);
-                this.insertaLogErroresLN(ex.Message.ToString(), codBanco);
+                this.insertaLogErroresLN("Archivo " + NombreArchivoSico + " inexistente o cortado", pagosEN.fechaPago, codBanco);
+                this.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, codBanco);
                 inconsistentes = new List<string>();
             }
             try
             {
-                consistentes = Util.LeerFicheroFTP(ServidorSico, "R" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP);
+                consistentes = Util.LeerFicheroFTP(ServidorSico, "R" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
                 if (consistentes.Count > 0)
                 {
                     try
@@ -115,19 +115,19 @@ namespace Pagos.LN.Consulta
                         }
                         else
                         {
-                            this.insertaLogErroresLN("Archivo cortado o vacío", pagosEN.codigoBanco);
+                            this.insertaLogErroresLN("Archivo cortado o vacío", pagosEN.fechaPago, pagosEN.codigoBanco);
                         }
                     }
                     catch (Exception e)
                     {
-                        this.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                        this.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                     }
                 }
             }
             catch (Exception ex)
             {
-                this.insertaLogErroresLN("Archivo " + NombreArchivoSico + " inexistente o cortado", pagosEN.codigoBanco);
-                this.insertaLogErroresLN(ex.Message.ToString(), codBanco);
+                this.insertaLogErroresLN("Archivo " + NombreArchivoSico + " inexistente o cortado", pagosEN.fechaPago, pagosEN.codigoBanco);
+                this.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                 consistentes = new List<string>();
             }
             arrPagos = this.ConsultarBancoFechaLN(pagosEN);
@@ -140,19 +140,19 @@ namespace Pagos.LN.Consulta
                     {
                         error_mensaje = "Error en la actualizacion Pagos/Montos Sico I/IR banco: " +
                                                 pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                        this.insertaLogErroresLN(error_mensaje, pagosEN.codigoBanco);
+                        this.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco);
                         error_mensaje = String.Empty;
                     }
                 }
                 catch (Exception e)
                 {
-                    this.insertaLogErroresLN(e.Message.ToString(), pagosEN.codigoBanco);
+                    this.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco);
                 }
             }
         }
-        public void insertaLogErroresLN(String mensaje, int codigoBanco = 0)
+        public void insertaLogErroresLN(String mensaje, String fechaPago, int codigoBanco = 0)
         {
-            String resultado = new RptPagosAD().insertaLogErroresAD(SP_InsertaLogErrores, mensaje, codigoBanco);
+            String resultado = new RptPagosAD().insertaLogErroresAD(SP_InsertaLogErrores, mensaje, codigoBanco, fechaPago);
         }
 
     }

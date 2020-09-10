@@ -208,11 +208,11 @@ namespace Pagos.AD.Consultas
                 throw new Exception(ex.Message);
             }
         }
-        public string insertaLogErroresAD(string procedimiento, String mensaje, int codigoBanco)
+        public string insertaLogErroresAD(string procedimiento, String mensaje, int codigoBanco, String fechaPago)
         {
             try
             {
-                string[,,] Param = new string[2, 3, 1];
+                string[,,] Param = new string[3, 3, 1];
 
                 Param[0, 0, 0] = codigoBanco.ToString();
                 Param[0, 1, 0] = "@inCodigoBanco";
@@ -221,6 +221,10 @@ namespace Pagos.AD.Consultas
                 Param[1, 0, 0] = mensaje;
                 Param[1, 1, 0] = "@inMensaje";
                 Param[1, 2, 0] = "nvarchar(MAX)";
+
+                Param[2, 0, 0] = fechaPago;
+                Param[2, 1, 0] = "@inFechaPago";
+                Param[2, 2, 0] = "date";
 
                 return wsc.Ejecutar(Param, procedimiento, "SQLBancos");
             }

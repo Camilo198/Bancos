@@ -574,7 +574,7 @@ namespace Pagos.LN
             }
         }
 
-        public IList<String> LeerFicheroFTP(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password, string param1 = "")
+        public IList<String> LeerFicheroFTP(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password, string fechaPago = "", int codigoBanco = 0)
         {
             IList<String> texto = null;
             try
@@ -589,7 +589,7 @@ namespace Pagos.LN
             catch (Exception ex)
             {
                 RptPagosLN pagosLN = new RptPagosLN();
-                pagosLN.insertaLogErroresLN(ex.Message.ToString(), Convert.ToInt32(param1));
+                pagosLN.insertaLogErroresLN(ex.Message.ToString()+": "+NombreArchivo, fechaPago, codigoBanco);
                 texto = new List<string>();
             }
             return texto;
