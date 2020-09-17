@@ -21,8 +21,6 @@ using SSH;
 using System.Data;
 using System.Configuration;
 
-using Renci.SshNet; /*PAGOS*/
-using SSH;
 using System.Collections; /*PAGOS*/
 
 /// <summary>
@@ -446,8 +444,29 @@ namespace WebServiceBancos
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
                         //--------------
+                        #region SAU Fecha usura
+                        // 
+                        FechaUsuraLN usura = new FechaUsuraLN();
+                        IList<FechaUsuraEN> parametroUsura = usura.ConsultarFechaUsuraLN();
 
-
+                        if (parametroUsura.Count > 0)
+                        {
+                            String fechaFilaUsura = parametroUsura[0].fechaUsura;
+                            // Fecha en formato año mes
+                            if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
+                            {
+                                sr.Close();
+                                if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(fechaFilaUsura))
+                                {
+                                    File.Delete(RutaArchivo + NombreArchivo);
+                                    return " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
+                                        + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+                                }
+                                return "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+                            }
+                        }
+                        #endregion
+                        #region Hora de aplicacion CMUÑOZ
                         TiemposLN tln = new TiemposLN();
                         ObjetoTablas objt = new ObjetoTablas();
                         objt.pCodBanco = this.CodBanco;
@@ -463,18 +482,25 @@ namespace WebServiceBancos
 
                                 sr.Close();
 
-                                return " ARCHIVO ELIMINADO PORQUE EL BANCO " + this.CodBanco + " AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
+                                return " ARCHIVO EN ESPERA PORQUE EL BANCO " + this.CodBanco + " AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
                             }
                         }
                         //    
                         //------
-
+                        #endregion
                         List<string[,]> res = objRecaudo.consultarDisponibilidad(CodBanco, partefija);/*DisponibilidadArchivos*/
 
                         if (res.Count > 0)
                         {
-
-                            return "NO HAY DISPONIBILIDAD DE EJECUCION PARA ESTE BANCO"; /*DisponibilidadArchivos*/
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "NO HAY DISPONIBILIDAD DE EJECUCION PARA ESTE BANCO"
+                                + CodBanco + " " + this.FechaRecaudo + RutaArchivo + NombreArchivo;
+                            //pagosLN.insertaLogErroresLN(error_mensaje,this.FechaRecaudo, Convert.ToInt32(CodBanco));
+                            // Mueve el archivo para evitar la interrupcion en la ejecucion
+                            ////RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            ////RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                            ////System.IO.File.Move(RutaOrigen, RutaDestino);
+                            return error_mensaje; /*DisponibilidadArchivos*/
                         }
 
                         string resp = objRecaudo.updateDisponibilidad(CodBanco, partefija, "1");
@@ -1351,112 +1377,127 @@ namespace WebServiceBancos
 
                 if (!NombreArchivo.Contains("Acreedores"))
                 {
-                    if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                    if (tipomovimiento != null)
                     {
-                        File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+                        if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                        {
+                            File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
 
-                        /// <summary>
-                        ///Si el proceso continuo correctamente,  mueve  el archivo de recibidos de la ruta origen a la ruta de procesados
-                        /// </summary>
-                        RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                        RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
-                        System.IO.File.Move(RutaOrigen, RutaDestino);
+                            /// <summary>
+                            ///Si el proceso continuo correctamente,  mueve  el archivo de recibidos de la ruta origen a la ruta de procesados
+                            /// </summary>
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
 
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Copiar a la ruta de epicor
+                            /// </summary>
+                            //Pagos Efectivo Contadores
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoSico);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] lines = File.ReadAllLines(RutaDestino);
+
+                            CountEfectivo = 0;
+                            foreach (string line in lines)
+                            {
+                                CountEfectivo++;
+                            }
+
+                            if (CountEfectivo == 0)
+                            {
+                                File.Delete(RutaDestino);
+
+                            }
+
+                            //PAgos Tarjeta Contadores
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoVisaMAstercardSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+                            //Visa y MasterCards
+                            string[] linesVisaMaster = File.ReadAllLines(RutaDestino);
+
+                            CountVisaMarterCard = 0;
+                            foreach (string line in linesVisaMaster)
+                            {
+                                CountVisaMarterCard++;
+                            }
+
+                            if (CountVisaMarterCard == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+
+                            //Amex
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoAmexSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] linesAmex = File.ReadAllLines(RutaDestino);
+
+                            CountAmex = 0;
+                            foreach (string line in linesAmex)
+                            {
+                                CountAmex++;
+                            }
+
+                            if (CountAmex == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+                            //Dinners
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoDinnersSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] linesDinners = File.ReadAllLines(RutaDestino);
+
+                            CountDinners = 0;
+                            foreach (string line in linesDinners)
+                            {
+                                CountDinners++;
+                            }
+
+                            if (CountDinners == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+                            //Elimina los archivos de Cache
+                            File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+
+                            CountSico = 0;
+                            CountSico = CountEfectivo + CountAmex + CountDinners + CountVisaMarterCard;
+                            /// <summary>
+                            ///Si el proceso continuo correctamente, lo mueve de la ruta origen a la ruta de procesados
+                            /// </summary>
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
+                        }
                     }
                     else
                     {
-                        /// <summary>
-                        /// Copiar a la ruta de epicor
-                        /// </summary>
-                        //Pagos Efectivo Contadores
-                        RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
-                        RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoSico);
-                        System.IO.File.Copy(RutaOrigen, RutaDestino, true);
-
-                        string[] lines = File.ReadAllLines(RutaDestino);
-
-                        CountEfectivo = 0;
-                        foreach (string line in lines)
-                        {
-                            CountEfectivo++;
-                        }
-
-                        if (CountEfectivo == 0)
-                        {
-                            File.Delete(RutaDestino);
-
-                        }
-
-                        //PAgos Tarjeta Contadores
-                        RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
-                        RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoVisaMAstercardSICO);
-                        System.IO.File.Copy(RutaOrigen, RutaDestino, true);
-                        //Visa y MasterCards
-                        string[] linesVisaMaster = File.ReadAllLines(RutaDestino);
-
-                        CountVisaMarterCard = 0;
-                        foreach (string line in linesVisaMaster)
-                        {
-                            CountVisaMarterCard++;
-                        }
-
-                        if (CountVisaMarterCard == 0)
-                        {
-                            File.Delete(RutaDestino);
-                        }
-
-                        //Amex
-                        RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
-                        RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoAmexSICO);
-                        System.IO.File.Copy(RutaOrigen, RutaDestino, true);
-
-                        string[] linesAmex = File.ReadAllLines(RutaDestino);
-
-                        CountAmex = 0;
-                        foreach (string line in linesAmex)
-                        {
-                            CountAmex++;
-                        }
-
-                        if (CountAmex == 0)
-                        {
-                            File.Delete(RutaDestino);
-                        }
-                        //Dinners
-                        RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
-                        RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoDinnersSICO);
-                        System.IO.File.Copy(RutaOrigen, RutaDestino, true);
-
-                        string[] linesDinners = File.ReadAllLines(RutaDestino);
-
-                        CountDinners = 0;
-                        foreach (string line in linesDinners)
-                        {
-                            CountDinners++;
-                        }
-
-                        if (CountDinners == 0)
-                        {
-                            File.Delete(RutaDestino);
-                        }
-                        //Elimina los archivos de Cache
-                        File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
-                        File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
-
-                        CountSico = 0;
-                        CountSico = CountEfectivo + CountAmex + CountDinners + CountVisaMarterCard;
-                        /// <summary>
-                        ///Si el proceso continuo correctamente, lo mueve de la ruta origen a la ruta de procesados
-                        /// </summary>
                         RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                         RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
                         System.IO.File.Move(RutaOrigen, RutaDestino);
+                        // Guardar en log
+                        error_mensaje = "Linea 06 inexistente en archivo";
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco));
+                        return error_mensaje;
                     }
+
                 }
                 else
                 {
@@ -1736,7 +1777,7 @@ namespace WebServiceBancos
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoAmexSICO, PathSystem, UsuFTP, PassFTP,
                                                             Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion);
-                                
+
                             }
                             else
                             {
@@ -1820,7 +1861,14 @@ namespace WebServiceBancos
             }
             catch (Exception ex)
             {
-                sr.Close();
+                // Sacar el archivo del directorio actual
+                RptPagosLN pagosLN = new RptPagosLN();
+                error_mensaje = ex.Message.ToString();
+                pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco));
+
+                RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                System.IO.File.Move(RutaOrigen, RutaDestino);
                 return ex.Message;
             }
         }

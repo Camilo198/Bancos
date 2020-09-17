@@ -51,6 +51,7 @@
     <Compile Include="Administracion\ConsultorXML.cs" />
     <Compile Include="Conexion\ConectorBD.cs" />
     <Compile Include="Conexion\Querys.cs" />
+    <Compile Include="Consultas\ArchivoAD.cs" />
     <Compile Include="Consultas\BancoAD.cs" />
     <Compile Include="Consultas\CorreoAD.cs" />
     <Compile Include="Consultas\RutaAD.cs" />

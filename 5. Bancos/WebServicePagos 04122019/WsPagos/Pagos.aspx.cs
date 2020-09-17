@@ -17,7 +17,7 @@ namespace WebServiceBancos
             //Descomentariar
            // string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_13022020_PO12022020_0000.txt", "S");
             //Comentariar a produccion
-            string resultado = prueba.LecturaPagos("", "", "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\PagosOnline\\Recibidos\\", "00015_1009202X_PO09092020_0000.txt", "S");
+            string resultado = prueba.LecturaPagos("", "", "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\Recibidos\\", "PAT4501716.txt", "N");
 
            // string resultado = prueba.PagosTarjeta("", "", @"\\sbogche016v\ArchPlanos\Pagos\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_16042020_PO01042020_1034.txt");
         }

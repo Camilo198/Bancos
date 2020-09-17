@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Consulta\AfilLN.cs" />
     <Compile Include="Consulta\CierreLN.cs" />
+    <Compile Include="Consulta\FechaUsuraLN.cs" />
     <Compile Include="Consulta\PagosErradosLN.cs" />
     <Compile Include="Consulta\PagosInconsistentesLN.cs" />
     <Compile Include="Consulta\PagosLN.cs" />

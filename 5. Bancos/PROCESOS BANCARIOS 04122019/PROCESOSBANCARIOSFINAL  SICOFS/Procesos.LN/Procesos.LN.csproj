@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Consultas\ArchivoLN.cs" />
     <Compile Include="Consultas\BancoLN.cs" />
     <Compile Include="Consultas\CorreoLN.cs" />
     <Compile Include="Consultas\RecaudoLN.cs" />

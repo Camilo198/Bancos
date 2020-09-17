@@ -25,7 +25,6 @@ namespace Procesos.AD.Consultas
         {
             Registrador = LogManager.GetLogger(this.GetType());
         }
-
         /// <summary>
         /// Esta funcion es la encargada de llenar los datos y ejecutar un procedimiento almacenado
         /// </summary>

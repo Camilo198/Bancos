@@ -46,6 +46,7 @@
     <Compile Include="Definicion\RutaDEF.cs" />
     <Compile Include="Definicion\TareaDEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tablas\ArchivoEN.cs" />
     <Compile Include="Tablas\Banco.cs" />
     <Compile Include="Tablas\Correo.cs" />
     <Compile Include="Tablas\Ruta.cs" />

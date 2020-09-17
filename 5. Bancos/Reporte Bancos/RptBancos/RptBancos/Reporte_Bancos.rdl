@@ -14,8 +14,11 @@
       <Query>
         <DataSourceName>DSBancos</DataSourceName>
         <QueryParameters>
-          <QueryParameter Name="@inFechaPago">
-            <Value>=Parameters!inFechaPago.Value</Value>
+          <QueryParameter Name="@inFechaInicial">
+            <Value>=Parameters!inFechaInicial.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@inFechaFinal">
+            <Value>=Parameters!inFechaFinal.Value</Value>
           </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
@@ -1382,6 +1385,14 @@
                   <Group Name="table1_Details_Group">
                     <DataElementName>Detail</DataElementName>
                   </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!Banco.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!Fecha_Recaudo.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
                   <TablixMembers>
                     <TablixMember />
                   </TablixMembers>
@@ -1391,13 +1402,15 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
+            <RepeatRowHeaders>true</RepeatRowHeaders>
             <FixedColumnHeaders>true</FixedColumnHeaders>
+            <FixedRowHeaders>true</FixedRowHeaders>
             <KeepTogether>true</KeepTogether>
             <DataSetName>DS_SPBancos</DataSetName>
             <Top>1.38431in</Top>
             <Left>0.58208cm</Left>
             <Height>0.92292in</Height>
-            <Width>16.98665in</Width>
+            <Width>16.98664in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -1413,7 +1426,7 @@
             <Style />
           </Image>
         </ReportItems>
-        <Height>2.30722in</Height>
+        <Height>3.95708in</Height>
         <Style />
       </Body>
       <Width>19.5in</Width>
@@ -1427,9 +1440,13 @@
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="inFechaPago">
+    <ReportParameter Name="inFechaInicial">
       <DataType>DateTime</DataType>
-      <Prompt>Fecha de Pago</Prompt>
+      <Prompt>Fecha Inicial</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="inFechaFinal">
+      <DataType>DateTime</DataType>
+      <Prompt>Fecha Final</Prompt>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
@@ -1440,7 +1457,12 @@
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>inFechaPago</ParameterName>
+          <ParameterName>inFechaInicial</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>inFechaFinal</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
