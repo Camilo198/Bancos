@@ -372,7 +372,7 @@ namespace WebServiceBancos
                     if (Convert.ToInt32(linea.Substring(0, 2)) == 01)// Obtener fecha recaudo SAU
                     {
                         // Fecha de creacion y modificacion del archivo  SAU
-                        FeCreacion = File.GetCreationTime(RutaArchivo + NombreArchivo);
+                        //FeCreacion = File.GetCreationTime(RutaArchivo + NombreArchivo);
                         FeModificacion = File.GetLastWriteTime(RutaArchivo + NombreArchivo);
                         // Fecha de recaudo para insertar en la tbl format date
                         FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
@@ -1492,6 +1492,7 @@ namespace WebServiceBancos
                         RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
                         System.IO.File.Move(RutaOrigen, RutaDestino);
                         // Guardar en log
+                        String respue2 = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
                         error_mensaje = "Linea 06 inexistente en archivo";
                         RptPagosLN pagosLN = new RptPagosLN();
                         pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco));

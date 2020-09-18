@@ -80,25 +80,29 @@ namespace Procesos.PS.Procesos
                 //ArchivoEN archivoEN = new ArchivoEN();
                 //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
                 //archivoLN.consultarArchivoBolsaLN(archivoEN);
-                ArchivoEN topOne = archivosOrdenados.ElementAt(0);
-                #endregion
-
-                ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
-                System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(ArchivoSalida);
-
-                System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
-
-                foreach (System.IO.FileInfo archivos in fileNames)
+                if (archivosOrdenados.Count > 0)
                 {
-                    if (topOne.RutaArchivo == ArchivoSalida+archivos.Name)
+
+                    ArchivoEN topOne = archivosOrdenados.ElementAt(0);
+                    #endregion
+
+                    ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
+                    System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(ArchivoSalida);
+
+                    System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
+
+                    foreach (System.IO.FileInfo archivos in fileNames)
                     {
-                        mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
-                        //   mensaje = ProcesoPagos.LecturaPagos("", "", ArchivoSalida, archivos.Name, "S");
-                        RespuestaProceso.Add("PagosOnline: " + mensaje);
+                        if (topOne.RutaArchivo == ArchivoSalida + archivos.Name)
+                        {
+                            mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
+                            //   mensaje = ProcesoPagos.LecturaPagos("", "", ArchivoSalida, archivos.Name, "S");
+                            RespuestaProceso.Add("PagosOnline: " + mensaje);
+                        }
                     }
+                    return RespuestaProceso;
                 }
                 return RespuestaProceso;
-
             }
             catch (Exception ex)
             {

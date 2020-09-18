@@ -78,7 +78,7 @@ namespace Procesos.PS.Procesos
                 BancoLN objBancoLN = new BancoLN();
                 lista = objBancoLN.consultar(objB);
                 //OBTIENE LAS RUTAS DE LOS BANCOS
-                //objCorreo = ObtenerCorreos();
+                objCorreo = ObtenerCorreos();
                 objCorreoRes = objCorreo;
                 RutaLN objRutaLN = new RutaLN();
                 Ruta objRuta = new Ruta();
@@ -214,22 +214,25 @@ namespace Procesos.PS.Procesos
 
                     if (procesoConError)
                     {
-                        ArchivoEN topOne = archivosOrdenados.ElementAt(0);
-                        ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
-                        System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaEntrada);
-
-                        System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
-
-                        foreach (System.IO.FileInfo archivos in fileNames)
+                        if (archivosOrdenados.Count > 0)
                         {
-                            if (topOne.RutaArchivo == RutaEntrada + archivos.Name)
-                            {
-                                ProcesoPagos.Timeout = 300000;
-                                mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
+                            ArchivoEN topOne = archivosOrdenados.ElementAt(0);
+                            ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
+                            System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaEntrada);
 
-                                RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                            System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
+
+                            foreach (System.IO.FileInfo archivos in fileNames)
+                            {
+                                if (topOne.RutaArchivo == RutaEntrada + archivos.Name)
+                                {
+                                    ProcesoPagos.Timeout = 300000;
+                                    mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
+
+                                    RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                                }
+
                             }
-                            
                         }
                     }
 
