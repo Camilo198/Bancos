@@ -6,13 +6,13 @@
     <ErrorLevel>2</ErrorLevel>
     <OverwriteDatasets>False</OverwriteDatasets>
     <OverwriteDataSources>False</OverwriteDataSources>
-    <TargetServerVersion>SSRS2016</TargetServerVersion>
+    <TargetServerVersion>SSRS2008R2</TargetServerVersion>
     <Platform>Win32</Platform>
     <TargetReportFolder>RptBancos</TargetReportFolder>
     <TargetDatasetFolder>Conjuntos de datos</TargetDatasetFolder>
     <TargetDatasourceFolder>Orígenes de datos</TargetDatasourceFolder>
     <TargetReportPartFolder>Elementos de informe</TargetReportPartFolder>
-    <TargetServerURL>http://localhost/reportserver</TargetServerURL>
+    <TargetServerURL>http://bocheltec27/reportserver</TargetServerURL>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugLocal' ">
     <FullPath>DebugLocal</FullPath>
