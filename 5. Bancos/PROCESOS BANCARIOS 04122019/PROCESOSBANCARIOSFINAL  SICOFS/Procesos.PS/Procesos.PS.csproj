@@ -64,11 +64,15 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BouncyCastle.CryptoExt">
+    <Reference Include="BouncyCastle.CryptoExt, Version=1.7.5487.27693, Culture=neutral, PublicKeyToken=0e13498f2133a5e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Librerias\BouncyCastle.CryptoExt.dll</HintPath>
     </Reference>
     <Reference Include="DidiSoft.Pgp">
       <HintPath>Librerias\DidiSoft.Pgp.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>Librerias\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
