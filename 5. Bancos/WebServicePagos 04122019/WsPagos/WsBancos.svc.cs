@@ -384,7 +384,18 @@ namespace WebServiceBancos
 
                         /*VALFEC*/
                         /*Aca vamos a validar que la fecha del dia se la fecha del archivo*/
-                        parametro = ObjParaLn.consultarParametro();
+                        try
+                        {
+                            parametro = ObjParaLn.consultarParametro();
+                        }
+                        catch (Exception e)
+                        {
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "Error en conexión a SICO" +e.Message.ToString();
+                            pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco));
+                            return error_mensaje;
+                        }
+                        
 
                         if (parametro.Rows.Count > 0)
                         {
@@ -1862,14 +1873,14 @@ namespace WebServiceBancos
             }
             catch (Exception ex)
             {
-                // Sacar el archivo del directorio actual
+
                 RptPagosLN pagosLN = new RptPagosLN();
                 error_mensaje = ex.Message.ToString();
                 pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco));
-
-                RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
-                System.IO.File.Move(RutaOrigen, RutaDestino);
+                // Sacar el archivo del directorio actual
+                //RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                //RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                //System.IO.File.Move(RutaOrigen, RutaDestino);
                 return ex.Message;
             }
         }

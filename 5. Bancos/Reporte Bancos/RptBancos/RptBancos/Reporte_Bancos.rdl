@@ -1440,13 +1440,13 @@
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="inFechaInicial">
-      <DataType>DateTime</DataType>
-      <Prompt>Fecha Inicial</Prompt>
-    </ReportParameter>
     <ReportParameter Name="inFechaFinal">
       <DataType>DateTime</DataType>
       <Prompt>Fecha Final</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="inFechaInicial">
+      <DataType>DateTime</DataType>
+      <Prompt>Fecha Inicial</Prompt>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
@@ -1455,12 +1455,12 @@
       <NumberOfRows>2</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
+          <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>inFechaInicial</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
+          <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>inFechaFinal</ParameterName>
         </CellDefinition>
