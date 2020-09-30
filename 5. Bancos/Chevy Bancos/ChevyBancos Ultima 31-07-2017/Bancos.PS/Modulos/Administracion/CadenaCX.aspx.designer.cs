@@ -7,11 +7,13 @@
 // </generado automáticamente>
 //------------------------------------------------------------------------------
 
-namespace Bancos.PS.Modulos.Administracion {
-    
-    
-    public partial class CadenaCX {
-        
+namespace Bancos.PS.Modulos.Administracion
+{
+
+
+    public partial class CadenaCX
+    {
+
         /// <summary>
         /// Control imgBtnHome.
         /// </summary>
@@ -20,7 +22,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ImageButton imgBtnHome;
-        
+
         /// <summary>
         /// Control imgBtnGuardar.
         /// </summary>
@@ -29,7 +31,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ImageButton imgBtnGuardar;
-        
+
         /// <summary>
         /// Control pnlCadenas.
         /// </summary>
@@ -38,7 +40,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlCadenas;
-        
+
         /// <summary>
         /// Control pnlDatos.
         /// </summary>
@@ -47,7 +49,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlDatos;
-        
+
         /// <summary>
         /// Control lbCadenaCX.
         /// </summary>
@@ -56,7 +58,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbCadenaCX;
-        
+
         /// <summary>
         /// Control txbCadenaCX.
         /// </summary>
@@ -65,7 +67,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbCadenaCX;
-        
+
         /// <summary>
         /// Control lbServidorDA.
         /// </summary>
@@ -74,7 +76,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbServidorDA;
-        
+
         /// <summary>
         /// Control txbServidorDA.
         /// </summary>
@@ -83,7 +85,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbServidorDA;
-        
+
         /// <summary>
         /// Control lbDominio.
         /// </summary>
@@ -92,7 +94,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbDominio;
-        
+
         /// <summary>
         /// Control txbDominio.
         /// </summary>
@@ -101,7 +103,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbDominio;
-        
+
         /// <summary>
         /// Control rceEsquinasRedondas.
         /// </summary>
@@ -110,7 +112,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::AjaxControlToolkit.RoundedCornersExtender rceEsquinasRedondas;
-        
+
         /// <summary>
         /// Control pnlConfigMail.
         /// </summary>
@@ -119,7 +121,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlConfigMail;
-        
+
         /// <summary>
         /// Control lbServidor.
         /// </summary>
@@ -128,7 +130,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbServidor;
-        
+
         /// <summary>
         /// Control txbServidor.
         /// </summary>
@@ -137,7 +139,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbServidor;
-        
+
         /// <summary>
         /// Control lbCorreo.
         /// </summary>
@@ -146,7 +148,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbCorreo;
-        
+
         /// <summary>
         /// Control txbCorreo.
         /// </summary>
@@ -155,7 +157,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbCorreo;
-        
+
         /// <summary>
         /// Control rceConfigMail.
         /// </summary>
@@ -164,7 +166,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::AjaxControlToolkit.RoundedCornersExtender rceConfigMail;
-        
+
         /// <summary>
         /// Control pnlUsuario.
         /// </summary>
@@ -173,7 +175,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlUsuario;
-        
+
         /// <summary>
         /// Control lbNombreUsuario.
         /// </summary>
@@ -182,7 +184,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbNombreUsuario;
-        
+
         /// <summary>
         /// Control txbUsuario.
         /// </summary>
@@ -191,7 +193,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbUsuario;
-        
+
         /// <summary>
         /// Control lbClave.
         /// </summary>
@@ -200,7 +202,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lbClave;
-        
+
         /// <summary>
         /// Control txbClave.
         /// </summary>
@@ -209,7 +211,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txbClave;
-        
+
         /// <summary>
         /// Control rceUsuarios.
         /// </summary>
@@ -218,7 +220,7 @@ namespace Bancos.PS.Modulos.Administracion {
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::AjaxControlToolkit.RoundedCornersExtender rceUsuarios;
-        
+
         /// <summary>
         /// Control lbEstado.
         /// </summary>

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Results>
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://172.16.29.16/Servicios/PagosOnline.svc?xsd=xsd0" filename="PagosOnline.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://172.16.29.16/Servicios/PagosOnline.svc?wsdl" filename="PagosOnline.wsdl" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://172.16.29.16/Servicios/PagosOnline.svc?xsd=xsd1" filename="PagosOnline0.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://172.16.29.16/Servicios/PagosOnline.svc?xsd=xsd2" filename="PagosOnline1.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:51647/Servicios/PagosOnline.svc?xsd=xsd2" filename="PagosOnline.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:51647/Servicios/PagosOnline.svc?xsd=xsd0" filename="PagosOnline0.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://localhost:51647/Servicios/PagosOnline.svc?wsdl" filename="PagosOnline.wsdl" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.DiscoveryDocumentReference" url="http://localhost:51647/Servicios/PagosOnline.svc?disco" filename="PagosOnline.disco" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:51647/Servicios/PagosOnline.svc?xsd=xsd1" filename="PagosOnline1.xsd" />
   </Results>
 </DiscoveryClientResultsFile>

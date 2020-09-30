@@ -160,6 +160,7 @@
     <Content Include="Modulos\Interpretaciones\LogBAN.aspx" />
     <Content Include="Modulos\MenuPrincipal.aspx" />
     <Content Include="Modulos\XML\Configuracion.xml" />
+    <Content Include="Prueba.aspx" />
     <Content Include="Servicios\AsoBancaria.svc" />
     <Content Include="Servicios\DatosDemonio.svc" />
     <None Include="Properties\PublishProfiles\Perfil1.pubxml" />
@@ -372,6 +373,13 @@
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Prueba.aspx.cs">
+      <DependentUpon>Prueba.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Prueba.aspx.designer.cs">
+      <DependentUpon>Prueba.aspx</DependentUpon>
     </Compile>
     <Compile Include="Servicios\Archivos\LectorArchivos.cs" />
     <Compile Include="Servicios\AsoBancaria.svc.cs">

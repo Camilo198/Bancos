@@ -272,6 +272,7 @@
     <Content Include="MarcaVisual\Iconos\Pause.png" />
     <Content Include="MarcaVisual\Iconos\Play.png" />
     <None Include="Web References\wsenviocorreos\service.disco" />
+    <None Include="Web References\ServicioPagosOnline\PagosOnline.disco" />
     <Content Include="XML\Configuracion.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -303,10 +304,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl">
+    <WebReferenceUrl Include="http://172.16.29.16/Servicios/PagosOnline.svc">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
-      <UpdateFromURL>http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://172.16.29.16/Servicios/PagosOnline.svc</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

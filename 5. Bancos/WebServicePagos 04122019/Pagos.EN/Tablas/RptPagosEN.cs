@@ -19,6 +19,7 @@ namespace Pagos.EN.Tablas
         public int cantPagosSicoInc { get; set; }
         public double valorMontoSicoInc { get; set; }
         public DateTime fechaModificacionArch { get; set; }
+        public String parteFija { get; set; }
 
     }
 }
