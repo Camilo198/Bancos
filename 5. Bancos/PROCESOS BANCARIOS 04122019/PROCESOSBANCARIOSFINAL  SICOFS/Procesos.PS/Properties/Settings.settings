@@ -24,7 +24,7 @@
       <Value Profile="(Default)">http://wsenviocorreos.chevyplan.col/service.asmx</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioBancos_WsBancos" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://localhost:8090/WsBancos.svc</Value>
+      <Value Profile="(Default)">http://sbogche048vp:9079/WsBancos.svc</Value>
     </Setting>
   </Settings>
 </SettingsFile>
