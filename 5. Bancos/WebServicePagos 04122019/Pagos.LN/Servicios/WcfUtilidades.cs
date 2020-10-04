@@ -11,6 +11,7 @@ using System.Data;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Pagos.LN.Consulta;
+using Renci.SshNet.Common;
 
 namespace Pagos.LN
 {
@@ -579,6 +580,7 @@ namespace Pagos.LN
             IList<String> texto = null;
             try
             {
+                
                 SftpClient cliente = new SftpClient(Ip, Login, Password);
                 cliente.Connect();
                 texto = cliente.ReadAllLines(RutaFTP + NombreArchivo);
@@ -594,5 +596,6 @@ namespace Pagos.LN
             }
             return texto;
         }
+
     }
 }

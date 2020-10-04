@@ -164,6 +164,7 @@ namespace WebServiceBancos
         String error_mensaje;
 
         String parteFijaAbstracta = "";
+        string parteFijaOriginal = "";
         System.IO.StreamReader sr = null;
         string respu = "";
         /// <summary>
@@ -443,6 +444,7 @@ namespace WebServiceBancos
                                         RutaEpicor = ArregloCodigo[2, 1].ToString();
                                         RutaProceso = ArregloCodigo[3, 1].ToString();
                                         parteFijaAbstracta = CodigoArchivos.Tables["TablaBanPagos"].Rows[i]["ParteFija"].ToString();
+                                        parteFijaOriginal = parteFijaAbstracta;
                                     }
                                     else
                                     {
@@ -464,6 +466,7 @@ namespace WebServiceBancos
                         if (parametroUsura.Count > 0)
                         {
                             String fechaFilaUsura = parametroUsura[0].fechaUsura;
+                            RptPagosLN pagosLN = new RptPagosLN();
                             // Fecha en formato año mes
                             if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
                             {
@@ -471,10 +474,18 @@ namespace WebServiceBancos
                                 if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(fechaFilaUsura))
                                 {
                                     File.Delete(RutaArchivo + NombreArchivo);
-                                    return " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
+                                    error_mensaje = " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
                                         + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+
+                                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                    return error_mensaje;
                                 }
-                                return "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+                                
+                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+
+                                pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+
+                                return error_mensaje;
                             }
                         }
                         #endregion
@@ -750,6 +761,7 @@ namespace WebServiceBancos
                                     else
                                     {
                                         pagosEN.valorMontoArchivo = sumaEfectivo;
+                                        parteFijaAbstracta = parteFijaOriginal;
                                     }
                                     pagosEN.parteFija = parteFijaAbstracta;
 
@@ -1349,6 +1361,20 @@ namespace WebServiceBancos
                     totnotascredito = notascredito + totnotascredito;
                     totnotasdebito = notasdebito + totnotasdebito;
                     totnreferenciaerrada = nreferenciaerrada + totnreferenciaerrada;
+                }
+                if (new FileInfo(RutaArchivo+NombreArchivo).Length == 0)
+                {
+                    RptPagosLN pagosLN = new RptPagosLN(); 
+                    error_mensaje = "Error Archívo vacío: " +  RutaArchivo + NombreArchivo + DateTime.Now.ToString();
+                    
+                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+
+                    sr.Close();
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
+                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return error_mensaje;
                 }
                 //CIERRE DEL WHILE
                 //CAMBIAR CONTADOR DE RECUADOS AHORA CONSULTAMOS  
