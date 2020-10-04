@@ -26,30 +26,10 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc")]
-        public string Procesos_PS_ServicioAsoBancaria_AsoBancaria {
-            get {
-                return ((string)(this["Procesos_PS_ServicioAsoBancaria_AsoBancaria"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
         [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche016v/AdministracionFtp/Servicios/moverArchivosFTP.svc")]
         public string Procesos_PS_MoverArchivosFTP_moverArchivosFTP {
             get {
                 return ((string)(this["Procesos_PS_MoverArchivosFTP_moverArchivosFTP"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:51647/Servicios/PagosOnline.svc")]
-        public string Procesos_PS_ServicioPagosOnline_PagosOnline {
-            get {
-                return ((string)(this["Procesos_PS_ServicioPagosOnline_PagosOnline"]));
             }
         }
         
@@ -66,7 +46,7 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:51647/Servicios/TarjetasCredito.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc")]
         public string Procesos_PS_ServicioTarjetaCredito_TarjetasCredito {
             get {
                 return ((string)(this["Procesos_PS_ServicioTarjetaCredito_TarjetasCredito"]));
@@ -96,7 +76,27 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche048vp:9079/WsBancos.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc")]
+        public string Procesos_PS_ServicioAsoBancaria_AsoBancaria {
+            get {
+                return ((string)(this["Procesos_PS_ServicioAsoBancaria_AsoBancaria"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche010f/Bancos/Servicios/PagosOnline.svc")]
+        public string Procesos_PS_ServicioPagosOnline_PagosOnline {
+            get {
+                return ((string)(this["Procesos_PS_ServicioPagosOnline_PagosOnline"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche048v:8084/WsBancos.svc")]
         public string Procesos_PS_ServicioBancos_WsBancos {
             get {
                 return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));

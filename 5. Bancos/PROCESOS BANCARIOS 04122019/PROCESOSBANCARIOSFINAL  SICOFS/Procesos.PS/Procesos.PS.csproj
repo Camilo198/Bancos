@@ -282,10 +282,10 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc">
+    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioAsoBancaria\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc</UpdateFromURL>
+      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -304,10 +304,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16/Servicios/PagosOnline.svc">
+    <WebReferenceUrl Include="http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
-      <UpdateFromURL>http://172.16.29.16/Servicios/PagosOnline.svc</UpdateFromURL>
+      <UpdateFromURL>http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -326,10 +326,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioRecaudo_Recaudo</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -337,10 +337,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche048vp:9079/WsBancos.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche048v:8084/WSBancos.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://sbogche048vp:9079/WsBancos.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche048v:8084/WSBancos.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
