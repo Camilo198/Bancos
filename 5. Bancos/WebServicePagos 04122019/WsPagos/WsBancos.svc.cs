@@ -283,7 +283,7 @@ namespace WebServiceBancos
                 {
                     return "Excepción no hay Pagos Online para procesar";
                 }
-               
+
                 PagosInconsistentesLN objInsertPagosIn = new PagosInconsistentesLN();
                 CierreLN ConsultaExis = new CierreLN();
                 PagosLN PagoValdLN = new PagosLN();
@@ -410,11 +410,11 @@ namespace WebServiceBancos
                         catch (Exception e)
                         {
                             RptPagosLN pagosLN = new RptPagosLN();
-                            error_mensaje = "Error en conexión a SICO "+RutaArchivo+NombreArchivo + e.Message.ToString();
+                            error_mensaje = "Error en conexión a SICO " + RutaArchivo + NombreArchivo + e.Message.ToString();
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
                             return error_mensaje;
                         }
-                        
+
 
                         if (parametro.Rows.Count > 0)
                         {
@@ -498,7 +498,7 @@ namespace WebServiceBancos
                                     pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
                                     return error_mensaje;
                                 }
-                                
+
                                 error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
 
                                 pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
@@ -760,7 +760,7 @@ namespace WebServiceBancos
 
                                     pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
                                     pagosEN.fechaPago = this.FechaRecaudo;
-                                    
+
                                     if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoVisaMarterCardSICO))
                                     {
                                         pagosEN.valorMontoArchivo = sumaVisaMastercard;
@@ -1209,9 +1209,18 @@ namespace WebServiceBancos
                                                             encabezado = "S";
                                                         }
                                                         RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO YA EXISTE");
-
-                                                        CrearArchivoSico(NombreArchivo);
-
+                                                        // SAU 6/10/2020 Pagos online a cuotas
+                                                        //if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                        //{
+                                                        //    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                        //    contadorPagoCuotas++;
+                                                        //    ncupos++;
+                                                        //}
+                                                        //else
+                                                        //{
+                                                            CrearArchivoSico(NombreArchivo);
+                                                        //}
+                                                        // SAU 6/10/2020 Pagos online a cuotas
                                                         nregistrosprocesados++;
                                                         nregistrosexistentes++;
                                                     }
@@ -1232,8 +1241,18 @@ namespace WebServiceBancos
                                                             npagosguardados++;
                                                             /*PAGOPI*/
                                                             npagosguardadosPI++;
-
-                                                            CrearArchivoSico(NombreArchivo);
+                                                            // SAU 6/10/2020 Pagos online a cuotas
+                                                            //if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                            //{
+                                                            //    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                            //    contadorPagoCuotas++;
+                                                            //    ncupos++;
+                                                            //}
+                                                            //else
+                                                            //{
+                                                                CrearArchivoSico(NombreArchivo);
+                                                            //}
+                                                            // SAU 6/10/2020 Pagos online a cuotas
                                                         }
                                                         else
                                                         {
@@ -1316,9 +1335,9 @@ namespace WebServiceBancos
                         pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
                         pagosEN.fechaModificacionArch = FeModificacion;
                         pagosEN.cantPagosArchivo = CantArchivoOrigen;
-                        
+
                         if (pagosEN.codigoBanco == Convert.ToInt32(CodBancoVisaMarterCardVentas) || pagosEN.codigoBanco == Convert.ToInt32(CodBancoDinnersVentas)
-                            ||pagosEN.codigoBanco == Convert.ToInt32(CodBancoAmexVentas) )
+                            || pagosEN.codigoBanco == Convert.ToInt32(CodBancoAmexVentas))
                         {
                             pagosEN.codigoBanco = Convert.ToInt32(CodBancoPSE);
                             parteFijaAbstracta = "0001x_";
@@ -1351,7 +1370,7 @@ namespace WebServiceBancos
                             pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
                             pagosEN.fechaPago = this.FechaRecaudo;
                             pagosEN.cantPagosArchivo = CantArchivoOrigen;
-          
+
                             arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
 
                             if (arrPagos.Count > 0) //Si existe
@@ -1380,7 +1399,7 @@ namespace WebServiceBancos
                     totnotasdebito = notasdebito + totnotasdebito;
                     totnreferenciaerrada = nreferenciaerrada + totnreferenciaerrada;
                 }
-                
+
                 //CIERRE DEL WHILE
                 //CAMBIAR CONTADOR DE RECUADOS AHORA CONSULTAMOS  
                 List<string[,]> listRecaudo2 = objRecaudo.ConsultarRegistrosIngresados(ValdObjetos, "pa_Ban_Cuenta_Recaudos");
@@ -1917,7 +1936,7 @@ namespace WebServiceBancos
             {
 
                 RptPagosLN pagosLN = new RptPagosLN();
-                error_mensaje = "General "+ RutaArchivo + NombreArchivo + ex.Message.ToString();
+                error_mensaje = "General " + RutaArchivo + NombreArchivo + ex.Message.ToString();
                 if (this.FechaRecaudo == null)
                 {
                     this.FechaRecaudo = DateTime.Now.ToString();

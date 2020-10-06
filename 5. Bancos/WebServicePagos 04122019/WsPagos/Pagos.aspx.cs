@@ -23,17 +23,20 @@ namespace WebServiceBancos
             //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_01012018_PO31122017_0000.txt", "S");
             //Comentariar a produccion
             //string resultado = prueba.LecturaPagos("", "", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Fiducia1\\Recaudo\\Bogota\\Recibidos\\", "05003146.OW3", "N");
-            string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", null, "S");
+           //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_06102020_PO06102020_0002_PRUEBA_SAU.txt", "S");
+            
         }
         public void pruebaSSH()
         {
             string PathSystem = "/export/home/SYSTEM/"; // SAU 08.09.2020
-            string ServidorSico = "172.16.30.5";
+            string ServidorSico = "172.16.30.7";
             //IR023201001220048 
             //R023201001220048
+            string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS*/
+            string PasswordSico = ConfigurationManager.AppSettings["password"].ToString();          /*PAGOS*/
             string NombreArchivoSico = "023201001220048.txt";
-            string RutaSico = "ftp://172.16.30.5/";
-            string UsuFTP = "chevyplan\\usaftp";
+            string RutaSico = "ftp://172.16.30.7/";
+            string UsuFTP = "chevyplan\\usaftpinfo";
             string PassFTP = "Chevy789";
             string Fechapago = "2020-10-01";
             int codigobanco = 23;
@@ -53,7 +56,7 @@ namespace WebServiceBancos
 
             try
             {
-                //CON.conecta_Server(ServidorSico, UsuFTP, PassFTP, "cp /export/home/SYSTEM/R023201001220048.txt /usr2/sico/mega/planos/");
+                CON.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, "cp /export/home/SYSTEM/IR066200928083125.txt /usr2/sico/mega/planos/");
                 //using (SshCommand c = new SshCommand()) // SshClient client = new SshClient(...)
                 //{
                 //    client.Connect();
@@ -68,7 +71,7 @@ namespace WebServiceBancos
                 //cliente.Connect();
                 //texto = cliente.ReadAllLines(RutaSico + NombreArchivoSico);
 
-                string res = util.DownloadFTP("\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Fiducia1\\Recaudo\\Prueba_gol\\", "R023201001220048.txt", RutaSico, UsuFTP, PassFTP);
+                string res = util.DownloadFTP("\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Fiducia1\\", "IR066200928083125.txt", RutaSico, UsuFTP, PassFTP);
 
             }
             catch (Exception ex)

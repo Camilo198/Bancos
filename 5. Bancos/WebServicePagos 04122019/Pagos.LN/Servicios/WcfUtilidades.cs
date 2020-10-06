@@ -458,11 +458,12 @@ namespace Pagos.LN
         /// <param name="Password">Password</param>
         public string DownloadFTP(string RemoteFile, string NombreArchivo, string LocalDirectory, string Login, string Password)
         {
+            System.IO.FileStream outPutStream = null;
             try
             {
                 FtpWebRequest ftp;
                 string donde = RemoteFile + NombreArchivo;
-                System.IO.FileStream outPutStream = new System.IO.FileStream(donde, FileMode.Create);
+                outPutStream = new System.IO.FileStream(donde, FileMode.Create);
                 ftp = ((FtpWebRequest)(FtpWebRequest.Create(new Uri((LocalDirectory + NombreArchivo.Trim())))));
                 ftp.Credentials = new NetworkCredential(Login, Password);
                 ftp.Method = WebRequestMethods.Ftp.DownloadFile;
@@ -487,6 +488,7 @@ namespace Pagos.LN
             }
             catch (Exception exc)
             {
+                outPutStream.Close();
                 return exc.Message;
             }
         }
@@ -598,7 +600,7 @@ namespace Pagos.LN
             }
             return texto;
         }
-        public IList<String> LeerFicheroFTPComando(string NombreArchivo, string UsuFTP, string PassFTP, string RutaFTP, string fechaPago = "", int codigoBanco = 0)
+        public IList<String> LeerFicheroFTP(string NombreArchivo, string UsuFTP, string PassFTP, string RutaFTP, string fechaPago = "", int codigoBanco = 0)
         {
             string RutaSico = ConfigurationManager.AppSettings["RutaFTP"].ToString();
 
@@ -612,9 +614,9 @@ namespace Pagos.LN
 
             String comando = "";
             IList<String> texto = null;
+            SSHConect CON = new SSHConect();
             try
             {
-                SSHConect CON = new SSHConect();
                 // Copiar archivo de export/home/system a megaplanos
                 comando = "cp "+ RutaFTP+NombreArchivo+" "+MegaPlanos;
                 CON.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
@@ -622,7 +624,7 @@ namespace Pagos.LN
                 string res = DownloadFTP(Repositorio, NombreArchivo, RutaSico, UsuFTP, PassFTP);
                 if (res == "S")
                 {
-                    texto = File.ReadAllLines(RutaFTP + NombreArchivo);
+                    texto = File.ReadAllLines(Repositorio + NombreArchivo);
                 }
                 else
                 {
@@ -636,6 +638,9 @@ namespace Pagos.LN
             }
             catch (Exception)
             {
+                comando = "rm " + MegaPlanos + NombreArchivo;
+                CON.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                File.Delete(Repositorio + NombreArchivo);
                 return new List<string>();
             }
         }

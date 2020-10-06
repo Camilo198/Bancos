@@ -67,7 +67,9 @@ namespace Pagos.LN.Consulta
             // Leo los resultados consistentes e inconsistentes de System
             try
             {
-                inconsistentes = Util.LeerFicheroFTP(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
+                //inconsistentes = Util.LeerFicheroFTP(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
+                inconsistentes = Util.LeerFicheroFTP("IR" + NombreArchivoSico, UsuFTP, PassFTP, PathSystem, pagosEN.fechaPago, pagosEN.codigoBanco);
+
                 if (inconsistentes.Count > 0)
                 {
                     try
@@ -101,7 +103,8 @@ namespace Pagos.LN.Consulta
             }
             try
             {
-                consistentes = Util.LeerFicheroFTP(ServidorSico, "R" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
+                //consistentes = Util.LeerFicheroFTP(ServidorSico, "R" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, pagosEN.fechaPago, pagosEN.codigoBanco);
+                consistentes = Util.LeerFicheroFTP("R" + NombreArchivoSico, UsuFTP, PassFTP, PathSystem, pagosEN.fechaPago, pagosEN.codigoBanco);
                 if (consistentes.Count > 0)
                 {
                     try
