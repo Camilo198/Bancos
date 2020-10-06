@@ -56,16 +56,6 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche010f/Administracionftp/Servicios/moverArchivosFTP.svc")]
-        public string Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP {
-            get {
-                return ((string)(this["Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
         [global::System.Configuration.DefaultSettingValueAttribute("http://wsenviocorreos.chevyplan.col/service.asmx")]
         public string Procesos_PS_wsenviocorreos_Service {
             get {
@@ -100,6 +90,16 @@ namespace Procesos.PS.Properties {
         public string Procesos_PS_ServicioBancos_WsBancos {
             get {
                 return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche010f/Administracionftp/Servicios/moverArchivosFTP.svc")]
+        public string Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP {
+            get {
+                return ((string)(this["Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP"]));
             }
         }
     }

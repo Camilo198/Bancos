@@ -275,8 +275,15 @@ namespace WebServiceBancos
                 System.Threading.Thread.Sleep(1000);
 
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-                sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
-
+                try
+                {
+                    sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
+                }
+                catch (Exception ex)
+                {
+                    return "Excepción no hay Pagos Online para procesar";
+                }
+               
                 PagosInconsistentesLN objInsertPagosIn = new PagosInconsistentesLN();
                 CierreLN ConsultaExis = new CierreLN();
                 PagosLN PagoValdLN = new PagosLN();
@@ -352,13 +359,24 @@ namespace WebServiceBancos
                 int LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
                 LoteMaximo++;
 
-
-
                 //PAGREP
                 //buscar en la base de datos antes de empezar a recorrerlo 
                 #region LECTURA DE ARCHIVO
-                //Lee el archivo mientras no existan lineas
+                if (new FileInfo(RutaArchivo + NombreArchivo).Length == 0)
+                {
+                    RptPagosLN pagosLN = new RptPagosLN();
+                    error_mensaje = "Error Archívo vacío: " + RutaArchivo + NombreArchivo + DateTime.Now.ToString();
 
+                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+
+                    sr.Close();
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
+                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return error_mensaje;
+                }
+                //Lee el archivo mientras existan lineas
                 while (sr.EndOfStream == false)
                 {
                     linea = sr.ReadLine();
@@ -392,7 +410,7 @@ namespace WebServiceBancos
                         catch (Exception e)
                         {
                             RptPagosLN pagosLN = new RptPagosLN();
-                            error_mensaje = "Error en conexión a SICO" +e.Message.ToString();
+                            error_mensaje = "Error en conexión a SICO "+RutaArchivo+NombreArchivo + e.Message.ToString();
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
                             return error_mensaje;
                         }
@@ -1362,20 +1380,7 @@ namespace WebServiceBancos
                     totnotasdebito = notasdebito + totnotasdebito;
                     totnreferenciaerrada = nreferenciaerrada + totnreferenciaerrada;
                 }
-                if (new FileInfo(RutaArchivo+NombreArchivo).Length == 0)
-                {
-                    RptPagosLN pagosLN = new RptPagosLN(); 
-                    error_mensaje = "Error Archívo vacío: " +  RutaArchivo + NombreArchivo + DateTime.Now.ToString();
-                    
-                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
-
-                    sr.Close();
-                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
-                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
-                    System.IO.File.Move(RutaOrigen, RutaDestino);
-                    return error_mensaje;
-                }
+                
                 //CIERRE DEL WHILE
                 //CAMBIAR CONTADOR DE RECUADOS AHORA CONSULTAMOS  
                 List<string[,]> listRecaudo2 = objRecaudo.ConsultarRegistrosIngresados(ValdObjetos, "pa_Ban_Cuenta_Recaudos");
@@ -1671,6 +1676,7 @@ namespace WebServiceBancos
                                 }
                                 //Almacena pagos consistentes e inconsistentes de SICO                                
                                 RptPagosLN pagosLN = new RptPagosLN();
+                                // Para pruebas
                                 pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoSico, PathSystem, UsuFTP, PassFTP,
                                                             Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaAbstracta);
 
@@ -1911,7 +1917,7 @@ namespace WebServiceBancos
             {
 
                 RptPagosLN pagosLN = new RptPagosLN();
-                error_mensaje = ex.Message.ToString();
+                error_mensaje = "General "+ RutaArchivo + NombreArchivo + ex.Message.ToString();
                 if (this.FechaRecaudo == null)
                 {
                     this.FechaRecaudo = DateTime.Now.ToString();
