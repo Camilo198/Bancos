@@ -836,6 +836,10 @@ namespace WebServiceBancos
                                     pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
                                     pagosEN.fechaPago = this.FechaRecaudo;
                                     pagosEN.parteFija = parteFijaAbstracta;
+                                    if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoPSE))
+                                    {
+                                        pagosEN.parteFija = parteFijaOriginal;
+                                    }
                                     pagosEN.valorMontoArchivo = sumaEfectivo;
 
                                     arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
@@ -1347,7 +1351,7 @@ namespace WebServiceBancos
                         if (pagosEN.codigoBanco == Convert.ToInt32(CodBancoPSE))
                         {
                             // Monto archivo, SP sin parámetros UPDATE
-
+                            pagosEN.parteFija = "0001x_";
                             try
                             {
                                 int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
