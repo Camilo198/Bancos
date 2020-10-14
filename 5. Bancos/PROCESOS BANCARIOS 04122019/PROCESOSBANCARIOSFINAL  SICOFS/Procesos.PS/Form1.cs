@@ -16,7 +16,7 @@ using System.Diagnostics;
 using System.Threading;
 
 using Procesos.AD.Administracion;
-
+using Procesos.PS.Codigo;
 
 namespace Procesos.PS
 {
@@ -206,6 +206,7 @@ namespace Procesos.PS
 
         private void Temporizador_Tick(object sender, EventArgs e)
         {
+            String RutaEntrada;
             try
             {
                 //CARGA TODOS LOS PROCESOS GUARDADOS EN BAN_TAREAS
@@ -214,7 +215,18 @@ namespace Procesos.PS
                 DataTable procesos = new TareaLN().consultar();
                 Tareas Tarea;
                 tiempoServidor = DateTime.Now;
-                String mensaje;
+
+                //OBTIENE LAS RUTAS DE LOS BANCOS
+                RutaLN objRutaLN = new RutaLN();
+                Ruta objRuta = new Ruta();
+                BancoLN objBancoLN = new BancoLN();
+                LectorArchivos objLector_ax = new LectorArchivos();
+
+                List<String> listaRutaArchivos_ax = new List<string>();
+                List<ArchivoEN> listaRutaArchivosOrdenados = new List<ArchivoEN>();
+                List<Banco> lista = new List<Banco>();
+                List<Banco> lista_ax = new List<Banco>();
+
                 foreach (DataRow fila in procesos.Rows)
                 {
                     Tarea = new Tareas();
@@ -231,9 +243,36 @@ namespace Procesos.PS
                     tiempoProceso = Convert.ToDateTime(Tarea.pInicio);
                     if (tiempoProceso <= tiempoServidor)
                     {
+                        #region SAU Pagos cierre mes - orden de pagos por fecha de la bolsa de archivos
+                        EN.Tablas.Banco objB = new EN.Tablas.Banco();
+
+                        objB.pActivo = true;
+                        objB.pTipoProceso = "POL_";  // Pagos Online
+
+                        lista = objBancoLN.consultar(objB);
+
+                        objB.pTipoProceso = "ABR_"; // Recaudo diario
+
+                        lista_ax = objBancoLN.consultar(objB);
+
+                        lista.AddRange(lista_ax);
+
+                        foreach (Banco bank in lista)
+                        {
+                            objRuta.pOid = bank.pRutaArchivosEntrada;
+                            RutaEntrada = objRutaLN.consultar(objRuta)[0].pRuta;
+                            List<String> listaRutaArchivos = objLector_ax.listarDirectorio(RutaEntrada);
+                            if (listaRutaArchivos_ax.Find(x => x.Contains(RutaEntrada)) == null)
+                            {
+                                listaRutaArchivos_ax.AddRange(listaRutaArchivos);
+                            }
+                        }
+                        listaRutaArchivosOrdenados = objLector_ax.procesarArchivosFecha(listaRutaArchivos_ax);
+                        objRuta.pOid = 0;
+                        #endregion
                         #region TAREA ASOBANCAIRA SIN USO
-                        
-                        
+
+
                         //**********************************************************
                         //SE REALIZA EL PROCESO DE ASOBANCARIA PARA TODOS LOS BANCOS
                         if (Tarea.pOperacion.Equals("Asobancaria"))
@@ -257,7 +296,7 @@ namespace Procesos.PS
 
                                 if (procesoConError == true)
                                 {
-                                  // AQUI  Tarea.pTiempoIntervalo = "30";
+                                    // AQUI  Tarea.pTiempoIntervalo = "30";
                                     valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
                                     if (valor <= 0)
                                         this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
@@ -284,13 +323,24 @@ namespace Procesos.PS
                         //************************************************************
                         //SE REALIZA EL PROCESO DE PAGOS ONLINE PARA TODOS LOS BANCOS
                         if (Tarea.pOperacion.Equals("PagosOnline"))
-                        {                            
+                        {
                             bool procesoConError = false;
                             List<String> RespuestaProceso = new List<string>();
                             this.label10.Text = Tarea.pNombreTarea;
                             Pausa(2);
                             PagosOnline objPagOnline = new PagosOnline();
-                            RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError);
+                            RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError, listaRutaArchivosOrdenados);
+
+                            #region Limpia Tabla bolsa pagos
+                            //ArchivoLN archivoLN = new ArchivoLN();
+                            //ArchivoEN archivoEN = new ArchivoEN();
+                            //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
+                            //archivoLN.eliminarArchivoBolsaLN(archivoEN);
+                            listaRutaArchivosOrdenados.Clear();
+                            listaRutaArchivos_ax.Clear();
+                            lista.Clear();
+                            lista.Clear();
+                            #endregion
 
                             TareaLN objTareasLN = new TareaLN();
                             int valor = 0;
@@ -304,7 +354,7 @@ namespace Procesos.PS
 
                                 if (procesoConError == true)
                                 {
-                                   // AQUI Tarea.pTiempoIntervalo = "30";
+                                    // AQUI Tarea.pTiempoIntervalo = "30";
                                     valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
                                     if (valor <= 0)
                                         this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
@@ -331,7 +381,7 @@ namespace Procesos.PS
                         //SE REALIZA EL PROCESO DE MOVER ARCHIVOS QUE SE ENCUENTRAN EN UNA FTP A CUALQUIER RUTA ESTABLECIDA
                         if (Tarea.pOperacion.Equals("MoverFtp"))
                         {
-                            
+
                             bool procesoConError = false;
                             String RespuestaProceso = String.Empty;
                             this.label10.Text = Tarea.pNombreTarea;
@@ -346,7 +396,7 @@ namespace Procesos.PS
                             {
                                 this.listBox1.Items.Add(this.label10.Text + " " + RespuestaProceso + " Hora: " + DateTime.Now.ToString());
 
-                               // AQUI Tarea.pTiempoIntervalo = "30";
+                                // AQUI Tarea.pTiempoIntervalo = "30";
                                 valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
 
                                 if (valor <= 0)
@@ -369,12 +419,12 @@ namespace Procesos.PS
                         #endregion
 
                         #region TAREA TARJETAS CREDITO
-                  
+
                         //************************************************************
                         //SE REALIZA EL PROCESAMIENTO DE LOS ARCHIVOS TARJETAS DE CREDITO PARA TODOS LOS BANCOS
                         if (Tarea.pOperacion.Equals("TarjetasCredito"))
                         {
-                            
+
                             bool procesoConError = false;
                             List<String> RespuestaProceso = new List<string>();
                             this.label10.Text = Tarea.pNombreTarea;
@@ -394,12 +444,12 @@ namespace Procesos.PS
 
                                 if (procesoConError == true)
                                 {
-                                   // AQUI Tarea.pTiempoIntervalo = "30";
+                                    // AQUI Tarea.pTiempoIntervalo = "30";
                                     valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
                                     if (valor <= 0)
                                         this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
                                     else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());                                        
+                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
                                 }
                                 else
                                 {
@@ -427,20 +477,29 @@ namespace Procesos.PS
                             this.label10.Text = Tarea.pNombreTarea;
                             Pausa(2);
                             Recaudo objRecaudo = new Recaudo();
-                            RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError);
-
+                            RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError, listaRutaArchivosOrdenados);
+                            #region Limpia Tabla bolsa pagos
+                            //ArchivoLN archivoLN = new ArchivoLN();
+                            //ArchivoEN archivoEN = new ArchivoEN();
+                            //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
+                            //archivoLN.eliminarArchivoBolsaLN(archivoEN);
+                            listaRutaArchivosOrdenados.Clear();
+                            listaRutaArchivos_ax.Clear();
+                            lista.Clear();
+                            lista.Clear();
+                            #endregion
                             TareaLN objTareasLN = new TareaLN();
                             int valor = 0;
 
                             if (RespuestaProceso.Count > 0)
                             {
                                 foreach (String procesoBanco in RespuestaProceso)
-                                {                                    
+                                {
                                     this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
                                 }
                                 if (procesoConError == true)
                                 {
-                                   // AQUI  Tarea.pTiempoIntervalo = "30";
+                                    // AQUI  Tarea.pTiempoIntervalo = "30";
                                     valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
                                     if (valor <= 0)
                                         this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
@@ -466,7 +525,7 @@ namespace Procesos.PS
                 Temporizador.Enabled = true;
                 this.btnStop.Enabled = true;
                 this.label10.Text = "";
-                
+
             }
             catch (Exception ex)
             {
@@ -489,7 +548,7 @@ namespace Procesos.PS
             this.btnStop.Enabled = true;
             Temporizador.Enabled = true;
             this.tabPage2.Parent = null;
-            this.Visible = false; 
+            this.Visible = false;
         }
         //BOTON PARA PAUSAR LAS TAREAS
         private void btnStop_Click(object sender, EventArgs e)

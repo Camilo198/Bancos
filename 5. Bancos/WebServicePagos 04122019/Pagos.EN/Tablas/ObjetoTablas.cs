@@ -84,5 +84,12 @@ namespace Pagos.EN.Tablas
         public String pForPagoErr { get; set; }
         public String pUsuarioProcesoErr { get; set; }
         public String pReferenciaPago { get; set; }
+
+        //Parametros Hora del Banco
+        public String pHoraBancoAplicacion { get; set; }
+
+        //Parametros Sleep del Banco
+        public Int32? pSleepMinutosAntes { get; set; }
+        public Int32? pSleepMinutosDespues { get; set; }
     }
 }

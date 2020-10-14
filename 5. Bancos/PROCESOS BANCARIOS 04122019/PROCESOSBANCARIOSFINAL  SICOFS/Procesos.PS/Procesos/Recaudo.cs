@@ -39,7 +39,7 @@ namespace Procesos.PS.Procesos
 
         CorreoLN objCorreoLN = new CorreoLN();
 
-        public List<String> obtenerBancosRecaudoDiario(ref bool procesoConError)
+        public List<String> obtenerBancosRecaudoDiario(ref bool procesoConError, List<ArchivoEN> archivosOrdenados)
         {
 
             #region "Atributos Bancos"
@@ -183,9 +183,16 @@ namespace Procesos.PS.Procesos
                     #endregion
 
                     //Marina RT  Se valida si la estructura del archivo origen no es asobancaria para correr el proceso de conversion de estructura
+                    //LLenar tabla temporal con la rutaEntrada y las fechas de los archivos que tiene adentro 
+        
+                    
+
+
+             
 
                     if (Asobancaria == "N")
                     {
+
                         mensaje = CorrerRecaudoDiario(NombreCuenta, IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaProcesado,
                                                     CorreosControl, Remitente, CodigoBanco, NumCuenta,
                                                     TipoCuenta, RutaSalidaEpicor, TipoProceso);
@@ -207,20 +214,25 @@ namespace Procesos.PS.Procesos
 
                     if (procesoConError)
                     {
-                        ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
-                        System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaEntrada);
-
-                        System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
-
-                        foreach (System.IO.FileInfo archivos in fileNames)
+                        if (archivosOrdenados.Count > 0)
                         {
-                            ProcesoPagos.Timeout = 300000;
-                            mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
+                            ArchivoEN topOne = archivosOrdenados.ElementAt(0);
+                            ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
+                            System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaEntrada);
 
-                            RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                            System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
 
+                            foreach (System.IO.FileInfo archivos in fileNames)
+                            {
+                                if (topOne.RutaArchivo == RutaEntrada + archivos.Name)
+                                {
+                                    ProcesoPagos.Timeout = 300000;
+                                    mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
 
+                                    RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                                }
 
+                            }
                         }
                     }
 

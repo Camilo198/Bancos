@@ -30,6 +30,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MicroFocus.COBOL.Runtime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0412c5e0b2aaa8f0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Librerias\MicroFocus.COBOL.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet">
+      <HintPath>..\WsPagos\Librerias\Renci.SshNet.dll</HintPath>
+    </Reference>
+    <Reference Include="SSHConect">
+      <HintPath>Librerias\SSHConect.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -46,12 +56,15 @@
   <ItemGroup>
     <Compile Include="Consulta\AfilLN.cs" />
     <Compile Include="Consulta\CierreLN.cs" />
+    <Compile Include="Consulta\FechaUsuraLN.cs" />
     <Compile Include="Consulta\PagosErradosLN.cs" />
     <Compile Include="Consulta\PagosInconsistentesLN.cs" />
     <Compile Include="Consulta\PagosLN.cs" />
     <Compile Include="Consulta\PagosTarjetaLN.cs" />
     <Compile Include="Consulta\ParaLN.cs" />
     <Compile Include="Consulta\RecaudoLN.cs" />
+    <Compile Include="Consulta\RptPagosLN.cs" />
+    <Compile Include="Consulta\TiemposLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -109,6 +122,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Librerias\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

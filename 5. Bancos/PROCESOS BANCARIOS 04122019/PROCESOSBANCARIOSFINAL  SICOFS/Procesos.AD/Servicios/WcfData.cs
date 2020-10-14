@@ -141,14 +141,36 @@ namespace Procesos.AD.Servicios
 
             }
 
-            /// <summary>
-            /// Realiza el proceso de actualizacion de la base de datos, (Insertar, Actualizar o Borrar)")
-            /// </summary>
-            /// <param name="procedimiento">Nombre del Procedimiento Almacenado que se ejecutara</param>
-            /// <param name="parametros"> sqlParameter[] con los parametros que recibe el Procedimiento</param>
-            /// <param name="conexion">Nombre de la conexion a la base de datos que utiliza</param>
-            /// <returns>Retorna en número de registros afectados</returns>
-            public string Actualizar(string procedimiento, SqlParameter[] parametros, SqlConnection ActConexion)
+        /// <summary>
+        /// Ejecuta un NonQuery creando el arreglo para los parámetros
+        /// </summary>
+        /// <param name="Valor">Parámetros entrada DT</param>
+        /// <param name="procedimiento">Procedimiento almacenado que ejecuta</param>
+        /// <param name="strConn">Clave que identifica la cadena de conexión en los connectionStrings</param>
+        /// <param name="tabla">Nombre de la tabla que se afecta</param>
+        /// <returns></returns>
+        public string Ejecutar(DataTable Valor, string procedimiento, string strConn, string tabla)
+        {
+            try
+            {
+                string pasa = Actualizar(procedimiento, Valor, ConectaSql(strConn), tabla);
+                return pasa;           
+            }
+            catch (Exception exc)
+            {
+                return "0 " + exc.Message;
+            }
+
+        }
+
+        /// <summary>
+        /// Realiza el proceso de actualizacion de la base de datos, (Insertar, Actualizar o Borrar)")
+        /// </summary>
+        /// <param name="procedimiento">Nombre del Procedimiento Almacenado que se ejecutara</param>
+        /// <param name="parametros"> sqlParameter[] con los parametros que recibe el Procedimiento</param>
+        /// <param name="conexion">Nombre de la conexion a la base de datos que utiliza</param>
+        /// <returns>Retorna en número de registros afectados</returns>
+        public string Actualizar(string procedimiento, SqlParameter[] parametros, SqlConnection ActConexion)
             {
                 int rowCount = 0;
                 SqlCommand cmd = new SqlCommand();
@@ -182,15 +204,53 @@ namespace Procesos.AD.Servicios
 
             }
 
+        /// <summary>
+        /// Realiza el proceso de actualizacion de la base de datos, (Insertar, Actualizar o Borrar)")
+        /// </summary>
+        /// <param name="procedimiento">Nombre del Procedimiento Almacenado que se ejecutara</param>
+        /// <param name="parametros"> sqlParameter[] con los parametros que recibe el Procedimiento</param>
+        /// <param name="conexion">Nombre de la conexion a la base de datos que utiliza</param>
+        /// <param name="tabla">Nombre de la tabla que se afecta</param>
+        /// <returns>Retorna en número de registros afectados</returns>
+        public string Actualizar(string procedimiento, DataTable parametros, SqlConnection ActConexion, String tabla)
+        {
+            int rowCount = 0;
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandTimeout = 5000;
+            cmd.Connection = ActConexion;
+            cmd.CommandText = procedimiento;
+            cmd.Parameters.AddWithValue(tabla, parametros);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+           
+            try
+            {
+                SqlParameter Parameter = cmd.Parameters.Add("@RowCount", SqlDbType.Int);
+                Parameter.Direction = ParameterDirection.ReturnValue;
+                cmd.ExecuteNonQuery();
+                rowCount = (Int32)cmd.Parameters["@RowCount"].Value;
+                return rowCount.ToString().Trim();
+            }
+            catch (Exception e)
+            {
+
+                return "0" + e.Message;
+            }
+            finally
+            {
+                cmd.Dispose();
+                ActConexion.Close();
+                ActConexion.Dispose();
+            }
+
+        }
 
 
-
-            /// <summary>
-            /// llena el arreglo de parametros
-            /// </summary>
-            /// <param name="Valor">Tamaño del arreglo</param>
-            /// <returns></returns>
-            public string LlenaParametro(string[, ,] Valor)
+        /// <summary>
+        /// llena el arreglo de parametros
+        /// </summary>
+        /// <param name="Valor">Tamaño del arreglo</param>
+        /// <returns></returns>
+        public string LlenaParametro(string[, ,] Valor)
             {
                 try
                 {

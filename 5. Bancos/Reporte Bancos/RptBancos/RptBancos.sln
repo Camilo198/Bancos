@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "RptBancos", "RptBancos\RptBancos.rptproj", "{DEE36C5E-B9F1-4545-8865-1425E23B28E7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Debug|Default.ActiveCfg = Debug
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Debug|Default.Build.0 = Debug
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Debug|Default.Deploy.0 = Debug
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.DebugLocal|Default.Build.0 = DebugLocal
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Release|Default.ActiveCfg = Release
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Release|Default.Build.0 = Release
+		{DEE36C5E-B9F1-4545-8865-1425E23B28E7}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2B093CE-66F7-45F2-8B6C-A2211BBD6BFD}
+	EndGlobalSection
+EndGlobal

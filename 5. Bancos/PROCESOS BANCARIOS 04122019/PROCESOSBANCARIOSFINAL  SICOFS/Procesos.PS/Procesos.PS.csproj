@@ -15,7 +15,7 @@
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publicar\</PublishUrl>
+    <PublishUrl>C:\Publicaciones_Fuentes\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -25,9 +25,11 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <AutorunEnabled>true</AutorunEnabled>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -49,21 +51,29 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.CryptoExt, Version=1.7.5487.27693, Culture=neutral, PublicKeyToken=0e13498f2133a5e1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\BouncyCastle.CryptoExt.dll</HintPath>
+      <HintPath>Librerias\BouncyCastle.CryptoExt.dll</HintPath>
     </Reference>
-    <Reference Include="DidiSoft.Pgp, Version=1.7.11.9, Culture=neutral, PublicKeyToken=e37f9891223147cd, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\OpenPGP Library for .NET 1.7.11\Bin\DidiSoft.Pgp.dll</HintPath>
+    <Reference Include="DidiSoft.Pgp">
+      <HintPath>Librerias\DidiSoft.Pgp.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>Librerias\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Starksoft.Cryptography.OpenPGP, Version=1.0.132.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Starksoft.Cryptography.OpenPGP.dll</HintPath>
+      <HintPath>Librerias\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Starksoft.Cryptography.OpenPGP">
+      <HintPath>Librerias\Starksoft.Cryptography.OpenPGP.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -148,6 +158,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -261,6 +272,7 @@
     <Content Include="MarcaVisual\Iconos\Pause.png" />
     <Content Include="MarcaVisual\Iconos\Play.png" />
     <None Include="Web References\wsenviocorreos\service.disco" />
+    <None Include="Web References\ServicioPagosOnline\PagosOnline.disco" />
     <Content Include="XML\Configuracion.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -270,10 +282,10 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc">
+    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioAsoBancaria\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc</UpdateFromURL>
+      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -281,10 +293,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioAsoBancaria_AsoBancaria</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl ">
+    <WebReferenceUrl Include="http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioMoverArchivosFTP\</RelPath>
-      <UpdateFromURL>http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl </UpdateFromURL>
+      <UpdateFromURL>http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -292,10 +304,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
-      <UpdateFromURL>http://172.16.29.16/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -314,10 +326,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioRecaudo_Recaudo</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://172.16.29.16/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -325,10 +337,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.29.16:8084/WsBancos.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche048v:8084/WSBancos.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://172.16.29.16:8084/WsBancos.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche048v:8084/WSBancos.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -369,6 +381,9 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Librerias\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

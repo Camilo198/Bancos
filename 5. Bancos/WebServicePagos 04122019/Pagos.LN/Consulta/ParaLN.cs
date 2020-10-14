@@ -26,7 +26,5 @@ namespace Pagos.LN.Consulta
             String query = "SELECT ParaCodigo, ParaAnoPro, ParaMesPro FROM PARA  WHERE (PARA.ParaCodigo='01')";
             return consultar(query);
         }
-
-
     }
 }

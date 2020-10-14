@@ -642,7 +642,15 @@ namespace Bancos.PS.Servicios
                     }
                     else
                     {
-                        linea += rellenarCampo(lineaDatos[i].ToString().Trim(), objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
+                        if (lineaDatos[i].ToString() != null)
+                        {
+                            if (lineaDatos[i].ToString().Contains("*"))
+                            {
+                                lineaDatos[i] = lineaDatos[i].ToString().Replace("*", "").Trim(' ');
+                            }
+                        }
+                        
+                         linea += rellenarCampo(lineaDatos[i].ToString().Trim(), objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
                     }
                     i++;
                 }
