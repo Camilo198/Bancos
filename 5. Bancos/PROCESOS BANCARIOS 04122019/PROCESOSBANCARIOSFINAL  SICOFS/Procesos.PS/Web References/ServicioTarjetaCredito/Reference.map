@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Results>
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc?xsd=xsd1" filename="TarjetasCredito.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc?xsd=xsd0" filename="TarjetasCredito0.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc?xsd=xsd2" filename="TarjetasCredito1.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc?wsdl" filename="TarjetasCredito.wsdl" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:8092/Servicios/TarjetasCredito.svc?xsd=xsd0" filename="TarjetasCredito.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:8092/Servicios/TarjetasCredito.svc?xsd=xsd2" filename="TarjetasCredito0.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://localhost:8092/Servicios/TarjetasCredito.svc?xsd=xsd1" filename="TarjetasCredito1.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://localhost:8092/Servicios/TarjetasCredito.svc?wsdl" filename="TarjetasCredito.wsdl" />
   </Results>
 </DiscoveryClientResultsFile>

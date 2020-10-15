@@ -412,6 +412,7 @@ namespace WebServiceBancos
                             RptPagosLN pagosLN = new RptPagosLN();
                             error_mensaje = "Error en conexión a SICO " + RutaArchivo + NombreArchivo + e.Message.ToString();
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                            sr.Close();
                             return error_mensaje;
                         }
 
@@ -1043,6 +1044,7 @@ namespace WebServiceBancos
                                         }
                                         RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
 
+
                                         CrearArchivoSico(NombreArchivo);
 
                                         nregistrosprocesados++;
@@ -1067,9 +1069,14 @@ namespace WebServiceBancos
                                         encabezado = "S";
                                     }
                                     RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
-
-                                    CrearArchivoSico(NombreArchivo);
-
+                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                    {
+                                        CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                    }
+                                    else
+                                    {
+                                        CrearArchivoSico(NombreArchivo);
+                                    }
                                     nregistrosprocesados++;
                                     nreferenciaerrada++;
                                     contnoinversion++;
@@ -1140,7 +1147,7 @@ namespace WebServiceBancos
                                     {
                                         string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagosCuotas");
                                         CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
-                                        contadorPagoCuotas++;
+                                        // contadorPagoCuotas++;
                                     }
                                     //----------
                                     else
@@ -1200,7 +1207,7 @@ namespace WebServiceBancos
                                                 {
                                                     /// <summary>
                                                     /// Valida en la tabla Pagos si el pago existe, si es asi lo guarda en un archivo, 
-                                                    /// si no lo inserta en esta misma tabla y lo guarda en un archivo con el resumen de los pagos
+                                                    /// si no lo inserta en esta misma tabla y lo guarda en un archivo con el resumen de los                        pagos
                                                     /// </summary>
 
                                                     List<string[,]> ConsultPagos = PagoValdLN.ValidaExistePago(ValdObjetos, "ConsultaExistePago");
@@ -1214,19 +1221,18 @@ namespace WebServiceBancos
                                                         }
                                                         RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO YA EXISTE");
                                                         // SAU 6/10/2020 Pagos online a cuotas
-                                                        //if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
-                                                        //{
-                                                        //    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
-                                                        //    contadorPagoCuotas++;
-                                                        //    ncupos++;
-                                                        //}
-                                                        //else
-                                                        //{
+                                                        if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                        {
+                                                            CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                        }
+                                                        else
+                                                        {
                                                             CrearArchivoSico(NombreArchivo);
-                                                        //}
+                                                        }
                                                         // SAU 6/10/2020 Pagos online a cuotas
                                                         nregistrosprocesados++;
                                                         nregistrosexistentes++;
+
                                                     }
                                                     else
                                                     {
@@ -1245,18 +1251,16 @@ namespace WebServiceBancos
                                                             npagosguardados++;
                                                             /*PAGOPI*/
                                                             npagosguardadosPI++;
-                                                            // SAU 6/10/2020 Pagos online a cuotas
-                                                            //if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
-                                                            //{
-                                                            //    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
-                                                            //    contadorPagoCuotas++;
-                                                            //    ncupos++;
-                                                            //}
-                                                            //else
-                                                            //{
+                                                            // SAU 6/10/2020 Pagos online
+                                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                            {
+                                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                            }
+                                                            else
+                                                            {
                                                                 CrearArchivoSico(NombreArchivo);
-                                                            //}
-                                                            // SAU 6/10/2020 Pagos online a cuotas
+                                                            }
+                                                            // SAU 6/10/2020 Pagos online
                                                         }
                                                         else
                                                         {
@@ -1280,8 +1284,15 @@ namespace WebServiceBancos
                                                 encabezado = "S";
                                             }
                                             RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
-
-                                            CrearArchivoSico(NombreArchivo);
+                                            // SAU 13/10/2020 
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
 
                                             nregistrosprocesados++;
                                             ncupos++;
@@ -1701,7 +1712,7 @@ namespace WebServiceBancos
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 // Para pruebas
                                 pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoSico, PathSystem, UsuFTP, PassFTP,
-                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaAbstracta);
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaOriginal);
 
                             }
                             else
@@ -2013,9 +2024,17 @@ namespace WebServiceBancos
                 /// <summary>
                 /// Trae el lote maximo que existe y lo aumenta en 1
                 /// </summary>
+                int LoteMaximo;
                 List<string[,]> ListPagos = PagoValdLN.ConsultaLoteMaximo("ConsultaMaxLotePagosTarjeta");
                 string[,] ArregloLote = ListPagos[0];
-                int LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                if (ArregloLote[0, 1].ToString() == "")
+                {
+                    LoteMaximo = 0;
+                }
+                else
+                {
+                    LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                }
                 LoteMaximo++;
 
                 #region LECTURA DE ARCHIVO

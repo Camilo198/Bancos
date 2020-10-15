@@ -59,7 +59,7 @@ namespace Procesos.PS.Procesos
                     foreach (string cc in CorreoControlB)
                     {
                         if (string.IsNullOrEmpty(cc)) break;
-                        CorreosControl.Add(cc);
+                        //CorreosControl.Add(cc); DESCOMENTAREAR A PRD
                     }
 
                     CodigoBanco = bank.pCodigoBanco;
@@ -127,7 +127,7 @@ namespace Procesos.PS.Procesos
                                                         "TAREA PROGRAMADA", RutaProcesado, TipoProceso);
                 return mens;
             }
-            catch
+            catch(Exception ex)
             {
                 return "Error en el servicio";
             }

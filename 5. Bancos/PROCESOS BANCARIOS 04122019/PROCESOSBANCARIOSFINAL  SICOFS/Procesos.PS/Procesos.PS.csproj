@@ -267,13 +267,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="XML\Configuracion.xml" />
     <None Include="Web References\ServicioAsoBancaria\AsoBancaria.disco" />
     <Content Include="MarcaVisual\Iconos\generar_archivos.png" />
     <Content Include="MarcaVisual\Iconos\Pause.png" />
     <Content Include="MarcaVisual\Iconos\Play.png" />
     <None Include="Web References\wsenviocorreos\service.disco" />
     <None Include="Web References\ServicioPagosOnline\PagosOnline.disco" />
-    <Content Include="XML\Configuracion.xml" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -293,16 +293,16 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioAsoBancaria_AsoBancaria</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl">
+    <WebReferenceUrl Include="http://localhost:8092/Servicios/TarjetasCredito.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioMoverArchivosFTP\</RelPath>
-      <UpdateFromURL>http://sbogche010f/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl</UpdateFromURL>
+      <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
+      <UpdateFromURL>http://localhost:8092/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
       </CachedDynamicPropName>
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
+      <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
     <WebReferenceUrl Include="http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
@@ -326,21 +326,21 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioRecaudo_Recaudo</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche048v/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <RelPath>Web References\ServicioMoverArchivosFTP\</RelPath>
+      <UpdateFromURL>http://sbogche048v/AdministracionFtp/Servicios/moverArchivosFTP.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
       </CachedDynamicPropName>
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
+      <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche048v:8084/WSBancos.svc%3fwsdl">
+    <WebReferenceUrl Include="http://localhost:8090/WsBancos.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://sbogche048v:8084/WSBancos.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://localhost:8090/WsBancos.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

@@ -384,7 +384,7 @@ namespace Bancos.PS.Servicios
                             objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : Archivo " + tipoArchivo + " con fecha de transaccion " + nombreArchivo.Substring(18, 8) + " fue generado correctamente";
                             objL.pTipoArchivo = TipoProcesoXCuenta;
                             objL.pTipoProceso = "GEN";
-                            new LogsLN().insertar(objL);
+                            //new LogsLN().insertar(objL); DESCOMENTAREAR A PRD
                             nombreArchivo = String.Empty;
                             registrosLote = 0;
                         }
@@ -642,7 +642,7 @@ namespace Bancos.PS.Servicios
                     }
                     else
                     {
-                        if (lineaDatos[i].ToString() != null)
+                        if (lineaDatos[i].ToString() != null) // SAU Nueva estructura AMEX 
                         {
                             if (lineaDatos[i].ToString().Contains("*"))
                             {

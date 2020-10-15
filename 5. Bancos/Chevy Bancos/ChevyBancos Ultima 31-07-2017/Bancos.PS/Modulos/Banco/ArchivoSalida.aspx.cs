@@ -344,12 +344,12 @@ namespace Bancos.PS.Modulos.Banco
                 UtilidadesWeb.ajustarMensaje(lbEstado, "Servicio Asobancaria", TipoMensaje.Informacion);
                 try
                 {
-                    ServicioAsoBancaria.AsoBancaria Guardar = new ServicioAsoBancaria.AsoBancaria();
-                    mens = Guardar.ServicioAso(NombreCuenta, CodigoCuenta, ArchivodeSalida, this.rbFTP.Checked,
-                                                  this.rbFTP.Checked, this.txbUrlFtp.Text, this.txbUsuarioFtp.Text,
-                                                  this.txbClaveFtp.Text, ArCorreo, ArCorreoe, CodigoBanco, this.txbRemitente.Text,
-                                                  HttpContext.Current.User.Identity.Name, this.ddlTipoArchivo.SelectedValue);
-                  UtilidadesWeb.ajustarMensaje(lbEstado, mens, TipoMensaje.Informacion);
+                  //  ServicioAsoBancaria.AsoBancaria Guardar = new ServicioAsoBancaria.AsoBancaria();
+                  //  mens = Guardar.ServicioAso(NombreCuenta, CodigoCuenta, ArchivodeSalida, this.rbFTP.Checked,
+                  //                                this.rbFTP.Checked, this.txbUrlFtp.Text, this.txbUsuarioFtp.Text,
+                  //                                this.txbClaveFtp.Text, ArCorreo, ArCorreoe, CodigoBanco, this.txbRemitente.Text,
+                  //                                HttpContext.Current.User.Identity.Name, this.ddlTipoArchivo.SelectedValue);
+                  //UtilidadesWeb.ajustarMensaje(lbEstado, mens, TipoMensaje.Informacion);
                 }
                 catch
                 {

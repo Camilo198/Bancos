@@ -1304,7 +1304,7 @@
                               <Color>LightGrey</Color>
                               <Style>Solid</Style>
                             </Border>
-                            <BackgroundColor>=IIf(Fields!Estado.Value="Exitoso","Lime","#f93538")</BackgroundColor>
+                            <BackgroundColor>=IIf(Fields!Estado.Value="Exitoso","LightGreen",IIf(Fields!Estado.Value="Sin Recaudo","Khaki","Tomato"))</BackgroundColor>
                             <FontFamily />
                             <VerticalAlign>Middle</VerticalAlign>
                             <PaddingLeft>2pt</PaddingLeft>
@@ -1313,6 +1313,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>

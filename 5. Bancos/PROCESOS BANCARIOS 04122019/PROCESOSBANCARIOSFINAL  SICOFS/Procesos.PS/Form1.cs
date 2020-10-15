@@ -22,7 +22,7 @@ namespace Procesos.PS
 {
     public partial class Form1 : Form
     {
-
+        private wsenviocorreos.Service EnvioCorreo = new wsenviocorreos.Service();
         int opcion = 0;
         //opcion 1 = Nuevo
         //opcion 2 = Editar
@@ -225,7 +225,7 @@ namespace Procesos.PS
                 List<String> listaRutaArchivos_ax = new List<string>();
                 List<ArchivoEN> listaRutaArchivosOrdenados = new List<ArchivoEN>();
                 List<Banco> lista = new List<Banco>();
-                List<Banco> lista_ax = new List<Banco>();
+                List<Banco> lista_ax = new List<Banco>();                
 
                 foreach (DataRow fila in procesos.Rows)
                 {
@@ -530,6 +530,9 @@ namespace Procesos.PS
             catch (Exception ex)
             {
                 this.listBox1.Items.Add(this.label10.Text + ex.Message + " Hora: " + DateTime.Now.ToString());
+                string email = this.txbCorreo.Text; 
+                string email_dev = "cristian.munoz@chevyplan.com.co";
+                EnvioMail("", "Error Gral: Procesos: "+ex.Message + " Hora: " + DateTime.Now.ToString(), email, email, email, email_dev);
                 return;
             }
             //finally
@@ -574,6 +577,35 @@ namespace Procesos.PS
         private void cmbPeriodo_SelectionChangeCommitted(object sender, EventArgs e)
         {
             mostrarIntervalo();
+        }
+
+        private void EnvioMail(string _Adjunto, string _Asunto, string _Mensaje, string _Para, string _Desde, string _Copia)
+        {
+            DataRow rowC;
+            try
+            {
+                DataSet DsCorreos = new DataSet();
+                DsCorreos.Tables.Add("Reportes");
+                DsCorreos.Tables["Reportes"].Columns.Add("strTo");
+                DsCorreos.Tables["Reportes"].Columns.Add("strCc");
+                DsCorreos.Tables["Reportes"].Columns.Add("strCo");
+                DsCorreos.Tables["Reportes"].Columns.Add("strSubject");
+                DsCorreos.Tables["Reportes"].Columns.Add("strMessaje");
+                DsCorreos.Tables["Reportes"].Columns.Add("strPath");
+
+                rowC = DsCorreos.Tables["Reportes"].NewRow();
+                rowC["strTo"] = _Para;
+                rowC["strCo"] = _Copia;
+                rowC["strSubject"] = _Asunto;
+                rowC["strMessaje"] = _Mensaje;
+                rowC["strPath"] = _Adjunto.Trim();
+                DsCorreos.Tables["Reportes"].Rows.Add(rowC);
+                EnvioCorreo.EnvioCorreos(DsCorreos, _Desde, false);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

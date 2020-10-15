@@ -8,9 +8,6 @@
     <Setting Name="Procesos_PS_ServicioRecaudo_Recaudo" Type="(Web Service URL)" Scope="Application">
       <Value Profile="(Default)">http://sbogche016v/Bancos/Servicios/Recaudo.svc</Value>
     </Setting>
-    <Setting Name="Procesos_PS_ServicioTarjetaCredito_TarjetasCredito" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://sbogche016v/Bancos/Servicios/TarjetasCredito.svc</Value>
-    </Setting>
     <Setting Name="Procesos_PS_wsenviocorreos_Service" Type="(Web Service URL)" Scope="Application">
       <Value Profile="(Default)">http://wsenviocorreos.chevyplan.col/service.asmx</Value>
     </Setting>
@@ -21,10 +18,13 @@
       <Value Profile="(Default)">http://sbogche010f/Bancos/Servicios/PagosOnline.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioBancos_WsBancos" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://sbogche048v:8084/WsBancos.svc</Value>
+      <Value Profile="(Default)">http://localhost:8090/WsBancos.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://sbogche010f/Administracionftp/Servicios/moverArchivosFTP.svc</Value>
+      <Value Profile="(Default)">http://sbogche048v/Administracionftp/Servicios/moverArchivosFTP.svc</Value>
+    </Setting>
+    <Setting Name="Procesos_PS_ServicioTarjetaCredito_TarjetasCredito" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost:8092/Servicios/TarjetasCredito.svc</Value>
     </Setting>
   </Settings>
 </SettingsFile>

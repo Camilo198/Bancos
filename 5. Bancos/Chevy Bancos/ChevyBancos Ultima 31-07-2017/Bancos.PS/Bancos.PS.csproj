@@ -164,69 +164,9 @@
     <Content Include="Servicios\AsoBancaria.svc" />
     <Content Include="Servicios\DatosDemonio.svc" />
     <None Include="Properties\PublishProfiles\Perfil1.pubxml" />
-    <None Include="Web References\ServicioAsoBancaria\AsoBancaria.wsdl" />
-    <None Include="Web References\ServicioAsoBancaria\AsoBancaria.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioAsoBancaria\AsoBancaria0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioAsoBancaria\AsoBancaria1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioAsoBancaria\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Web References\ServicioAsoBancaria\AsoBancaria.disco" />
     <Content Include="Servicios\PagosOnline.svc" />
     <Content Include="Servicios\Recaudo.svc" />
     <Content Include="Servicios\TarjetasCredito.svc" />
-    <None Include="Web References\ServicioPagos\PagosOnline.wsdl" />
-    <None Include="Web References\ServicioPagos\PagosOnline.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioPagos\PagosOnline0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioPagos\PagosOnline1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioPagos\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Web References\ServicioRecaudo\Recaudo.wsdl" />
-    <None Include="Web References\ServicioRecaudo\Recaudo.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioRecaudo\Recaudo0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioRecaudo\Recaudo1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioRecaudo\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Web References\ServicioTarjetaCredito\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Web References\ServicioTarjetaCredito\TarjetasCredito.wsdl" />
-    <None Include="Web References\ServicioTarjetaCredito\TarjetasCredito.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioTarjetaCredito\TarjetasCredito0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioTarjetaCredito\TarjetasCredito1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web References\ServicioPagos\PagosOnline.disco" />
-    <None Include="Web References\ServicioTarjetaCredito\TarjetasCredito.disco" />
-    <None Include="Web References\ServicioRecaudo\Recaudo.disco" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -406,26 +346,6 @@
     <Compile Include="Servicios\TarjetasCredito.svc.cs">
       <DependentUpon>TarjetasCredito.svc</DependentUpon>
     </Compile>
-    <Compile Include="Web References\ServicioAsoBancaria\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
-    <Compile Include="Web References\ServicioPagos\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
-    <Compile Include="Web References\ServicioRecaudo\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
-    <Compile Include="Web References\ServicioTarjetaCredito\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="PaginaMaestra\Sitio.Master" />
@@ -449,52 +369,6 @@
   </ItemGroup>
   <ItemGroup>
     <WebReferences Include="Web References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/PagosOnline.svc">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioPagos\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/PagosOnline.svc</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Bancos_PS_ServicioPagos_PagosOnline</CachedSettingsPropName>
-    </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/Recaudo.svc">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioRecaudo\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/Recaudo.svc</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Bancos_PS_ServicioRecaudo_Recaudo</CachedSettingsPropName>
-    </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/TarjetasCredito.svc">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/TarjetasCredito.svc</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Bancos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
-    </WebReferenceUrl>
-    <WebReferenceUrl Include="http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioAsoBancaria\</RelPath>
-      <UpdateFromURL>http://172.16.20.40:100/Bancos/Servicios/AsoBancaria.svc</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Bancos_PS_ServicioAsoBancaria_AsoBancaria</CachedSettingsPropName>
-    </WebReferenceUrl>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
