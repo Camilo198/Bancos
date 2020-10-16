@@ -275,12 +275,35 @@ namespace WebServiceBancos
                 System.Threading.Thread.Sleep(1000);
 
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+                FileStream stream = null;
                 try
                 {
+                    try
+                    {
+
+                        //FileInfo file = new FileInfo(RutaArchivo + NombreArchivo);
+                        //stream = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+                    }
+                    catch (IOException)
+                    {
+
+                        throw;
+                    }
+                    finally
+                    {
+                        //if (stream != null)
+                        //    stream.Close();
+                    }
+
                     sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
+
                 }
                 catch (Exception ex)
                 {
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
                     return "Excepción no hay Pagos Online para procesar";
                 }
 
@@ -355,10 +378,55 @@ namespace WebServiceBancos
                 /// Trae el lote maximo que existe y lo aumenta en 1
                 /// </summary>
                 List<string[,]> ListPagos = PagoValdLN.ConsultaLoteMaximo("ConsultaMaxLotePagos");
-                string[,] ArregloLote = ListPagos[0];
-                int LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
-                LoteMaximo++;
+                int LoteMaximo = 0;
+                if (ListPagos != null)
+                {
+                    if (ListPagos.Count > 0)
+                    {
+                        string[,] ArregloLote = ListPagos[0];
+                        LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                        LoteMaximo++;
+                    }
+                    else
+                    {
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+                        if (this.FechaRecaudo == null)
+                        {
+                            this.FechaRecaudo = DateTime.Now.ToString();
+                        }
+                        if (parteFijaAbstracta == "")
+                        {
+                            parteFijaAbstracta = NombreArchivo;
+                        }
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        return error_mensaje;
+                    }
+                }
+                else
+                {
+                    RptPagosLN pagosLN = new RptPagosLN();
+                    error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+                    if (this.FechaRecaudo == null)
+                    {
+                        this.FechaRecaudo = DateTime.Now.ToString();
+                    }
+                    if (parteFijaAbstracta == "")
+                    {
+                        parteFijaAbstracta = NombreArchivo;
+                    }
+                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
+                    return error_mensaje;
 
+                }
                 //PAGREP
                 //buscar en la base de datos antes de empezar a recorrerlo 
                 #region LECTURA DE ARCHIVO
@@ -369,7 +437,10 @@ namespace WebServiceBancos
 
                     pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
 
-                    sr.Close();
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
                     RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                     String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
                     RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
@@ -412,7 +483,10 @@ namespace WebServiceBancos
                             RptPagosLN pagosLN = new RptPagosLN();
                             error_mensaje = "Error en conexión a SICO " + RutaArchivo + NombreArchivo + e.Message.ToString();
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                            sr.Close();
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return error_mensaje;
                         }
 
@@ -425,8 +499,10 @@ namespace WebServiceBancos
 
                             if (!FechaRecaudo.Substring(0, 7).Equals(FecParSico))
                             {
-
-                                sr.Close();
+                                if (sr != null)
+                                {
+                                    sr.Close();
+                                }
                                 if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(FecParSico))
                                 {
                                     File.Delete(RutaArchivo + NombreArchivo);
@@ -467,6 +543,10 @@ namespace WebServiceBancos
                                     }
                                     else
                                     {
+                                        if (sr != null)
+                                        {
+                                            sr.Close();
+                                        }
                                         return "OCURRIO UN ERROR EN LA CONSULTA DEL BANCO"; /*PAGOS*/
                                     }
                                 }
@@ -474,6 +554,10 @@ namespace WebServiceBancos
                         }
                         else
                         {
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
                         //--------------
@@ -489,7 +573,7 @@ namespace WebServiceBancos
                             // Fecha en formato año mes
                             if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
                             {
-                                sr.Close();
+                                
                                 if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(fechaFilaUsura))
                                 {
                                     File.Delete(RutaArchivo + NombreArchivo);
@@ -497,13 +581,60 @@ namespace WebServiceBancos
                                         + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
 
                                     pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                    if (sr != null)
+                                    {
+                                        sr.Close();
+                                    }
+                                    if (ArchivoSico != null)
+                                    {
+                                        ArchivoSico.Close();
+                                    }
+                                    if (ArchivoVisaMAstercardSICO != null)
+                                    {
+                                        ArchivoVisaMAstercardSICO.Close();
+                                    }
+                                    if (ArchivoAmexSICO != null)
+                                    {
+                                        ArchivoAmexSICO.Close();
+                                    }
+                                    if (ArchivoDinnersSICO != null)
+                                    {
+                                        ArchivoDinnersSICO.Close();
+                                    }
+                                    if (RegistrosProcesados != null)
+                                    {
+                                        RegistrosProcesados.Close();
+                                    }
                                     return error_mensaje;
                                 }
 
                                 error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
 
                                 pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
-
+                                if (sr != null)
+                                {
+                                    sr.Close();
+                                }
+                                if (ArchivoSico != null)
+                                {
+                                    ArchivoSico.Close();
+                                }
+                                if (ArchivoVisaMAstercardSICO != null)
+                                {
+                                    ArchivoVisaMAstercardSICO.Close();
+                                }
+                                if (ArchivoAmexSICO != null)
+                                {
+                                    ArchivoAmexSICO.Close();
+                                }
+                                if (ArchivoDinnersSICO != null)
+                                {
+                                    ArchivoDinnersSICO.Close();
+                                }
+                                if (RegistrosProcesados != null)
+                                {
+                                    RegistrosProcesados.Close();
+                                }
                                 return error_mensaje;
                             }
                         }
@@ -521,8 +652,10 @@ namespace WebServiceBancos
 
                             if (horaSistema < horaBanco)
                             {
-
-                                sr.Close();
+                                if (sr != null)
+                                {
+                                    sr.Close();
+                                }
 
                                 return " ARCHIVO EN ESPERA PORQUE EL BANCO " + this.CodBanco + " AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
                             }
@@ -542,6 +675,10 @@ namespace WebServiceBancos
                             ////RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             ////RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
                             ////System.IO.File.Move(RutaOrigen, RutaDestino);
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return error_mensaje; /*DisponibilidadArchivos*/
                         }
 
@@ -549,7 +686,10 @@ namespace WebServiceBancos
 
                         if (!resp.Equals("1"))
                         {
-                            sr.Close();
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD";
                         }
 
@@ -559,11 +699,19 @@ namespace WebServiceBancos
 
                         if (ConsultaCodigoBanco.Count == 0)
                         {
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
 
                         if (NombreBanco == String.Empty)
                         {
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
 
@@ -580,8 +728,34 @@ namespace WebServiceBancos
                         if (listRecaudo.Count != 0)
                         {
                             insertarRecaudo = false;
-                            sr.Close();
-                            File.Delete(RutaArchivo + NombreArchivo);
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
+                            if (ArchivoSico != null)
+                            {
+                                ArchivoSico.Close();
+                            }
+                            if (ArchivoVisaMAstercardSICO != null)
+                            {
+                                ArchivoVisaMAstercardSICO.Close();
+                            }
+                            if (ArchivoAmexSICO != null)
+                            {
+                                ArchivoAmexSICO.Close();
+                            }
+                            if (ArchivoDinnersSICO != null)
+                            {
+                                ArchivoDinnersSICO.Close();
+                            }
+                            if (RegistrosProcesados != null)
+                            {
+                                RegistrosProcesados.Close();
+                            }
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
+                            //File.Delete(RutaArchivo + NombreArchivo); SAU SE COMENTA PARA QUE LO DEJE EN PROCESADOS Y NO LO BORRE
 
                             objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");// habilita de nuevo la disponibilidad
                             //registroDuplicado = true;
@@ -1420,13 +1594,35 @@ namespace WebServiceBancos
                 List<string[,]> listRecaudo2 = objRecaudo.ConsultarRegistrosIngresados(ValdObjetos, "pa_Ban_Cuenta_Recaudos");
                 if (CantArchivoOrigen != Convert.ToInt16(listRecaudo2[0][0, 1]))
                 {
-
-                    sr.Close();
+                    
                     Correo = Util.EnvioMail(" ", "Proceso Fallido" + NombreBanco, "Buen día, \n\n" +
                               "La cantidad de registros procesados no coincide con la cantidad que dice el archivo plano.",
                              ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                              ConfigurationManager.AppSettings["CorreoCC"].ToString());
-
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
+                    if (ArchivoSico != null)
+                    {
+                        ArchivoSico.Close();
+                    }
+                    if (ArchivoVisaMAstercardSICO != null)
+                    {
+                        ArchivoVisaMAstercardSICO.Close();
+                    }
+                    if (ArchivoAmexSICO != null)
+                    {
+                        ArchivoAmexSICO.Close();
+                    }
+                    if (ArchivoDinnersSICO != null)
+                    {
+                        ArchivoDinnersSICO.Close();
+                    }
+                    if (RegistrosProcesados != null)
+                    {
+                        RegistrosProcesados.Close();
+                    }
                     return "PROCESO FINALIZADO INCONSISTENCIA DE DATOS";
                 }
 
@@ -1441,18 +1637,35 @@ namespace WebServiceBancos
                 RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
                 RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
 
-                RegistrosProcesados.Close();
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
                 //Cerrar la escritura de los archivos
                 if (!NombreArchivo.Contains("Acreedores"))
                 {
-                    ArchivoSico.Close();
-                    ArchivoVisaMAstercardSICO.Close();
-                    ArchivoAmexSICO.Close();
-                    ArchivoDinnersSICO.Close();
+                    if (ArchivoSico != null)
+                    {
+                        ArchivoSico.Close();
+                    }
+                    if (ArchivoVisaMAstercardSICO != null)
+                    {
+                        ArchivoVisaMAstercardSICO.Close();
+                    }
+                    if (ArchivoAmexSICO != null)
+                    {
+                        ArchivoAmexSICO.Close();
+                    }
+                    if (ArchivoDinnersSICO != null)
+                    {
+                        ArchivoDinnersSICO.Close();
+                    }
 
                 }
-
-                sr.Close();
+                if (sr != null)
+                {
+                    sr.Close();
+                }
 
                 #endregion
 
@@ -1477,6 +1690,10 @@ namespace WebServiceBancos
                             /// </summary>
                             RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             System.IO.File.Move(RutaOrigen, RutaDestino);
 
                         }
@@ -1569,19 +1786,49 @@ namespace WebServiceBancos
                             /// </summary>
                             RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             System.IO.File.Move(RutaOrigen, RutaDestino);
                         }
                     }
                     else
                     {
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        if (ArchivoSico != null)
+                        {
+                            ArchivoSico.Close();
+                        }
+                        if (ArchivoVisaMAstercardSICO != null)
+                        {
+                            ArchivoVisaMAstercardSICO.Close();
+                        }
+                        if (ArchivoAmexSICO != null)
+                        {
+                            ArchivoAmexSICO.Close();
+                        }
+                        if (ArchivoDinnersSICO != null)
+                        {
+                            ArchivoDinnersSICO.Close();
+                        }
+                        if (RegistrosProcesados != null)
+                        {
+                            RegistrosProcesados.Close();
+                        }
                         RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                         RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                       
                         System.IO.File.Move(RutaOrigen, RutaDestino);
                         // Guardar en log
                         String respue2 = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
                         error_mensaje = "Linea 06 inexistente en archivo";
                         RptPagosLN pagosLN = new RptPagosLN();
                         pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                        
                         return error_mensaje;
                     }
 
@@ -1593,6 +1840,10 @@ namespace WebServiceBancos
                     /// </summary>
                     RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                     RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
                     System.IO.File.Move(RutaOrigen, RutaDestino);
                 }
 
@@ -1940,10 +2191,16 @@ namespace WebServiceBancos
                 string respue = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
                 if (!respue.Equals("1"))
                 {
-                    sr.Close();
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
                     return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD AL FINALZAR EL PROCESO";
                 }
-
+                if (sr != null)
+                {
+                    sr.Close();
+                }
                 return "PROCESO REALIZADO CON EXITO";
 
             }
@@ -1951,6 +2208,30 @@ namespace WebServiceBancos
             {
 
                 RptPagosLN pagosLN = new RptPagosLN();
+                if (sr != null)
+                {
+                    sr.Close();
+                }
+                if (ArchivoSico != null)
+                {
+                    ArchivoSico.Close();
+                }
+                if (ArchivoVisaMAstercardSICO != null)
+                {
+                    ArchivoVisaMAstercardSICO.Close();
+                }
+                if (ArchivoAmexSICO != null)
+                {
+                    ArchivoAmexSICO.Close();
+                }
+                if (ArchivoDinnersSICO != null)
+                {
+                    ArchivoDinnersSICO.Close();
+                }
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
                 error_mensaje = "General " + RutaArchivo + NombreArchivo + ex.Message.ToString();
                 if (this.FechaRecaudo == null)
                 {
@@ -1961,6 +2242,7 @@ namespace WebServiceBancos
                     parteFijaAbstracta = NombreArchivo;
                 }
                 pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+
                 // Sacar el archivo del directorio actual
                 //RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                 //RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
@@ -2024,18 +2306,45 @@ namespace WebServiceBancos
                 /// <summary>
                 /// Trae el lote maximo que existe y lo aumenta en 1
                 /// </summary>
-                int LoteMaximo;
+                int LoteMaximo = 0;
                 List<string[,]> ListPagos = PagoValdLN.ConsultaLoteMaximo("ConsultaMaxLotePagosTarjeta");
-                string[,] ArregloLote = ListPagos[0];
-                if (ArregloLote[0, 1].ToString() == "")
+                if (ListPagos != null)
                 {
-                    LoteMaximo = 0;
+                    if (ListPagos.Count > 0)
+                    {
+                        string[,] ArregloLote = ListPagos[0];
+                        LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                        LoteMaximo++;
+                    }
+                    else
+                    {
+                        error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        if (RegistrosProcesados != null)
+                        {
+                            RegistrosProcesados.Close();
+                        }
+                        return error_mensaje;
+                    }
                 }
                 else
                 {
-                    LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                    error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
+                    if (RegistrosProcesados != null)
+                    {
+                        RegistrosProcesados.Close();
+                    }
+                    return error_mensaje;
                 }
-                LoteMaximo++;
 
                 #region LECTURA DE ARCHIVO
 
@@ -2223,9 +2532,15 @@ namespace WebServiceBancos
 
                 RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
                 RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
+                if (sr != null)
+                {
+                    sr.Close();
+                }
 
-                RegistrosProcesados.Close();
-                sr.Close();
                 string legalizados = (PagoValdLN.Legalizacionpagos("UpdateLegalizaciones"));
                 String legalizados2 = (PagoValdLN.Legalizacionpagos("UpdateLegalizacionesPagoCuota"));
 
@@ -2265,6 +2580,14 @@ namespace WebServiceBancos
             }
             catch (Exception ex)
             {
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
+                if (sr != null)
+                {
+                    sr.Close();
+                }
                 return ex.Message;
             }
         }
