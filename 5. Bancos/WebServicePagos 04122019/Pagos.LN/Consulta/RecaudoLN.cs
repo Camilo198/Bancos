@@ -128,7 +128,7 @@ namespace Pagos.LN.Consulta
                 return listaDisponibiliad = wsc.LlenarLista(Valor, "pa_ban_Consulta_disponibilidad_banco", "SQLBancos", "SP", "Sql");
    
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return listaDisponibiliad;
             }

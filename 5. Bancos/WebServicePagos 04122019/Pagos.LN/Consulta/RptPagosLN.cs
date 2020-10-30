@@ -53,7 +53,6 @@ namespace Pagos.LN.Consulta
             IList<string> recaudoSico;
             IList<String> inconsistentes;
             IList<String> consistentes;
-            List<string> busquedaPago;
             //SAU Revisar fichero en SICO
             string[] stringSeparators = new string[] { " " };
             RptPagosEN pagosEN = new RptPagosEN();

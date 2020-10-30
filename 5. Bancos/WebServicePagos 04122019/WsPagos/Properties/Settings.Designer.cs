@@ -22,5 +22,15 @@ namespace WebServiceBancos.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sdatche005vp:8012/ServMetodosSICO.svc")]
+        public string WsPagos_ServMetodosSICO_ServMetodosSICO {
+            get {
+                return ((string)(this["WsPagos_ServMetodosSICO_ServMetodosSICO"]));
+            }
+        }
     }
 }

@@ -26,73 +26,7 @@ namespace WebServiceBancos
             string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_15102020_PO14102020_0000.txt", "S");
            // string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\ATH\Recibidos\", "ChevyPlan_OCC_20200901_03092020_07_45_10.txt");
         }
-        public void pruebaSSH()
-        {
-            string PathSystem = "/export/home/SYSTEM/"; // SAU 08.09.2020
-            string ServidorSico = "172.16.30.7";
-            //IR023201001220048 
-            //R023201001220048
-            string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS*/
-            string PasswordSico = ConfigurationManager.AppSettings["password"].ToString();          /*PAGOS*/
-            string NombreArchivoSico = "023201001220048.txt";
-            string RutaSico = "ftp://172.16.30.7/";
-            string UsuFTP = "chevyplan\\usaftpinfo";
-            string PassFTP = "Chevy789";
-            string Fechapago = "2020-10-01";
-            int codigobanco = 23;
-            WcfUtilidades util = new WcfUtilidades();
-            IList<String> texto = null;
-            KeyboardInteractiveAuthenticationMethod kauth = new KeyboardInteractiveAuthenticationMethod(UsuFTP);
-            PasswordAuthenticationMethod pauth = new PasswordAuthenticationMethod(UsuFTP, PassFTP);
-
-            kauth.AuthenticationPrompt += new EventHandler<Renci.SshNet.Common.AuthenticationPromptEventArgs>(HandleKeyEvent);
-            string[] myArray = new string[1];
-            myArray[0] = UsuFTP;
-            AuthenticationMethod[] auths = new AuthenticationMethod[1];
-            auths[0] = new PasswordAuthenticationMethod(UsuFTP, PassFTP);
-            ConnectionInfo connectionInfo = new ConnectionInfo(ServidorSico, "22", auths[0], pauth, kauth);
-
-            SSHConect CON = new SSHConect();
-
-            try
-            {
-                CON.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, "cp /export/home/SYSTEM/IR066200928083125.txt /usr2/sico/mega/planos/");
-                //using (SshCommand c = new SshCommand()) // SshClient client = new SshClient(...)
-                //{
-                //    client.Connect();
-
-                //    using (SshCommand command = client.CreateCommand("cat printerimport_2014-02-28_03.21.41.log"))
-                //    {
-                //        label01.Text = command.Execute();
-                //    }
-                //}
-
-                //SftpClient cliente = new SftpClient(ServidorSico, UsuFTP, PassFTP);
-                //cliente.Connect();
-                //texto = cliente.ReadAllLines(RutaSico + NombreArchivoSico);
-
-                string res = util.DownloadFTP("\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Fiducia1\\", "IR066200928083125.txt", RutaSico, UsuFTP, PassFTP);
-
-            }
-            catch (Exception ex)
-            {
-
-                string error = ex.Message;
-            }
-
-
-            //util.LeerFicheroFTP(ServidorSico, "IR" + NombreArchivoSico, PathSystem, UsuFTP, PassFTP, Fechapago, codigobanco);
-
-            //String RutaProcesado = @"\\sbogche016v\ArchPlanos\Pagos\Fiducia1\TC\Bancolombia\Procesados\";
-            //System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaProcesado);
-
-            //System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
-
-            //foreach (System.IO.FileInfo archivos in fileNames)
-            //{
-            //    string resultado = prueba.PagosTarjeta("", "", RutaProcesado, archivos.Name);
-            //}
-        }
+        
         public void HandleKeyEvent(Object sender, Renci.SshNet.Common.AuthenticationPromptEventArgs e)
         {
             foreach (Renci.SshNet.Common.AuthenticationPrompt prompt in e.Prompts)

@@ -7,7 +7,6 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Configuration;
-
 using Pagos.LN;
 using Pagos.EN;
 using Pagos.LN.Consulta;
@@ -15,13 +14,9 @@ using Pagos.EN.Tablas;
 using Ionic.Zip;
 using System.Globalization;
 using System.Data;
-
 using Renci.SshNet;
 using SSH;
-using System.Data;
-using System.Configuration;
-
-using System.Collections; /*PAGOS*/
+using System.Collections;
 
 /// <summary>
 /// Desarrollado por: Nicolas Larrotta
@@ -75,8 +70,8 @@ namespace WebServiceBancos
 
         static StreamWriter RegistrosProcesados, ArchivoSico;
         string DigitoVerificacion, FormaPago, FechaRecaudo, calculodigito, Referencia, linea, exporasico, FecParSico;
-        string RutaEpicor, RutaProceso, partefija, GuardaInconsistencia, Sucursal, fechaaasico, informacion;
-        string NombreBanco, CodBanco, NombreArchivo, FechaSico, Correo, RutaOrigen, RutaDestino, franquicia, tipomovimiento, HoraArchivo, MinutosArchivo;
+        string RutaEpicor, RutaProceso, partefija, GuardaInconsistencia, Sucursal, informacion;
+        string NombreBanco, CodBanco, FechaSico, Correo, RutaOrigen, RutaDestino, franquicia, tipomovimiento, HoraArchivo, MinutosArchivo;
         Pagos.LN.WcfUtilidades Util = new Pagos.LN.WcfUtilidades();
         String CarpetaBanco = "";
         string fecha = "_" + DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
@@ -85,7 +80,6 @@ namespace WebServiceBancos
         String EstadoContrato = "";
         int CantArchivoOrigen = 0;
         int CountSico = 0;
-        int contrato;
         int Valor = 0;
         string RutaSico = ConfigurationManager.AppSettings["RutaFTP"].ToString();
         string UsuFTP = ConfigurationManager.AppSettings["UserFTP"].ToString();
@@ -105,7 +99,7 @@ namespace WebServiceBancos
         string grupo, numero, nivel;
         bool validacion;
         bool validacionCupo;
-        bool ExisteRegstro;
+        bool ExisteRegstro=false;
 
         AfilLN objConsultaAfil = new AfilLN();
 
@@ -275,14 +269,12 @@ namespace WebServiceBancos
                 System.Threading.Thread.Sleep(1000);
 
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-                FileStream stream = null;
+
                 try
                 {
                     try
                     {
 
-                        //FileInfo file = new FileInfo(RutaArchivo + NombreArchivo);
-                        //stream = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
                     }
                     catch (IOException)
                     {
@@ -291,8 +283,7 @@ namespace WebServiceBancos
                     }
                     finally
                     {
-                        //if (stream != null)
-                        //    stream.Close();
+                        
                     }
 
                     sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
@@ -304,7 +295,7 @@ namespace WebServiceBancos
                     {
                         sr.Close();
                     }
-                    return "Excepción no hay Pagos Online para procesar";
+                    return "Excepción no hay Pagos Online para procesar"+ex.Message;
                 }
 
                 PagosInconsistentesLN objInsertPagosIn = new PagosInconsistentesLN();
@@ -327,21 +318,6 @@ namespace WebServiceBancos
                 Fiducia = "F1";
                 Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
 
-                //Se comentaria porque ya no se manajera la fiducia 3
-                //switch (RangoCont[5].ToString())
-                //{
-                //    case "Fiducia1":
-                //        Fiducia = "F1";
-                //        Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
-                //        break;
-                //    case "Fiducia3":
-                //        Fiducia = "F3";
-                //        Directorio = Repositorio + @"\Fiducia3\Procesos\" + año + "\\" + mes + "\\";
-                //        break;
-                //    default:
-                //        break;
-                //}
-
                 int nregistrosprocesados = 0;
                 int nreferenciadesconocida = 0;
                 int ncupos = 0;
@@ -356,23 +332,11 @@ namespace WebServiceBancos
                 int totnotasdebito = 0;
                 int totnreferenciaerrada = 0;
                 int contadordelineas = 0;
-                int contadorPagoCuotas = 0;
 
                 if (!Directory.Exists(Directorio))
                 {
                     System.IO.Directory.CreateDirectory(Directorio);
                 }
-
-                //Se comentaria porque ya no se manajera la fiducia 3
-                ////Se encarga de validar a que fiducia pertenece
-                //ObjetoTablas ObjPara = new ObjetoTablas();
-                //ObjPara.pParametro = "Contratos Fiducia 3";
-                //ObjPara.pVigente = "S";
-
-                //List<ObjetoTablas> listaParametro = new PagosLN().ConsultaEstadoParametro(ObjPara, "ConsultaParametroEstado");
-
-                //if (listaParametro.Count == 0)
-                //    return "OCURRIO UN ERROR EN LA PARAMETRIZACIÓN DE FIDUCIA 3";
 
                 /// <summary>
                 /// Trae el lote maximo que existe y lo aumenta en 1
@@ -1923,13 +1887,13 @@ namespace WebServiceBancos
                         ObjetoTablas objt = new ObjetoTablas();
                         objt.pCodBanco = this.CodBanco;
                         IList<ObjetoTablas> listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                        ServMetodosSICO.ServMetodosSICO smsico = new ServMetodosSICO.ServMetodosSICO();
                         if (listaSleepBancos.Count > 0)
                         {
                             this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
                             System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
                         }
 
-                        string comando;
                         if (CountEfectivo > 0)
                         {
                             // Pagos Efectivo
@@ -1939,10 +1903,9 @@ namespace WebServiceBancos
                                 informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + ". \n";
                                 /*PAGOS*/
                                 //Se encarga de aplicar directamente en SICO
-                                comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    smsico.Proappaau(NombreArchivoSico);
                                 }
                                 catch (Exception ex)
                                 {
@@ -1994,10 +1957,11 @@ namespace WebServiceBancos
                                 informacion = informacion + "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + ". \n";
                                 /*PAGOS*/
                                 //Se encarga de aplicar directamente en SICO
-                                comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
+
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    smsico.Proappaau(NombreArchivoVisaMAstercardSICO);
+
                                 }
                                 catch (Exception ex)
                                 {
@@ -2043,10 +2007,9 @@ namespace WebServiceBancos
                                 informacion = informacion + "Nombre archivo Tarjeta Dinners para SICO: " + NombreArchivoDinnersSICO + ". \n";
                                 /*PAGOS*/
                                 //Se encarga de aplicar directamente en SICO
-                                comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    smsico.Proappaau(NombreArchivoDinnersSICO);
                                 }
                                 catch (Exception ex)
                                 {
@@ -2092,10 +2055,9 @@ namespace WebServiceBancos
                                 informacion = informacion + "Nombre archivo Tarjeta Amex para SICO: " + NombreArchivoAmexSICO + ". \n";
                                 /*PAGOS*/
                                 //Se encarga de aplicar directamente en SICO
-                                comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
-                                try
-                                {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                         try
+                                {                                    
+                                    smsico.Proappaau(NombreArchivoAmexSICO);
                                 }
                                 catch (Exception ex)
                                 {
@@ -2243,10 +2205,6 @@ namespace WebServiceBancos
                 }
                 pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
 
-                // Sacar el archivo del directorio actual
-                //RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                //RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
-                //System.IO.File.Move(RutaOrigen, RutaDestino);
                 return ex.Message;
             }
         }
