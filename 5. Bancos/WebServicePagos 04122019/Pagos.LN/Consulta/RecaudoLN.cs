@@ -102,7 +102,7 @@ namespace Pagos.LN.Consulta
             }
             catch (Exception)
             {
-                return listaRecaudoValida;
+                return new List<string[,]>();
             }
         }
 

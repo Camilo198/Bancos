@@ -304,6 +304,17 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
+    <WebReferenceUrl Include="http://localhost:9084/WsBancos.svc%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\ServicioBancos\</RelPath>
+      <UpdateFromURL>http://localhost:9084/WsBancos.svc%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Procesos_PS_ServicioBancos_WsBancos</CachedSettingsPropName>
+    </WebReferenceUrl>
     <WebReferenceUrl Include="http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
@@ -336,17 +347,6 @@
       </CachedDynamicPropName>
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
-    </WebReferenceUrl>
-    <WebReferenceUrl Include="http://localhost:8090/WsBancos.svc%3fwsdl">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://localhost:8090/WsBancos.svc%3fwsdl</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Procesos_PS_ServicioBancos_WsBancos</CachedSettingsPropName>
     </WebReferenceUrl>
     <WebReferenceUrl Include="http://wsenviocorreos.chevyplan.col/service.asmx">
       <UrlBehavior>Dynamic</UrlBehavior>

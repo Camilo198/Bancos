@@ -22,6 +22,8 @@ using System.Data;
 using System.Configuration;
 
 using System.Collections; /*PAGOS*/
+using System.Web.UI.WebControls;
+using System.Diagnostics;
 
 /// <summary>
 /// Desarrollado por: Nicolas Larrotta
@@ -275,28 +277,10 @@ namespace WebServiceBancos
                 System.Threading.Thread.Sleep(1000);
 
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-                FileStream stream = null;
+                Process[] targetProcess = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(RutaArchivo+NombreArchivo));
                 try
                 {
-                    try
-                    {
-
-                        //FileInfo file = new FileInfo(RutaArchivo + NombreArchivo);
-                        //stream = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-                    }
-                    catch (IOException)
-                    {
-
-                        throw;
-                    }
-                    finally
-                    {
-                        //if (stream != null)
-                        //    stream.Close();
-                    }
-
                     sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
-
                 }
                 catch (Exception ex)
                 {
@@ -573,7 +557,7 @@ namespace WebServiceBancos
                             // Fecha en formato año mes
                             if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
                             {
-                                
+
                                 if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(fechaFilaUsura))
                                 {
                                     File.Delete(RutaArchivo + NombreArchivo);
@@ -690,6 +674,13 @@ namespace WebServiceBancos
                             {
                                 sr.Close();
                             }
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD " + this.CodBanco + " " + RutaArchivo + NombreArchivo;
+                            pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
+                            if (sr != null)
+                            {
+                                sr.Close();
+                            }
                             return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD";
                         }
 
@@ -714,9 +705,6 @@ namespace WebServiceBancos
                             }
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
-
-
-
 
                         //Valida si ya existe 
                         /*PAGREP*/
@@ -1503,11 +1491,11 @@ namespace WebServiceBancos
                     }
                     /*
                      *   String CodBancoVisaMarterCardSICO = "029";
-        String CodBancoAmexSICO = "042";
-        String CodBancoDinnersSico = "041";
-        String CodBancoVisaMarterCardVentas = "043";
-        String CodBancoAmexVentas = "045";
-        String CodBancoDinnersVentas = "044";
+                    String CodBancoAmexSICO = "042";
+                    String CodBancoDinnersSico = "041";
+                    String CodBancoVisaMarterCardVentas = "043";
+                    String CodBancoAmexVentas = "045";
+                    String CodBancoDinnersVentas = "044";
                      * SAU PAGOS 09 */
                     if (Convert.ToInt32(linea.Substring(0, 2)) == 09)
                     {
@@ -1592,38 +1580,63 @@ namespace WebServiceBancos
                 //CIERRE DEL WHILE
                 //CAMBIAR CONTADOR DE RECUADOS AHORA CONSULTAMOS  
                 List<string[,]> listRecaudo2 = objRecaudo.ConsultarRegistrosIngresados(ValdObjetos, "pa_Ban_Cuenta_Recaudos");
-                if (CantArchivoOrigen != Convert.ToInt16(listRecaudo2[0][0, 1]))
+                if (listRecaudo2.Count > 0)
                 {
-                    
-                    Correo = Util.EnvioMail(" ", "Proceso Fallido" + NombreBanco, "Buen día, \n\n" +
-                              "La cantidad de registros procesados no coincide con la cantidad que dice el archivo plano.",
-                             ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
-                             ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                    if (CantArchivoOrigen != Convert.ToInt16(listRecaudo2[0][0, 1]))
+                    {
+                        Correo = Util.EnvioMail(" ", "Proceso Fallido" + NombreBanco, "Buen día, \n\n" +
+                                  "La cantidad de registros procesados no coincide con la cantidad que dice el archivo plano.",
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        if (ArchivoSico != null)
+                        {
+                            ArchivoSico.Close();
+                        }
+                        if (ArchivoVisaMAstercardSICO != null)
+                        {
+                            ArchivoVisaMAstercardSICO.Close();
+                        }
+                        if (ArchivoAmexSICO != null)
+                        {
+                            ArchivoAmexSICO.Close();
+                        }
+                        if (ArchivoDinnersSICO != null)
+                        {
+                            ArchivoDinnersSICO.Close();
+                        }
+                        if (RegistrosProcesados != null)
+                        {
+                            RegistrosProcesados.Close();
+                        }
+                        return "PROCESO FINALIZADO INCONSISTENCIA DE DATOS";
+                    }
+                }
+                else
+                {
                     if (sr != null)
                     {
                         sr.Close();
                     }
-                    if (ArchivoSico != null)
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
+                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+
+
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+
+                    RptPagosLN pagosLN = new RptPagosLN();
+                    if (this.FechaRecaudo == null)
                     {
-                        ArchivoSico.Close();
+                        this.FechaRecaudo = DateTime.Now.ToString();
                     }
-                    if (ArchivoVisaMAstercardSICO != null)
-                    {
-                        ArchivoVisaMAstercardSICO.Close();
-                    }
-                    if (ArchivoAmexSICO != null)
-                    {
-                        ArchivoAmexSICO.Close();
-                    }
-                    if (ArchivoDinnersSICO != null)
-                    {
-                        ArchivoDinnersSICO.Close();
-                    }
-                    if (RegistrosProcesados != null)
-                    {
-                        RegistrosProcesados.Close();
-                    }
-                    return "PROCESO FINALIZADO INCONSISTENCIA DE DATOS";
+                    error_mensaje = "Recaudo con otra estructura " + this.CodBanco+ " " + RutaArchivo + NombreArchivo;
+                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
+
+                    return error_mensaje;
                 }
 
                 /// <summary>
@@ -1793,7 +1806,7 @@ namespace WebServiceBancos
                             System.IO.File.Move(RutaOrigen, RutaDestino);
                         }
                     }
-                    else
+                    else // No hay linea 06
                     {
                         if (sr != null)
                         {
@@ -1821,14 +1834,14 @@ namespace WebServiceBancos
                         }
                         RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                         RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
-                       
+
                         System.IO.File.Move(RutaOrigen, RutaDestino);
                         // Guardar en log
                         String respue2 = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
                         error_mensaje = "Linea 06 inexistente en archivo";
                         RptPagosLN pagosLN = new RptPagosLN();
-                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                        
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
+                        // Inserta el pago vacio para que se vea en el reporte
                         return error_mensaje;
                     }
 
@@ -1868,9 +1881,25 @@ namespace WebServiceBancos
 
                 if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
                 {
+                    List<System.IO.FileInfo> listaArch = new List<System.IO.FileInfo>();
+                    System.IO.FileInfo[] fileNames;
                     String archi = "";
-                    System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaArchivo);
-                    System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
+
+                    System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaProceso); // SAU ANTES RutaArchivo 29.10.2020
+                    fileNames = dirInfo.GetFiles("*.*");
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        listaArch.Add(fileNames[i]);
+                    }
+
+                    dirInfo = new System.IO.DirectoryInfo(RutaArchivo);
+                    fileNames = dirInfo.GetFiles("*.*");
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        listaArch.Add(fileNames[i]);
+                    }
+
+                    fileNames = listaArch.ToArray();
 
                     foreach (System.IO.FileInfo archivos in fileNames)
                     {
@@ -1878,10 +1907,10 @@ namespace WebServiceBancos
                         if (archi.Contains(NombreArchivo))
                         {
 
-                            RutaOrigen = System.IO.Path.Combine(RutaArchivo, archi);
+                            RutaOrigen = System.IO.Path.Combine(archivos.DirectoryName, archi);
                             RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoSico);
-                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
-                            File.Delete(RutaArchivo + archi);
+                            System.IO.File.Move(archivos.FullName, RutaDestino);
+                            //File.Delete(RutaArchivo + archi);
                             exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
                             if (exporasico == "OK")
                             {
@@ -1891,6 +1920,11 @@ namespace WebServiceBancos
                                 //Se encarga de aplicar directamente en SICO
                                 string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                                 Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                // Para pruebas
+                                pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, NombreArchivoSico, PathSystem, UsuFTP, PassFTP,
+                                                            Convert.ToInt32(this.CodBanco), this.FechaRecaudo, FeModificacion, parteFijaOriginal);
                             }
                             else
                             {
@@ -1914,10 +1948,7 @@ namespace WebServiceBancos
 
                         ///
 
-
-
                         ////
-
 
                         TiemposLN tln = new TiemposLN();
                         ObjetoTablas objt = new ObjetoTablas();
@@ -2232,7 +2263,7 @@ namespace WebServiceBancos
                 {
                     RegistrosProcesados.Close();
                 }
-                error_mensaje = "General " + RutaArchivo + NombreArchivo + ex.Message.ToString();
+                error_mensaje = "General " + RutaArchivo + NombreArchivo + ex.ToString();
                 if (this.FechaRecaudo == null)
                 {
                     this.FechaRecaudo = DateTime.Now.ToString();

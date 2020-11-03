@@ -76,16 +76,6 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8090/WsBancos.svc")]
-        public string Procesos_PS_ServicioBancos_WsBancos {
-            get {
-                return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
         [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche048v/Administracionftp/Servicios/moverArchivosFTP.svc")]
         public string Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP {
             get {
@@ -100,6 +90,16 @@ namespace Procesos.PS.Properties {
         public string Procesos_PS_ServicioTarjetaCredito_TarjetasCredito {
             get {
                 return ((string)(this["Procesos_PS_ServicioTarjetaCredito_TarjetasCredito"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9084/WsBancos.svc")]
+        public string Procesos_PS_ServicioBancos_WsBancos {
+            get {
+                return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
             }
         }
     }
