@@ -43,7 +43,7 @@ namespace Pagos.LN.Consulta
         {
             try
             {
-                string[, ,] Valor = new string[6, 3, 1];
+                string[, ,] Valor = new string[7, 3, 1];
 
                 Valor[0, 0, 0] = ValdObjetos.pCodBanco.ToString();
                 Valor[0, 1, 0] = "@LugarDePago";
@@ -68,8 +68,10 @@ namespace Pagos.LN.Consulta
                 Valor[5, 0, 0] = ValdObjetos.pParteFija;
                 Valor[5, 1, 0] = "@ParteFija";
                 Valor[5, 2, 0] = "varchar(20)";
-
-
+                // SAGUILAR SE AGREGA EL NUMAUTORIZACION PARA RPT CONCILIACION 16.12.2020
+                Valor[6, 0, 0] = ValdObjetos.pNumAutorizacion;
+                Valor[6, 1, 0] = "@NumAutorizacion";
+                Valor[6, 2, 0] = "varchar(20)";
 
                 return wsc.Ejecutar(Valor, procedimiento, "SQLBancos");
             }

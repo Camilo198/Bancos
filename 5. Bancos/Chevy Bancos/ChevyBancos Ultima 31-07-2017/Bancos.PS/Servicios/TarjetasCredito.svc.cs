@@ -75,8 +75,8 @@ namespace Bancos.PS.Servicios
                                               String CodigoBanco, String NumCuenta, String TipoCuenta,
                                               String Usuario, String RutaProcesado, String TipoProceso)
         {
-            
-            TipoProcesoXCuenta = TipoProceso; 
+
+            TipoProcesoXCuenta = TipoProceso;
 
             switch (TipoCuenta)
             {
@@ -107,9 +107,9 @@ namespace Bancos.PS.Servicios
                 LineaExcluidaIncio = lista[0].pLineasExcluidasInicio.Value;
                 LineaExcluidaFin = lista[0].pLineasExcluidasFin.Value;
                 NumeroHoja = lista[0].pNumeroHojaExcel.Value - 1;
-                NomHoja = lista[0].pNomHoja.ToString().Trim()+ "$";
+                NomHoja = lista[0].pNomHoja.ToString().Trim() + "$";
                 EsExcel = lista[0].pEsExcel.Value;
-                CaracterDecimal = lista[0] .pCaracterDecimal.ToString();
+                CaracterDecimal = lista[0].pCaracterDecimal.ToString();
             }
 
             #endregion
@@ -177,7 +177,7 @@ namespace Bancos.PS.Servicios
                     {
                         string path = System.IO.Path.GetFullPath(archivo);
 
-                      //  OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=" + "'" + "Excel 12.0;HDR=YES;IMEX=0;" + "'");
+                        //  OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=" + "'" + "Excel 12.0;HDR=YES;IMEX=0;" + "'");
                         //OleDbConnection oledbConn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source="   + path + ";Extended Properties=""Excel 8.0;HDR=Yes;IMEX=1"");
                         OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;'");
                         try
@@ -203,7 +203,7 @@ namespace Bancos.PS.Servicios
                             cmd.Connection = oledbConn;
 
                             cmd.CommandType = CommandType.Text;
-                            if(RutaEntrada.Contains("Falabella"))
+                            if (RutaEntrada.Contains("Falabella"))
                                 cmd.CommandText = "SELECT * FROM [" + NomHoja + "]";
                             else
                                 cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
@@ -211,7 +211,7 @@ namespace Bancos.PS.Servicios
                             oleda = new OleDbDataAdapter(cmd);
 
                             oleda.Fill(DsExcel, "excelData");
-                          
+
                         }
                         catch (Exception ex)
                         {
@@ -229,7 +229,7 @@ namespace Bancos.PS.Servicios
 
                             for (int i = 0; i < row.ItemArray.Length; i++)
                             {
-                                                                       
+
                                 lineaExcel = lineaExcel + row[i].ToString();
                                 lineaDatos.Add(row[i].ToString().Replace(@"$", "").Replace(@"-", "")); //.Replace(@".", "")); //.Replace(@",", "") se quita para no elimar la parte decimal y luego poder redondear
                             }
@@ -237,12 +237,12 @@ namespace Bancos.PS.Servicios
                             if (lineaExcel != null && lineaExcel != String.Empty)
                             {
                                 if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0 && lineasArchivo.Count == 0)
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoArchivo,CaracterDecimal);
+                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoArchivo, CaracterDecimal);
                                 else if ((ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 0) ||
                                 (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 1 && ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0))
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoLote,CaracterDecimal);
+                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoLote, CaracterDecimal);
                                 else
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoDetalle,CaracterDecimal);
+                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoDetalle, CaracterDecimal);
 
                                 lineasArchivo.Add(lineaExcel);
                             }
@@ -296,18 +296,18 @@ namespace Bancos.PS.Servicios
 
                         //if (NombreCuenta != "TCR")
                         //{
-                            if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
-                                lineasArchivo.RemoveAt(0);
-                            if (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0)
-                                lineasArchivo.RemoveAt(0);
-                            if (ListaEstructuraArchivoBancoControlArchivo.Count > 0)
-                                lineasArchivo.RemoveAt(lineasArchivo.Count - 2);
-                            if (ListaEstructuraArchivoBancoControlLote.Count > 0)
-                                lineasArchivo.RemoveAt(lineasArchivo.Count - 1);
+                        if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
+                            lineasArchivo.RemoveAt(0);
+                        if (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0)
+                            lineasArchivo.RemoveAt(0);
+                        if (ListaEstructuraArchivoBancoControlArchivo.Count > 0)
+                            lineasArchivo.RemoveAt(lineasArchivo.Count - 2);
+                        if (ListaEstructuraArchivoBancoControlLote.Count > 0)
+                            lineasArchivo.RemoveAt(lineasArchivo.Count - 1);
 
-                            lineasArchivo.RemoveRange(lineasArchivo.Count - LineaExcluidaFin, LineaExcluidaFin);//ELIMINA TODAS LAS LINEAS DEL FIN QUE SON EXCLUIDAS POR CONFIGURACION    
-                        //}
-                        
+                        lineasArchivo.RemoveRange(lineasArchivo.Count - LineaExcluidaFin, LineaExcluidaFin);//ELIMINA TODAS LAS LINEAS DEL FIN QUE SON EXCLUIDAS POR CONFIGURACION    
+                                                                                                            //}
+
 
                         foreach (String linea in lineasArchivo)
                         {
@@ -356,10 +356,10 @@ namespace Bancos.PS.Servicios
                     ds1.Tables.Add(dt1);
                     //**************************************************************************
                     //**************************************************************************
-                    
+
                     Dictionary<Int32, String> asignacionCampos = new Dictionary<Int32, String>();
                     asignacionCampos = valorCampo(dt1.Rows[0].ItemArray[1].ToString(), ListaEstructuraArchivoBancoDetalle);
-              
+
                     //SE CREA LA CARPETA DONDE VAN A QUEDAR LOS ARCHIVOS DE TARJETAS CREDITO SI NO EXISTE
                     if (!Directory.Exists(Directorio))
                     {
@@ -400,10 +400,13 @@ namespace Bancos.PS.Servicios
                     //}
                     LineasArmadasdt.Clear();
 
-                   // objLector.borrarArchivo(archivo);
+                    // objLector.borrarArchivo(archivo);
 
                     System.Threading.Thread.Sleep(1000);
-                    File.Move(archivo, RutaSalida+nombre);
+                    string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+                      DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + "_";
+
+                    File.Move(archivo, RutaSalida + fecha + nombre);
                 }
 
                 return "Proceso " + tipoArchivo + " ejecutado con exito!!";
@@ -417,7 +420,7 @@ namespace Bancos.PS.Servicios
                 objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : " + ex.Message;
                 objL.pTipoArchivo = TipoProcesoXCuenta;
                 objL.pTipoProceso = "GEN";
-                new LogsLN().insertar(objL);
+                //new LogsLN().insertar(objL);   // DESCOMENTAREAR A PRD
                 return ex.Message;
             }
         }
@@ -488,7 +491,7 @@ namespace Bancos.PS.Servicios
                                               "_", ControlHora, "_", ConsecutivoArchivo, ".txt");
                 sw = new StreamWriter(Directorio + nombreArchivo, false);
 
-                
+
                 #region Armar Linea Encabezado Archivo
 
                 asignacionCampos.Add(0, "1EA");
@@ -504,7 +507,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-               
+
                 #region Armar Linea Encabezado Lote
 
                 asignacionCampos.Add(0, "2EL");
@@ -515,7 +518,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-              
+
                 #region Armar Linea Detalle
 
                 for (int i = ciclo; i < ciclo + Limite; i++)
@@ -602,7 +605,7 @@ namespace Bancos.PS.Servicios
         }
 
         //SE ARMA CADA LINEA DE ASOBANCARIA SEGUN LOS PARAMETROS DE LA ESTRUCTURA
-        private String armarLineasExcel(List<String> lineaDatos, List<Bancos.EN.Tablas.EstructuraArchivo> lineasAsobancaria,string CaracterDecimal)
+        private String armarLineasExcel(List<String> lineaDatos, List<Bancos.EN.Tablas.EstructuraArchivo> lineasAsobancaria, string CaracterDecimal)
         {
             int i = 0;
             try
@@ -629,15 +632,15 @@ namespace Bancos.PS.Servicios
                         {
 
                             Valor_ = lineaDatos[i].ToString();
-                            if(CaracterDecimal == ",")
+                            if (CaracterDecimal == ",")
                                 ValorD = Math.Round(Convert.ToDecimal(Valor_), 0);
                             else
-                                ValorD = Math.Round(Convert.ToDecimal(Valor_.Replace(".",",")), 0);
+                                ValorD = Math.Round(Convert.ToDecimal(Valor_.Replace(".", ",")), 0);
                             linea += rellenarCampo(ValorD.ToString().Trim() + "00", objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
                         }
                         else
                         {
-                            linea += rellenarCampo(lineaDatos[i].ToString().Trim()+"00", objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
+                            linea += rellenarCampo(lineaDatos[i].ToString().Trim() + "00", objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
                         }
                     }
                     else
@@ -649,8 +652,8 @@ namespace Bancos.PS.Servicios
                                 lineaDatos[i] = lineaDatos[i].ToString().Replace("*", "").Trim(' ');
                             }
                         }
-                        
-                         linea += rellenarCampo(lineaDatos[i].ToString().Trim(), objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
+
+                        linea += rellenarCampo(lineaDatos[i].ToString().Trim(), objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
                     }
                     i++;
                 }
@@ -857,7 +860,7 @@ namespace Bancos.PS.Servicios
         {
             if (campo.Trim() == "R04088")
                 campo = campo;
-           // campo = campo.Trim();
+            // campo = campo.Trim();
             if (campo.Length <= longitud)
             {
                 if (alineacion.Equals("der"))
@@ -941,7 +944,7 @@ namespace Bancos.PS.Servicios
         public List<Bancos.EN.Tablas.InterpreteArchivo> obtenerTransformacionArchivo(String IdCuentaBancoEpicor)
         {
 
-            List<Bancos.EN.Tablas.InterpreteArchivo> datos = new InterpreteArchivoLN().consultar(IdCuentaBancoEpicor,"ABT1"); /// TipoProcesoXCuenta);
+            List<Bancos.EN.Tablas.InterpreteArchivo> datos = new InterpreteArchivoLN().consultar(IdCuentaBancoEpicor, "ABT1"); /// TipoProcesoXCuenta);
             return datos;
 
         }
@@ -1061,9 +1064,9 @@ namespace Bancos.PS.Servicios
             }
             else
             {
-                 f[0] =   fecha.Substring(0,format[0].Length);
-                f[1] =   fecha.Substring(format[0].Length + x,format[1].Length);
-                f[2] = fecha.Substring(format[0].Length + format[1].Length + 2 * x ,format[2].Length);
+                f[0] = fecha.Substring(0, format[0].Length);
+                f[1] = fecha.Substring(format[0].Length + x, format[1].Length);
+                f[2] = fecha.Substring(format[0].Length + format[1].Length + 2 * x, format[2].Length);
             }
             for (int i = 0; i < format.Length; i++)
             {

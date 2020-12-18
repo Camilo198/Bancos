@@ -277,7 +277,6 @@ namespace WebServiceBancos
                 System.Threading.Thread.Sleep(1000);
 
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-                Process[] targetProcess = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(RutaArchivo+NombreArchivo));
                 try
                 {
                     sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
