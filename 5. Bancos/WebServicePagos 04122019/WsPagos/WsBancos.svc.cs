@@ -1275,7 +1275,14 @@ namespace WebServiceBancos
                                             }
                                             RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
 
-                                            CrearArchivoSico(NombreArchivo);
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
 
                                             nregistrosprocesados++;
                                             nreferenciadesconocida++;
@@ -1337,7 +1344,17 @@ namespace WebServiceBancos
                                                 }
                                                 RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA PROCESADA");
 
-                                                CrearArchivoSico(NombreArchivo);
+                                                if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                {
+                                                    string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagosCuotas");
+                                                    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                    // contadorPagoCuotas++;
+                                                }
+                                                //----------
+                                                else
+                                                {
+                                                    CrearArchivoSico(NombreArchivo);
+                                                }
 
                                                 nregistrosprocesados++;
                                                 nregistrosexistentes++;
@@ -1359,7 +1376,14 @@ namespace WebServiceBancos
                                                     }
                                                     RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA NO VIGENTE");
 
-                                                    CrearArchivoSico(NombreArchivo);
+                                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                    {
+                                                        CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                    }
+                                                    else
+                                                    {
+                                                        CrearArchivoSico(NombreArchivo);
+                                                    }
 
                                                     nregistrosprocesados++;
                                                     nregistrosexistentes++;
@@ -1476,7 +1500,14 @@ namespace WebServiceBancos
                                             }
                                             RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
 
-                                            CrearArchivoSico(NombreArchivo);
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
 
                                             nregistrosprocesados++;
                                             nreferenciadesconocida++;
@@ -1632,7 +1663,7 @@ namespace WebServiceBancos
                     {
                         this.FechaRecaudo = DateTime.Now.ToString();
                     }
-                    error_mensaje = "Recaudo con otra estructura " + this.CodBanco+ " " + RutaArchivo + NombreArchivo;
+                    error_mensaje = "Recaudo con otra estructura " + this.CodBanco + " " + RutaArchivo + NombreArchivo;
                     pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
 
                     return error_mensaje;

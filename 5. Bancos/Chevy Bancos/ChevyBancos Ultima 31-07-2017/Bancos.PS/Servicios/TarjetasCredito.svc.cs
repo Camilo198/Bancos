@@ -185,7 +185,7 @@ namespace Bancos.PS.Servicios
 
                             oledbConn.Open();
 
-                            OleDbCommand cmd = new OleDbCommand(); ;
+                            OleDbCommand cmd = new OleDbCommand();
 
                             OleDbDataAdapter oleda = new OleDbDataAdapter();
 
@@ -253,7 +253,15 @@ namespace Bancos.PS.Servicios
                     #region LECTURA ARCHIVO PLANO
                     else
                     {
-                        lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        if (archivo.Contains(".csv"))
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
+                        }
+                        else
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        }
+                       
                     }
                     #endregion
 

@@ -78,7 +78,7 @@ namespace Pagos.LN.Consulta
                         if (txtPago != null)
                         {
                             recaudoSico = txtPago.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-                            pagosEN.cantPagosSicoInc = Convert.ToInt32(recaudoSico.ElementAt(2));
+                            pagosEN.cantPagosSicoInc = Convert.ToInt32(recaudoSico.ElementAt(2).Replace(',', '.'));
                             pagosEN.valorMontoSicoInc = Convert.ToDouble(recaudoSico.ElementAt(3).Replace(',', '.'));
                             recaudoSico = null;
                         }
@@ -113,7 +113,7 @@ namespace Pagos.LN.Consulta
                         if (txtPago != null)
                         {
                             recaudoSico = txtPago.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-                            pagosEN.cantPagosSicoCon = Convert.ToInt32(recaudoSico.ElementAt(2));
+                            pagosEN.cantPagosSicoCon = Convert.ToInt32(recaudoSico.ElementAt(2).Replace(',', '.'));
                             pagosEN.valorMontoSicoCon = Convert.ToDouble(recaudoSico.ElementAt(3).Replace(',', '.'));
                             recaudoSico = null;
                         }

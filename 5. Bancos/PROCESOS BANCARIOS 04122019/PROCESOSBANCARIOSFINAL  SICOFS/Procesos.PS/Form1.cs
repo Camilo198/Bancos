@@ -530,9 +530,9 @@ namespace Procesos.PS
             catch (Exception ex)
             {
                 //this.listBox1.Items.Add(this.label10.Text + ex.Message + " Hora: " + DateTime.Now.ToString());
-                //string email = this.txbCorreo.Text; 
-                //string email_dev = "notificacion.desarrollo@chevyplan.com.co";
-                //EnvioMail("", "Error Gral: Procesos: "+ex.Message + " Hora: " + DateTime.Now.ToString(), email, email, email, email_dev);
+                string email = "steven.aguilar@chevyplan.com.co";
+                string email_dev = "steven.aguilar@chevyplan.com.co";
+                EnvioMail("", "Error Gral: Procesos Bancarios", "Error Gral: Procesos: " + ex.ToString() + " Hora: " + DateTime.Now.ToString(), email, email, email_dev);
                 // return
                 Temporizador.Enabled = true;
                 this.btnStop.Enabled = true;

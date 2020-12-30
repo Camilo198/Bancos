@@ -59,6 +59,55 @@ namespace Bancos.PS.Servicios.Archivos
             return listaLineas;
         }
 
+        public List<String> leerArchivoTarjetasCSV(String rutaArchivo, List<Bancos.EN.Tablas.EstructuraArchivo> ListaDeEstructuraArchivoBanco)
+        {
+            List<String> listaLineas = new List<String>();
+            try
+            {
+                StreamReader objLector = new StreamReader(rutaArchivo, System.Text.Encoding.GetEncoding(1252));
+                String strLinea = "";
+                int cont = 0;
+                while (strLinea != null)
+                {
+                    strLinea = objLector.ReadLine();
+                    if (strLinea != null && strLinea != String.Empty)
+                    {
+                        //strLinea = strLinea.Replace(@";", " ");
+                        //strLinea = strLinea.Replace(@",", " ");
+
+                        string[] listaLinea = strLinea.Split(',');
+
+                        for (int i = 0; i < listaLinea.Length; i++)
+                        {
+                            foreach (var item in ListaDeEstructuraArchivoBanco)
+                            {
+                                cont = i + 1;
+                                if (item.pOrdenColumna == cont)  // Se colocan espacios para completar de acuerdo a la long parametrizada
+                                {
+                                    var len = item.pLongitud;
+                                    listaLinea[i] = listaLinea[i].PadRight(Convert.ToInt32(len), ' ');
+                                    break;
+                                }
+                            }
+                            cont = 0;
+                        }
+                        strLinea = "";
+                        for (int i = 0; i < listaLinea.Length; i++)
+                        {
+                            strLinea = strLinea + listaLinea[i];
+                        }
+                        listaLineas.Add(strLinea);//REVISAR ARCHIVOS AL QUITARLES LA COMA
+                    }
+                }
+                objLector.Close();
+            }
+            catch (Exception ex)
+            {
+                objLog.Error(ex.Message);
+            }
+            return listaLineas;
+        }
+
         public void borrarArchivo(String rutaArchivo)
         {
             try
@@ -71,16 +120,16 @@ namespace Bancos.PS.Servicios.Archivos
             }
         }
 
-        public void moverArchivo(String rutaArchivo, String RutaProcesado,String TipoArchivo, String NombreArchivo)
+        public void moverArchivo(String rutaArchivo, String RutaProcesado, String TipoArchivo, String NombreArchivo)
         {
             try
             {
                 if (rutaArchivo.Contains(".xls"))
                     File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + ".xls");
                 else
-                    File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + NombreArchivo+ ".txt");
+                    File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + NombreArchivo + ".txt");
             }
-            catch 
+            catch
             {
                 throw new Exception("Archivo " + rutaArchivo + " no se pudo mover a ruta de procesados, borrelo manualmente para evitar pagos duplicados");
                 //objLog.Error(ex.Message);
