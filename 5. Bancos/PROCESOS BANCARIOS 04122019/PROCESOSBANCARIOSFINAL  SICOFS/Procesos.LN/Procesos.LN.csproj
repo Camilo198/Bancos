@@ -51,6 +51,7 @@
     <Compile Include="Consultas\ArchivoLN.cs" />
     <Compile Include="Consultas\BancoLN.cs" />
     <Compile Include="Consultas\CorreoLN.cs" />
+    <Compile Include="Consultas\LogLN.cs" />
     <Compile Include="Consultas\RecaudoLN.cs" />
     <Compile Include="Consultas\RutaLN.cs" />
     <Compile Include="Consultas\TareaLN.cs" />

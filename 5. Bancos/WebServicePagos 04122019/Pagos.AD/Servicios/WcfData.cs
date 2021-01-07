@@ -530,7 +530,39 @@ namespace Pagos.AD.Servicios
 
             }
         }
-       
+        public string ejecutarQueryDataTable(DataTable dt, string procedimiento, string strConn, string tipoTabla)
+        {
+            SqlConnection Con = ConectaSql(strConn);
+            int rowCount = 0;
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandTimeout = 5000;
+            cmd.Connection = Con;
+            cmd.CommandText = procedimiento;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue(tipoTabla, dt);
+
+            try
+            {
+                SqlParameter Parameter = cmd.Parameters.Add("@RowCount", SqlDbType.Int);
+                Parameter.Direction = ParameterDirection.ReturnValue;
+                cmd.ExecuteNonQuery();
+                rowCount = (Int32)cmd.Parameters["@RowCount"].Value;
+                return rowCount.ToString().Trim();
+            }
+            catch (Exception e)
+            {
+
+                return "0" + e.Message;
+            }
+            finally
+            {
+                cmd.Dispose();
+                Con.Close();
+                Con.Dispose();
+            }
+
+        }
+
     }
 
 

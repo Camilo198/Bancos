@@ -58,6 +58,7 @@
     <Compile Include="Consultas\ArchivoAD.cs" />
     <Compile Include="Consultas\BancoAD.cs" />
     <Compile Include="Consultas\CorreoAD.cs" />
+    <Compile Include="Consultas\LogAD.cs" />
     <Compile Include="Consultas\RutaAD.cs" />
     <Compile Include="Consultas\TareaAD.cs" />
     <Compile Include="Consultas\TransferenciaArchivosAD.cs" />

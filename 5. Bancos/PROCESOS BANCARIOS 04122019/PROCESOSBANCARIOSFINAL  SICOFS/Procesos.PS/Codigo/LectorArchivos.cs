@@ -80,6 +80,7 @@ namespace Procesos.PS.Codigo
             try
             {
                 lista.AddRange(Directory.GetFiles(directorio));
+                lista.RemoveAll(x => x.Contains(".db"));
                 //lista.AddRange(Directory.GetFiles(directorio, "*.txt"));
             }
             catch
@@ -117,12 +118,13 @@ namespace Procesos.PS.Codigo
         public List<ArchivoEN> procesarArchivosFecha(List<String> archivo)
         {
             List<ArchivoEN> lista_ax = new List<ArchivoEN>();
+            IList<ArchivoEN> lista_BD = new List<ArchivoEN>();
 
             foreach (var item in archivo)
             {
                 lista_ax.Add(new ArchivoEN()
                 {
-                    Fecha = File.GetLastWriteTime(item).ToString("yyyy-MM-dd"),
+                    Fecha = File.GetCreationTime(item), //.ToString("yyyy-MM-dd")
                     RutaArchivo = item
                 });
             }
@@ -140,16 +142,29 @@ namespace Procesos.PS.Codigo
             //Se comentarea porque en runtime se puede manejar
             // el control de los ficheros
             // la tabla no existe en PRD
-            //ArchivoEN archivoEN = new ArchivoEN();
-            //ArchivoLN archivoLN = new ArchivoLN();
-            //
-            //foreach (var item in lista_ax)
-            //{ 
-            //    archivo.Add(item.RutaArchivo);
-            //    //archivoEN.Fecha = item.Fecha;
-            //    //archivoEN.RutaArchivo = item.RutaArchivo;
-            //    //resultado = archivoLN.insertarArchivoBolsaLN(archivoEN);
-            //}
+            ArchivoEN archivoEN = new ArchivoEN();
+            ArchivoLN archivoLN = new ArchivoLN();
+
+            lista_BD = archivoLN.consultarArchivoBolsaLN(archivoEN);
+
+            for (int i = 0; i < lista_ax.Count; i++)
+            {
+                for (int j = 0; j < lista_BD.Count; j++)
+                {
+                    if (lista_ax[i].RutaArchivo == lista_BD[j].RutaArchivo)   
+                    {
+
+                    }
+                }
+            }
+
+            foreach (var item in lista_ax)
+            {
+                archivo.Add(item.RutaArchivo);
+                archivoEN.Fecha = item.Fecha;
+                archivoEN.RutaArchivo = item.RutaArchivo;
+                String res = archivoLN.insertarArchivoBolsaLN(archivoEN);
+            }
             return lista_ax;
         }
     }

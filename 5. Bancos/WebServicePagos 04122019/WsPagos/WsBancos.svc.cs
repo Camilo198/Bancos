@@ -169,6 +169,9 @@ namespace WebServiceBancos
         string parteFijaOriginal = "";
         System.IO.StreamReader sr = null;
         string respu = "";
+
+        ArchivoEN archivoLinea = new ArchivoEN();
+        ArchivoLN archivoLN = new ArchivoLN();
         /// <summary>
         /// Metodo que consulta la referencia cupo en SICO
         /// </summary>
@@ -274,21 +277,26 @@ namespace WebServiceBancos
 
             try
             {
-                System.Threading.Thread.Sleep(1000);
+                archivoLinea.fechaProceso = DateTime.Now;
+                var listaArchivo = archivoLN.almacenaLineasArchivoLN(RutaArchivo, NombreArchivo, PagosOnline, archivoLinea);
 
+                if (listaArchivo == null)
+                {
+                    return "Archivo vacío o inexistente o con otra estructura o movido";
+                }
                 string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-                try
-                {
-                    sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
-                }
-                catch (Exception ex)
-                {
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
-                    return "Excepción no hay Pagos Online para procesar";
-                }
+                //try // 04 / 01 / 2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (sr != null)
+                //    {
+                //        sr.Close();
+                //    }
+                //    return "Excepción no hay Pagos Online para procesar";
+                //}
 
                 PagosInconsistentesLN objInsertPagosIn = new PagosInconsistentesLN();
                 CierreLN ConsultaExis = new CierreLN();
@@ -309,6 +317,8 @@ namespace WebServiceBancos
 
                 Fiducia = "F1";
                 Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
+
+                String resQueryLog = "";
 
                 //Se comentaria porque ya no se manajera la fiducia 3
                 //switch (RangoCont[5].ToString())
@@ -383,10 +393,10 @@ namespace WebServiceBancos
                             parteFijaAbstracta = NombreArchivo;
                         }
                         pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                        if (sr != null)
-                        {
-                            sr.Close();
-                        }
+                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                        //{
+                        //    sr.Close();
+                        //}
                         return error_mensaje;
                     }
                 }
@@ -403,37 +413,42 @@ namespace WebServiceBancos
                         parteFijaAbstracta = NombreArchivo;
                     }
                     pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
                     return error_mensaje;
 
                 }
                 //PAGREP
                 //buscar en la base de datos antes de empezar a recorrerlo 
                 #region LECTURA DE ARCHIVO
-                if (new FileInfo(RutaArchivo + NombreArchivo).Length == 0)
-                {
-                    RptPagosLN pagosLN = new RptPagosLN();
-                    error_mensaje = "Error Archívo vacío: " + RutaArchivo + NombreArchivo + DateTime.Now.ToString();
+                //if (new FileInfo(RutaArchivo + NombreArchivo).Length == 0) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    RptPagosLN pagosLN = new RptPagosLN();
+                //    error_mensaje = "Error Archívo vacío: " + RutaArchivo + NombreArchivo + DateTime.Now.ToString();
 
-                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                //    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
 
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
-                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
-                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
-                    System.IO.File.Move(RutaOrigen, RutaDestino);
-                    return error_mensaje;
-                }
+                //    if (sr != null)
+                //    {
+                //        sr.Close();
+                //    }
+                //    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                //    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
+                //    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+                //    System.IO.File.Move(RutaOrigen, RutaDestino);
+                //    return error_mensaje;
+                //}
+
                 //Lee el archivo mientras existan lineas
-                while (sr.EndOfStream == false)
+
+                //while (sr.EndOfStream == false)  //04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                foreach (var item in listaArchivo)
                 {
-                    linea = sr.ReadLine();
+                    //linea = sr.ReadLine();
+                    linea = item;
+                    archivoLinea.numLinea++;
 
                     contnoinversion = 0;
                     notascredito = 0;
@@ -464,12 +479,12 @@ namespace WebServiceBancos
                         catch (Exception e)
                         {
                             RptPagosLN pagosLN = new RptPagosLN();
-                            error_mensaje = "Error en conexión a SICO " + RutaArchivo + NombreArchivo + e.Message.ToString();
+                            error_mensaje = "Error en conexión a SICO lectura parametro fecha" + RutaArchivo + NombreArchivo + e.Message.ToString();
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             return error_mensaje;
                         }
 
@@ -482,17 +497,22 @@ namespace WebServiceBancos
 
                             if (!FechaRecaudo.Substring(0, 7).Equals(FecParSico))
                             {
-                                if (sr != null)
-                                {
-                                    sr.Close();
-                                }
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
                                 if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(FecParSico))
                                 {
                                     File.Delete(RutaArchivo + NombreArchivo);
+                                    archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
                                     return " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE SICO : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico;
                                 }
-
-                                return "NO COINCIDE LA FECHA : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico;
+                                
+                                error_mensaje = "NO COINCIDE LA FECHA : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico+ " " + RutaArchivo + NombreArchivo;
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, "");
+                                archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                                return error_mensaje;
                             }
                         }
 
@@ -526,22 +546,26 @@ namespace WebServiceBancos
                                     }
                                     else
                                     {
-                                        if (sr != null)
-                                        {
-                                            sr.Close();
-                                        }
-                                        return "OCURRIO UN ERROR EN LA CONSULTA DEL BANCO"; /*PAGOS*/
+                                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                        //{
+                                        //    sr.Close();
+                                        //}
+                                        RptPagosLN pagosLN = new RptPagosLN();
+                                        error_mensaje = "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO" + RutaArchivo + NombreArchivo;
+                                        pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                        archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                                        return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO";
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
-                            return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return "OCURRIO UN ERROR EN LA CONSULTA DEL BANCO";
                         }
                         //--------------
                         #region SAU Fecha usura
@@ -562,12 +586,14 @@ namespace WebServiceBancos
                                     File.Delete(RutaArchivo + NombreArchivo);
                                     error_mensaje = " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
                                         + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+                                    
+                                    archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
 
                                     pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
-                                    if (sr != null)
-                                    {
-                                        sr.Close();
-                                    }
+                                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                    //{
+                                    //    sr.Close();
+                                    //}
                                     if (ArchivoSico != null)
                                     {
                                         ArchivoSico.Close();
@@ -591,13 +617,13 @@ namespace WebServiceBancos
                                     return error_mensaje;
                                 }
 
-                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura +" "+ RutaArchivo + NombreArchivo;
 
                                 pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
-                                if (sr != null)
-                                {
-                                    sr.Close();
-                                }
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
                                 if (ArchivoSico != null)
                                 {
                                     ArchivoSico.Close();
@@ -635,10 +661,10 @@ namespace WebServiceBancos
 
                             if (horaSistema < horaBanco)
                             {
-                                if (sr != null)
-                                {
-                                    sr.Close();
-                                }
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
 
                                 return " ARCHIVO EN ESPERA PORQUE EL BANCO " + this.CodBanco + " AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
                             }
@@ -653,15 +679,15 @@ namespace WebServiceBancos
                             RptPagosLN pagosLN = new RptPagosLN();
                             error_mensaje = "NO HAY DISPONIBILIDAD DE EJECUCION PARA ESTE BANCO"
                                 + CodBanco + " " + this.FechaRecaudo + RutaArchivo + NombreArchivo;
-                            //pagosLN.insertaLogErroresLN(error_mensaje,this.FechaRecaudo, Convert.ToInt32(CodBanco), parteFijaAbstracta);
+                            //pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
                             // Mueve el archivo para evitar la interrupcion en la ejecucion
                             ////RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             ////RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
                             ////System.IO.File.Move(RutaOrigen, RutaDestino);
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             return error_mensaje; /*DisponibilidadArchivos*/
                         }
 
@@ -669,17 +695,17 @@ namespace WebServiceBancos
 
                         if (!resp.Equals("1"))
                         {
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             RptPagosLN pagosLN = new RptPagosLN();
                             error_mensaje = "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD " + this.CodBanco + " " + RutaArchivo + NombreArchivo;
                             pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD";
                         }
 
@@ -689,19 +715,19 @@ namespace WebServiceBancos
 
                         if (ConsultaCodigoBanco.Count == 0)
                         {
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
 
                         if (NombreBanco == String.Empty)
                         {
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
                         }
 
@@ -715,10 +741,10 @@ namespace WebServiceBancos
                         if (listRecaudo.Count != 0)
                         {
                             insertarRecaudo = false;
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             if (ArchivoSico != null)
                             {
                                 ArchivoSico.Close();
@@ -747,6 +773,7 @@ namespace WebServiceBancos
                             objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");// habilita de nuevo la disponibilidad
                             //registroDuplicado = true;
                             //pagosConError += ValdObjetos.pCodBanco + " " + ValdObjetos.pFecPago + " " + ValdObjetos.pContrato + " " + ValdObjetos.pValPago + " . \n ";
+                            archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
                             return "EL ARCHIVO YA SE ENCUENTRA PROCESADO"; /*REGREP*/
                         }
                         else
@@ -783,7 +810,8 @@ namespace WebServiceBancos
                         {
                             return "OCURRIO UN ERROR AL CONSULTAR LUPA";
                         }
-
+                        // Eliminar linea de lista
+                        archivoLN.EliminarLineasPagoLN(archivoLinea, "P");
                     }
                     else
                     {
@@ -906,6 +934,89 @@ namespace WebServiceBancos
                                 // SAU Monto insertado
                             // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
                                 */
+                                /// <summary>
+                                /// Se encarga de evaluar si es de una fiducia errada y si lo es lo guarda en una tabla de Pagos Errados
+                                /// </summary>
+                                #region CONTROL FIDUCIAS
+                                /*FIDCON*/
+                                ExisteRegstro = false;
+                                if (Convert.ToString(Referencia).Length >= 8)
+                                {
+                                    validacionCupo = ExisteCupo(Referencia);
+
+                                    if (validacionCupo)
+                                    {
+                                        DataRow row = DtAfilCupo.Rows[0];
+                                        ContratoValida = row["AfilNroCon"].ToString();
+                                        ValdObjetos.pContrato = ContratoValida; // SAGUILAR PAQUETE DE PAGOS II
+                                        ExisteRegstro = true;
+                                    }
+                                }
+                                else
+                                {
+                                    validacion = ExisteContrato(Referencia);
+
+                                    if (validacion)
+                                    {
+                                        ContratoValida = Referencia;
+                                        ValdObjetos.pContrato = ContratoValida; // SAGUILAR PAQUETE DE PAGOS II
+                                        ExisteRegstro = true;
+                                    }
+                                }
+
+
+                                //Se comentarea porque ya no se utilizaa la fiducia 3
+                                //if (ExisteRegstro)
+                                //{
+                                //    ObjetoTablas objParaResul = new ObjetoTablas();
+                                //    objParaResul = listaParametro[0];
+                                //    String[] RangoContrato = objParaResul.pValor.ToString().Split('-');
+                                //    int fiduciaerrada = 0;
+
+                                //    switch (LupaFiducia.Trim())
+                                //    {
+                                //        case "1":
+                                //            if (Convert.ToInt32(ContratoValida) >= Convert.ToInt32(RangoContrato[0].ToString()) && Convert.ToInt32(ContratoValida) <= Convert.ToInt32(RangoContrato[1].ToString()))
+                                //            {
+                                //                fiduciaerrada++;
+                                //            }
+                                //            break;
+                                //        case "3":
+                                //            if (Convert.ToInt32(ContratoValida) < Convert.ToInt32(RangoContrato[0].ToString()) || Convert.ToInt32(ContratoValida) > Convert.ToInt32(RangoContrato[1].ToString()))
+                                //            {
+                                //                fiduciaerrada++;
+                                //            }
+                                //            break;
+                                //        default:
+                                //            break;
+                                //    }
+
+                                //    if (fiduciaerrada > 0)
+                                //    {
+
+                                //        ObjetoTablas objParaErrados = new ObjetoTablas();
+                                //        objParaErrados.pProcesoErr = "PA";
+                                //        objParaErrados.pReferenciaErr = ContratoValida;
+                                //        objParaErrados.pCodBancoErr = ValdObjetos.pCodBanco;
+                                //        objParaErrados.pValorPagoErr = ValdObjetos.pValPago;
+                                //        objParaErrados.pFechaErr = Convert.ToDateTime(ValdObjetos.pFecPago).ToString("dd/MM/yyyy");
+                                //        objParaErrados.pForPagoErr = ValdObjetos.pForPago;
+                                //        objParaErrados.pUsuarioProcesoErr = "AUTOMATICO";
+
+
+                                //        List<string[,]> ConsultPagosErrados = new PagosErradosLN().ValidaExistePagoErrado(objParaErrados, "ConsultaExistePagoErrado");
+
+                                //        if (ConsultPagosErrados.Count == 0)
+                                //        {
+                                //            string GuardaPagoErrado = new PagosErradosLN().InsertPagosErrados(objParaErrados, "InsertPagosErrados");
+                                //        }
+
+                                //    }
+                                //}
+
+
+
+                                #endregion
                                 RptPagosEN pagosEN = new RptPagosEN();
 
                                 pagosEN.fechaModificacionArch = FeModificacion;
@@ -955,13 +1066,32 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la actualización Monto Archivo banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
                                         }
                                     }
                                     else
@@ -973,13 +1103,34 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+
+                                                
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
                                         }
                                     }
 
@@ -1014,13 +1165,33 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la actualización Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+
                                                 error_mensaje = String.Empty;
                                             }
                                         }
-                                        catch (Exception e)
+                                        catch (Exception ex)
                                         {
-                                            pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
                                         }
                                     }
                                     else
@@ -1032,13 +1203,33 @@ namespace WebServiceBancos
                                             {
                                                 error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                                pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+
                                                 error_mensaje = String.Empty;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
                                         }
                                     }
 
@@ -1048,90 +1239,6 @@ namespace WebServiceBancos
                                     }
                                 }
                             }
-
-                            /// <summary>
-                            /// Se encarga de evaluar si es de una fiducia errada y si lo es lo guarda en una tabla de Pagos Errados
-                            /// </summary>
-                            #region CONTROL FIDUCIAS
-                            /*FIDCON*/
-                            ExisteRegstro = false;
-                            if (Convert.ToString(Referencia).Length >= 8)
-                            {
-                                validacionCupo = ExisteCupo(Referencia);
-
-                                if (validacionCupo)
-                                {
-                                    DataRow row = DtAfilCupo.Rows[0];
-                                    ContratoValida = row["AfilNroCon"].ToString();
-                                    ExisteRegstro = true;
-                                }
-                            }
-                            else
-                            {
-                                validacion = ExisteContrato(Referencia);
-
-                                if (validacion)
-                                {
-                                    ContratoValida = Referencia;
-                                    ExisteRegstro = true;
-                                }
-                            }
-
-
-                            //Se comentarea porque ya no se utilizaa la fiducia 3
-                            //if (ExisteRegstro)
-                            //{
-                            //    ObjetoTablas objParaResul = new ObjetoTablas();
-                            //    objParaResul = listaParametro[0];
-                            //    String[] RangoContrato = objParaResul.pValor.ToString().Split('-');
-                            //    int fiduciaerrada = 0;
-
-                            //    switch (LupaFiducia.Trim())
-                            //    {
-                            //        case "1":
-                            //            if (Convert.ToInt32(ContratoValida) >= Convert.ToInt32(RangoContrato[0].ToString()) && Convert.ToInt32(ContratoValida) <= Convert.ToInt32(RangoContrato[1].ToString()))
-                            //            {
-                            //                fiduciaerrada++;
-                            //            }
-                            //            break;
-                            //        case "3":
-                            //            if (Convert.ToInt32(ContratoValida) < Convert.ToInt32(RangoContrato[0].ToString()) || Convert.ToInt32(ContratoValida) > Convert.ToInt32(RangoContrato[1].ToString()))
-                            //            {
-                            //                fiduciaerrada++;
-                            //            }
-                            //            break;
-                            //        default:
-                            //            break;
-                            //    }
-
-                            //    if (fiduciaerrada > 0)
-                            //    {
-
-                            //        ObjetoTablas objParaErrados = new ObjetoTablas();
-                            //        objParaErrados.pProcesoErr = "PA";
-                            //        objParaErrados.pReferenciaErr = ContratoValida;
-                            //        objParaErrados.pCodBancoErr = ValdObjetos.pCodBanco;
-                            //        objParaErrados.pValorPagoErr = ValdObjetos.pValPago;
-                            //        objParaErrados.pFechaErr = Convert.ToDateTime(ValdObjetos.pFecPago).ToString("dd/MM/yyyy");
-                            //        objParaErrados.pForPagoErr = ValdObjetos.pForPago;
-                            //        objParaErrados.pUsuarioProcesoErr = "AUTOMATICO";
-
-
-                            //        List<string[,]> ConsultPagosErrados = new PagosErradosLN().ValidaExistePagoErrado(objParaErrados, "ConsultaExistePagoErrado");
-
-                            //        if (ConsultPagosErrados.Count == 0)
-                            //        {
-                            //            string GuardaPagoErrado = new PagosErradosLN().InsertPagosErrados(objParaErrados, "InsertPagosErrados");
-                            //        }
-
-                            //    }
-                            //}
-
-
-
-                            #endregion
-
-
                             /// <summary>
                             /// Si el codigo de verificación calculado es diferente al del plano, lo inserta en la tabla 
                             /// Pagos Inconsistentes y lo guarda en un archivo
@@ -1516,6 +1623,8 @@ namespace WebServiceBancos
                                     }
                                 }
                             }
+                            // Eliminar linea de lista
+                            archivoLN.EliminarLineasPagoLN(archivoLinea, "P");
                         }
 
                     }
@@ -1562,13 +1671,33 @@ namespace WebServiceBancos
                                 {
                                     error_mensaje = "Error en la actualización Codigo PSE banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+
+                                    resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    if (resQueryLog == "1")
+                                    {
+                                        pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    else
+                                    {
+                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    resQueryLog = String.Empty;
+
                                     error_mensaje = String.Empty;
                                 }
                             }
-                            catch (Exception e)
+                            catch (Exception ex)
                             {
-                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                }
+                                resQueryLog = String.Empty;
                             }
 
                         }
@@ -1589,16 +1718,38 @@ namespace WebServiceBancos
                                     {
                                         error_mensaje = "Error en la actualización cantidad pagos Arch Origen banco: " +
                                                     pagosEN.codigoBanco + " " + pagosEN.fechaPago;
-                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        if (resQueryLog == "1")
+                                        {
+                                            pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        }
+                                        else
+                                        {
+                                            pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        }
+                                        resQueryLog = String.Empty;
+
                                         error_mensaje = string.Empty;
                                     }
                                 }
-                                catch (Exception e)
+                                catch (Exception ex)
                                 {
-                                    pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    if (resQueryLog == "1")
+                                    {
+                                        pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    else
+                                    {
+                                        pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    resQueryLog = String.Empty;
                                 }
                             }
                         }
+                        // Limpiar la tabla de lineas de lo restante ya que se leyó exitosamente
+                        // Eliminar linea de lista
+                        archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
                         break;
                     }
 
@@ -1618,10 +1769,10 @@ namespace WebServiceBancos
                                   "La cantidad de registros procesados no coincide con la cantidad que dice el archivo plano.",
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
-                        if (sr != null)
-                        {
-                            sr.Close();
-                        }
+                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                        //{
+                        //    sr.Close();
+                        //}
                         if (ArchivoSico != null)
                         {
                             ArchivoSico.Close();
@@ -1645,30 +1796,6 @@ namespace WebServiceBancos
                         return "PROCESO FINALIZADO INCONSISTENCIA DE DATOS";
                     }
                 }
-                else
-                {
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
-                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
-                    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
-
-
-                    System.IO.File.Move(RutaOrigen, RutaDestino);
-
-                    RptPagosLN pagosLN = new RptPagosLN();
-                    if (this.FechaRecaudo == null)
-                    {
-                        this.FechaRecaudo = DateTime.Now.ToString();
-                    }
-                    error_mensaje = "Recaudo con otra estructura " + this.CodBanco + " " + RutaArchivo + NombreArchivo;
-                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
-
-                    return error_mensaje;
-                }
-
                 /// <summary>
                 /// Convierte en formato numero el valor total de los registros procesados
                 /// </summary>
@@ -1705,10 +1832,10 @@ namespace WebServiceBancos
                     }
 
                 }
-                if (sr != null)
-                {
-                    sr.Close();
-                }
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
 
                 #endregion
 
@@ -1733,10 +1860,10 @@ namespace WebServiceBancos
                             /// </summary>
                             RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             System.IO.File.Move(RutaOrigen, RutaDestino);
 
                         }
@@ -1829,19 +1956,19 @@ namespace WebServiceBancos
                             /// </summary>
                             RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                             RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
-                            if (sr != null)
-                            {
-                                sr.Close();
-                            }
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
                             System.IO.File.Move(RutaOrigen, RutaDestino);
                         }
                     }
                     else // No hay linea 06
                     {
-                        if (sr != null)
-                        {
-                            sr.Close();
-                        }
+                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                        //{
+                        //    sr.Close();
+                        //}
                         if (ArchivoSico != null)
                         {
                             ArchivoSico.Close();
@@ -1883,10 +2010,10 @@ namespace WebServiceBancos
                     /// </summary>
                     RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                     RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
                     System.IO.File.Move(RutaOrigen, RutaDestino);
                 }
 
@@ -1919,14 +2046,21 @@ namespace WebServiceBancos
                     fileNames = dirInfo.GetFiles("*.*");
                     for (int i = 0; i < fileNames.Length; i++)
                     {
-                        listaArch.Add(fileNames[i]);
+                        if (fileNames[i].Name.Contains(NombreArchivo) && fileNames[i].Name.Contains("Recaudo_"))
+                        {
+                            listaArch.Add(fileNames[i]);
+                        }
+
                     }
 
                     dirInfo = new System.IO.DirectoryInfo(RutaArchivo);
                     fileNames = dirInfo.GetFiles("*.*");
                     for (int i = 0; i < fileNames.Length; i++)
                     {
-                        listaArch.Add(fileNames[i]);
+                        if (fileNames[i].Name.Contains(NombreArchivo) && fileNames[i].Name.Contains("Recaudo_"))
+                        {
+                            listaArch.Add(fileNames[i]);
+                        }
                     }
 
                     fileNames = listaArch.ToArray();
@@ -2033,6 +2167,20 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar. " + exporasico,
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                                
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
                             }
                         }
 
@@ -2086,6 +2234,20 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
                             }
                         }
                         if (CountDinners > 0)
@@ -2135,6 +2297,20 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
                             }
                         }
                         if (CountAmex > 0)
@@ -2185,6 +2361,20 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
                             }
                         }
                     }
@@ -2252,16 +2442,16 @@ namespace WebServiceBancos
                 string respue = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
                 if (!respue.Equals("1"))
                 {
-                    if (sr != null)
-                    {
-                        sr.Close();
-                    }
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
                     return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD AL FINALZAR EL PROCESO";
                 }
-                if (sr != null)
-                {
-                    sr.Close();
-                }
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
                 return "PROCESO REALIZADO CON EXITO";
 
             }
@@ -2269,10 +2459,10 @@ namespace WebServiceBancos
             {
 
                 RptPagosLN pagosLN = new RptPagosLN();
-                if (sr != null)
-                {
-                    sr.Close();
-                }
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
                 if (ArchivoSico != null)
                 {
                     ArchivoSico.Close();
@@ -2304,11 +2494,27 @@ namespace WebServiceBancos
                 }
                 pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
 
+                if (parteFijaAbstracta != "" && this.FechaRecaudo != null && this.CodBanco != null )
+                {
+                    String resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                    if (resQueryLog == "1")
+                    {
+                        pagosLN.actualizaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                    }
+                    else
+                    {
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                    }
+                    resQueryLog = String.Empty;
+                }
+
+                
+
                 // Sacar el archivo del directorio actual
                 //RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                 //RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
                 //System.IO.File.Move(RutaOrigen, RutaDestino);
-                return ex.Message;
+                return ex.ToString();
             }
         }
 

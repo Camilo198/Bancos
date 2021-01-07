@@ -7,7 +7,7 @@ namespace Procesos.EN.Tablas
 {
     public class ArchivoEN
     {
-        public String Fecha { get; set; }
+        public DateTime Fecha { get; set; }
         public String RutaArchivo { get; set; }
     }
 }

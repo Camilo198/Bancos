@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consulta\AfilLN.cs" />
+    <Compile Include="Consulta\ArchivoLN.cs" />
     <Compile Include="Consulta\CierreLN.cs" />
     <Compile Include="Consulta\FechaUsuraLN.cs" />
     <Compile Include="Consulta\PagosErradosLN.cs" />

@@ -17,6 +17,7 @@ using System.Threading;
 
 using Procesos.AD.Administracion;
 using Procesos.PS.Codigo;
+using System.Configuration;
 
 namespace Procesos.PS
 {
@@ -30,6 +31,7 @@ namespace Procesos.PS
         String tiempo; // FECHA Y HORA QUE SE LE ENVIA AL PROCESO AL ACTUALIZAR O INSERTAR
         DateTime tiempoProceso; // LA FECHA Y HORA DEL PROCESO QUE ES INVOCADO
         DateTime tiempoServidor; // LA FECHA Y HORA DEL SERVIDOR   
+        LogLN log = new LogLN(); // Logs de error
 
         public Form1()
         {
@@ -225,7 +227,10 @@ namespace Procesos.PS
                 List<String> listaRutaArchivos_ax = new List<string>();
                 List<ArchivoEN> listaRutaArchivosOrdenados = new List<ArchivoEN>();
                 List<Banco> lista = new List<Banco>();
-                List<Banco> lista_ax = new List<Banco>();                
+                List<Banco> lista_ax = new List<Banco>();
+
+                ArchivoLN archivoLN = new ArchivoLN();
+                ArchivoEN archivoEN = new ArchivoEN();
 
                 foreach (DataRow fila in procesos.Rows)
                 {
@@ -331,14 +336,12 @@ namespace Procesos.PS
                             PagosOnline objPagOnline = new PagosOnline();
                             RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError, listaRutaArchivosOrdenados);
 
-                            #region Limpia Tabla bolsa pagos
-                            //ArchivoLN archivoLN = new ArchivoLN();
-                            //ArchivoEN archivoEN = new ArchivoEN();
-                            //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
+                            #region Limpia bolsa archivos pagos
+                            //archivoEN.Fecha = System.DateTime.Now;
+                            //archivoEN.RutaArchivo = "";
                             //archivoLN.eliminarArchivoBolsaLN(archivoEN);
                             listaRutaArchivosOrdenados.Clear();
                             listaRutaArchivos_ax.Clear();
-                            lista.Clear();
                             lista.Clear();
                             #endregion
 
@@ -478,14 +481,12 @@ namespace Procesos.PS
                             Pausa(2);
                             Recaudo objRecaudo = new Recaudo();
                             RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError, listaRutaArchivosOrdenados);
-                            #region Limpia Tabla bolsa pagos
-                            //ArchivoLN archivoLN = new ArchivoLN();
-                            //ArchivoEN archivoEN = new ArchivoEN();
-                            //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
+                            #region Limpia bolsa archivos pagos
+                            //archivoEN.Fecha = System.DateTime.Now;
+                            //archivoEN.RutaArchivo = "";
                             //archivoLN.eliminarArchivoBolsaLN(archivoEN);
                             listaRutaArchivosOrdenados.Clear();
                             listaRutaArchivos_ax.Clear();
-                            lista.Clear();
                             lista.Clear();
                             #endregion
                             TareaLN objTareasLN = new TareaLN();
@@ -529,21 +530,22 @@ namespace Procesos.PS
             }
             catch (Exception ex)
             {
+                log.insertaLogErroresLN("Procesos Bancarios: "+ex.ToString(), DateTime.Now.ToString());
                 //this.listBox1.Items.Add(this.label10.Text + ex.Message + " Hora: " + DateTime.Now.ToString());
-                string email = "steven.aguilar@chevyplan.com.co";
-                string email_dev = "steven.aguilar@chevyplan.com.co";
+                string email = ConfigurationManager.AppSettings["correoSoporte"];
+                string email_dev = ConfigurationManager.AppSettings["correoSoporte"];
                 EnvioMail("", "Error Gral: Procesos Bancarios", "Error Gral: Procesos: " + ex.ToString() + " Hora: " + DateTime.Now.ToString(), email, email, email_dev);
                 // return
                 Temporizador.Enabled = true;
                 this.btnStop.Enabled = true;
                 this.label10.Text = "";
             }
-            //finally
-            //{
-            //    Temporizador.Enabled = true;
-            //    this.btnStop.Enabled = true;
-            //    this.label10.Text = "";
-            //}
+            finally
+            {
+                Temporizador.Enabled = true;
+                this.btnStop.Enabled = true;
+                this.label10.Text = "";
+            }
 
         }
 
@@ -555,6 +557,11 @@ namespace Procesos.PS
             Temporizador.Enabled = true;
             this.tabPage2.Parent = null;
             this.Visible = false;
+            ArchivoLN archivoLN = new ArchivoLN();
+            ArchivoEN archivoEN = new ArchivoEN();
+            archivoEN.Fecha = System.DateTime.Now;
+            archivoEN.RutaArchivo = "";
+            archivoLN.eliminarArchivoBolsaLN(archivoEN, "T");
         }
         //BOTON PARA PAUSAR LAS TAREAS
         private void btnStop_Click(object sender, EventArgs e)
@@ -607,7 +614,7 @@ namespace Procesos.PS
             }
             catch (Exception)
             {
-                throw;
+                
             }
         }
 

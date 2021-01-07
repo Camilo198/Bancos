@@ -581,6 +581,9 @@ namespace Pagos.LN
 
         public IList<String> LeerFicheroFTP(string Ip, string NombreArchivo, string RutaFTP, string Login, string Password, string fechaPago = "", int codigoBanco = 0)
         {
+            string RutaSico = ConfigurationManager.AppSettings["RutaFTP"].ToString();
+            string Repositorio = ConfigurationManager.AppSettings["Repositorio"].ToString();
+
             IList<String> texto = null;
             try
             {
@@ -594,9 +597,8 @@ namespace Pagos.LN
             }
             catch (Exception ex)
             {
-                RptPagosLN pagosLN = new RptPagosLN();
-                pagosLN.insertaLogErroresLN(ex.Message.ToString()+": "+NombreArchivo, fechaPago, codigoBanco);
-                texto = new List<string>();
+                File.Delete(Repositorio + NombreArchivo);
+                return new List<string>();
             }
             return texto;
         }

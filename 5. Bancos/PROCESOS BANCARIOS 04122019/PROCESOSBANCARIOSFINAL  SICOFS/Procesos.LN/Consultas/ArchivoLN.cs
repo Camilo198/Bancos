@@ -14,21 +14,15 @@ namespace Procesos.LN.Consultas
 
         public string insertarArchivoBolsaLN(ArchivoEN objEntidad)
         {
-
-            String respuesta = new ArchivoAD().insertarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad);
-            return respuesta;
+            return new ArchivoAD().insertarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad);
         }
         public IList<ArchivoEN> consultarArchivoBolsaLN(ArchivoEN objEntidad)
         {
-
-            IList<ArchivoEN> lista = new ArchivoAD().consultarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad);
-            return lista;
+            return new ArchivoAD().consultarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad);
         }
-        public string eliminarArchivoBolsaLN(ArchivoEN objEntidad)
+        public string eliminarArchivoBolsaLN(ArchivoEN objEntidad, String Operacion)
         {
-
-            String respuesta = new ArchivoAD().elimiarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad);
-            return respuesta;
+            return new ArchivoAD().elimiarArchivoBolsaAD(SP_QueryArchivoBolsa, objEntidad, Operacion);
         }
 
     }

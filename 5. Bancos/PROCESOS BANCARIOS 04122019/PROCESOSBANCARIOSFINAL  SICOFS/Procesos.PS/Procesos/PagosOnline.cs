@@ -78,7 +78,7 @@ namespace Procesos.PS.Procesos
                 #region Consultar  tabla bolsa  
                 //ArchivoLN archivoLN = new ArchivoLN();
                 //ArchivoEN archivoEN = new ArchivoEN();
-                //archivoEN.Fecha = System.DateTime.Now.ToString("yyyy-MM-dd");
+                //archivoEN.Fecha = System.DateTime.Now;
                 //archivoLN.consultarArchivoBolsaLN(archivoEN);
                 if (archivosOrdenados.Count > 0)
                 {
@@ -98,6 +98,14 @@ namespace Procesos.PS.Procesos
                             mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
                             //   mensaje = ProcesoPagos.LecturaPagos("", "", ArchivoSalida, archivos.Name, "S");
                             RespuestaProceso.Add("PagosOnline: " + mensaje);
+                            if (mensaje == "PROCESO REALIZADO CON EXITO")
+                            {
+                                ArchivoLN archivoLN = new ArchivoLN();
+                                ArchivoEN archivoEN = new ArchivoEN();
+                                archivoEN.Fecha = System.DateTime.Now;
+                                archivoEN.RutaArchivo = topOne.RutaArchivo;
+                                archivoLN.eliminarArchivoBolsaLN(archivoEN, "D");
+                            }
                         }
                     }
                     return RespuestaProceso;

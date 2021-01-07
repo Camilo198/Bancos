@@ -230,6 +230,14 @@ namespace Procesos.PS.Procesos
                                     mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
 
                                     RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                                    if (mensaje == "PROCESO REALIZADO CON EXITO")
+                                    {
+                                        ArchivoLN archivoLN = new ArchivoLN();
+                                        ArchivoEN archivoEN = new ArchivoEN();
+                                        archivoEN.Fecha = System.DateTime.Now;
+                                        archivoEN.RutaArchivo = topOne.RutaArchivo;
+                                        archivoLN.eliminarArchivoBolsaLN(archivoEN, "D");
+                                    }
                                 }
 
                             }
@@ -347,7 +355,7 @@ namespace Procesos.PS.Procesos
             }
             catch (Exception)
             {
-                throw;
+
             }
         }
 
