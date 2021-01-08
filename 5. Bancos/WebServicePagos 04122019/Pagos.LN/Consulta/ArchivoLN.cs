@@ -34,25 +34,45 @@ namespace Pagos.LN.Consulta
             String error_mensaje = "";
             String Fichero = RutaArchivo + NombreArchivo;
 
-            if (Fichero.Contains(".xlsx") || Fichero.Contains(".xls") || Fichero.Contains(".csv")) // Mueve fichero de otros formatos
-            {
-                aux = RutaArchivo;
-                String rutaProc = aux.Replace("Recibidos", "Procesados");
-                String RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
-
-                if (!Directory.Exists(rutaProc))
-                {
-                    System.IO.Directory.CreateDirectory(rutaProc);
-                }
-                string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
-                  DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
-
-                System.IO.File.Move(Fichero, RutaDestino + "_" + fecha);
-                return null;
-            }
-
             try
             {
+                if (Fichero.Contains(".xlsx") || Fichero.Contains(".xls") || Fichero.Contains(".csv")) // Mueve fichero de otros formatos
+                {
+                    aux = RutaArchivo;
+                    String rutaProc = aux.Replace("Recibidos", "Procesados");
+                    String RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+
+                    if (!Directory.Exists(rutaProc))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaProc);
+                    }
+                    string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+                      DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+
+                    System.IO.File.Move(Fichero, RutaDestino + "_" + fecha);
+                    return null;
+                }
+                if (new FileInfo(Fichero).Length == 0)  // Archivo vacío
+                {
+                    aux = RutaArchivo;
+
+                    String rutaProc = aux.Replace("Recibidos", "Procesados");
+                    String RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
+
+                    string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+                      DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+
+                    if (!Directory.Exists(rutaProc))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaProc);
+                    }
+                    System.IO.File.Move(Fichero, RutaDestino + "_" + fecha);
+                    RptPagosLN pagosLN = new RptPagosLN();
+                    error_mensaje = "Fichero vacio " + RutaArchivo + NombreArchivo;
+                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, "");
+                    return null;
+                }
+
                 #region datos del banco
                 if (PagosOnline == "S")
                     archivoLinea.parteFija = NombreArchivo; //Nombre del archivo del banco para pagos PSE

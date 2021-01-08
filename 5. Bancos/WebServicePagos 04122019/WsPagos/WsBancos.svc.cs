@@ -83,6 +83,8 @@ namespace WebServiceBancos
         String CarpetaBanco = "";
         string fecha = "_" + DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
         DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+        string fecha_otroArc = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+        DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') ;
         string encabezado = "";
         String EstadoContrato = "";
         int CantArchivoOrigen = 0;
@@ -2531,6 +2533,21 @@ namespace WebServiceBancos
         {
             try
             {
+                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx") )
+                {
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaFin = RutaArchivo;
+                    rutaFin = rutaFin.Replace("Procesados", "Historico");
+                    if (!Directory.Exists(rutaFin))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaFin);
+                    }
+                    RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
+
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return "Archivo con formato excel no admitido movido";
+                }
+
                 int TipoOperacion;
                 System.IO.StreamReader sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
                 PagosTarjetaLN ConsultaPagosTarjeta = new PagosTarjetaLN();
@@ -2787,8 +2804,21 @@ namespace WebServiceBancos
                         }
                     }
                 }
+                // Control para mover archivos en otras estructuras a histórico y que no se procesen
+                if (RegistrosProcesados == null)
+                {
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaFin = RutaArchivo;
+                    rutaFin = rutaFin.Replace("Procesados", "Historico");
+                    if (!Directory.Exists(rutaFin))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaFin);
+                    }
+                    RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
 
-
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return "Archivo con otra estructura movido";
+                }
                 /// <summary>
                 /// Convierte en formato numero el valor total de los registros procesados
                 /// </summary>

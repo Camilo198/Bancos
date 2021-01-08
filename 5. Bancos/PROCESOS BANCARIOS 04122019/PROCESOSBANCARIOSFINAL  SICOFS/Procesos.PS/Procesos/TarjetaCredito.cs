@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using Procesos.EN;
 using Procesos.EN.Tablas;
 using Procesos.LN.Consultas;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
+using System.IO;
 
 namespace Procesos.PS.Procesos
 {
@@ -51,7 +54,7 @@ namespace Procesos.PS.Procesos
                 foreach (Banco bank in lista)
                 {
                     TipoProceso = bank.pTipoProceso;
-                    IdCuentaBanco = Convert.ToString(bank.pId.Value); 
+                    IdCuentaBanco = Convert.ToString(bank.pId.Value);
                     NombreCuenta = bank.pNombreCuenta;
                     IdCuentaBancoEpicor = bank.pIdCuentaBanco;
                     CorreoControlB = bank.pCorreoControl.Split(';');
@@ -77,7 +80,7 @@ namespace Procesos.PS.Procesos
                                                 CorreosControl, Remitente, CodigoBanco, NumCuenta,
                                                 TipoCuenta, RutaSalidaEpicor, TipoProceso);
 
-                    
+
                     if (!mensaje.Equals("Proceso Archivos Tarjeta Credito ejecutado con exito!!"))
                     {
                         procesoConError = true;
@@ -91,13 +94,21 @@ namespace Procesos.PS.Procesos
                     ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
                     System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaProcesado);
 
-                    System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*");
+                    System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*").Where(file => !file.FullName.EndsWith(".xls")).ToArray();
+                    fileNames = fileNames.Where(file => !file.FullName.EndsWith(".xlsx")).ToArray();
+                    fileNames = fileNames.Where(file => !file.FullName.EndsWith(".db")).ToArray();
 
-                    foreach (System.IO.FileInfo archivos in fileNames)
+                    //foreach (System.IO.FileInfo archivos in fileNames)
+                    //{
+                    //    mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
+                    //    RespuestaProceso.Add("Proceso Pagos TC: " + mensaje);
+                    //}
+                    Parallel.ForEach<FileInfo>(fileNames, archivos =>
                     {
                         mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
-                        RespuestaProceso.Add("Proceso Pagos TC: " + mensaje);
                     }
+                        
+                    );
 
                 }
 
@@ -127,7 +138,7 @@ namespace Procesos.PS.Procesos
                                                         "TAREA PROGRAMADA", RutaProcesado, TipoProceso);
                 return mens;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return "Error en el servicio";
             }

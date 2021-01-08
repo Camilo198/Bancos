@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Procesos.PS.Codigo
 {
@@ -119,6 +122,7 @@ namespace Procesos.PS.Codigo
         {
             List<ArchivoEN> lista_ax = new List<ArchivoEN>();
             IList<ArchivoEN> lista_BD = new List<ArchivoEN>();
+            IList<ArchivoEN> lista_eliminados = new List<ArchivoEN>();
 
             foreach (var item in archivo)
             {
@@ -144,17 +148,17 @@ namespace Procesos.PS.Codigo
             // la tabla no existe en PRD
             ArchivoEN archivoEN = new ArchivoEN();
             ArchivoLN archivoLN = new ArchivoLN();
+            archivoEN.Fecha = DateTime.Now;
+            archivoEN.RutaArchivo = "";
 
             lista_BD = archivoLN.consultarArchivoBolsaLN(archivoEN);
-
-            for (int i = 0; i < lista_ax.Count; i++)
+                
+            if (lista_BD.Count > 0)
             {
-                for (int j = 0; j < lista_BD.Count; j++)
+                lista_eliminados = lista_BD.Where(x => !lista_ax.Any(y => x.RutaArchivo == y.RutaArchivo)).ToList();
+                foreach (var item in lista_eliminados)
                 {
-                    if (lista_ax[i].RutaArchivo == lista_BD[j].RutaArchivo)   
-                    {
-
-                    }
+                    archivoLN.eliminarArchivoBolsaLN(item, "D");
                 }
             }
 
