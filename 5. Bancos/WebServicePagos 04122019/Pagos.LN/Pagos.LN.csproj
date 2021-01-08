@@ -63,6 +63,7 @@
     <Compile Include="Consulta\PagosLN.cs" />
     <Compile Include="Consulta\PagosTarjetaLN.cs" />
     <Compile Include="Consulta\ParaLN.cs" />
+    <Compile Include="Consulta\ParametrosLN.cs" />
     <Compile Include="Consulta\RecaudoLN.cs" />
     <Compile Include="Consulta\RptPagosLN.cs" />
     <Compile Include="Consulta\TiemposLN.cs" />

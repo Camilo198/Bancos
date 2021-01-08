@@ -45,6 +45,7 @@
     <Compile Include="Conexion\Querys.cs" />
     <Compile Include="Consultas\ArchivoAD.cs" />
     <Compile Include="Consultas\FechaUsuraAD.cs" />
+    <Compile Include="Consultas\ParametrosAD.cs" />
     <Compile Include="Consultas\RptPagosAD.cs" />
     <Compile Include="Consultas\TiemposAD.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

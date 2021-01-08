@@ -72,7 +72,7 @@ namespace Pagos.LN.Consulta
                 Valor[6, 0, 0] = ValdObjetos.pNumAutorizacion;
                 Valor[6, 1, 0] = "@NumAutorizacion";
                 Valor[6, 2, 0] = "varchar(20)";
-                // SAGUILAR SE AGREGA EL NUMAUTORIZACION PARA RPT CONCILIACION 05.01.2021
+                // SAGUILAR SE AGREGA EL CONTRATO PARA RPT CONCILIACION 05.01.2021
                 Valor[7, 0, 0] = ValdObjetos.pContrato;
                 Valor[7, 1, 0] = "@Contrato";
                 Valor[7, 2, 0] = "varchar(50)";

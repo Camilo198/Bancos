@@ -143,9 +143,6 @@ namespace Procesos.PS.Codigo
                 else return x.Fecha.CompareTo(y.Fecha);
             });
 
-            //Se comentarea porque en runtime se puede manejar
-            // el control de los ficheros
-            // la tabla no existe en PRD
             ArchivoEN archivoEN = new ArchivoEN();
             ArchivoLN archivoLN = new ArchivoLN();
             archivoEN.Fecha = DateTime.Now;

@@ -18,7 +18,10 @@ namespace WebServiceBancos
 
         [OperationContract]
         string PagosTarjeta(string usuario, string password, string RutaArchivo, string NombreArchivo);
-       
+
+        [OperationContract]
+        string ProcesarPagosSinSubir(string usuario, string password);
+
     }
 
 }

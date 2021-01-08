@@ -15,6 +15,7 @@ namespace Pagos.LN.Consulta
     {
         private string SP_Insert_Arch_Banco = "pa_Ban_Inserta_Lineas_Arch_Banco";
         private string SP_Elimina_Arch_Banco = "pa_Ban_Elimina_Lineas_Arch_Banco";
+        private string SP_ArchNoAplicadosSICO = "pa_Ban_FTP_ArchNoAplicadosSICO";
         public IList<String> almacenaLineasArchivoLN(String RutaArchivo, String NombreArchivo, String PagosOnline, ArchivoEN archivoLinea)
         {
             String NombreBanco, RutaEpicor, RutaProceso, aux = "";
@@ -211,7 +212,7 @@ namespace Pagos.LN.Consulta
                     System.IO.File.Move(Fichero, RutaDestino + "_" + fecha);
                     return null;
                 }
-                
+
                 if (CodBanco != "")
                 {
                     archivoLinea.codBanco = Convert.ToInt32(CodBanco);
@@ -229,7 +230,7 @@ namespace Pagos.LN.Consulta
                     aux = lineaDetalle.FirstOrDefault(s => Convert.ToInt32(s.Substring(0, 2)) == 09);
                     archivoLinea.cantPagos = Convert.ToInt32(aux.Substring(3, 8));
                 }
-                
+
                 List<ArchivoEN> lineas = new List<ArchivoEN>();
 
                 foreach (var item in lineaDetalle)
@@ -268,5 +269,17 @@ namespace Pagos.LN.Consulta
             return new ArchivoAD().EliminarLineasPagoAD(SP_Elimina_Arch_Banco, objEntidad, Operacion);
         }
 
+        public String InsertarArchNoAplicadosSICOLN(ArchNoAPSICOEN objEntidad, String Operacion)
+        {
+            return new ArchivoAD().InsertarArchNoAplicadosSICOAD(SP_ArchNoAplicadosSICO, objEntidad, Operacion);
+        }
+        public IList<ArchNoAPSICOEN> ConsultarArchNoAplicadosSICOLN(ArchNoAPSICOEN objEntidad, String Operacion)
+        {
+            return new ArchivoAD().ConsultarArchNoAplicadosSICOLN(SP_ArchNoAplicadosSICO, objEntidad, Operacion);
+        }
+        public String EliminarArchNoAplicadosSICOLN(ArchNoAPSICOEN objEntidad, String Operacion)
+        {
+            return new ArchivoAD().EliminarArchNoAplicadosSICOLN(SP_ArchNoAplicadosSICO, objEntidad, Operacion);
+        }
     }
 }

@@ -18,12 +18,11 @@ using System.Data;
 
 using Renci.SshNet;
 using SSH;
-using System.Data;
-using System.Configuration;
 
 using System.Collections; /*PAGOS*/
 using System.Web.UI.WebControls;
 using System.Diagnostics;
+using System.Linq;
 
 /// <summary>
 /// Desarrollado por: Nicolas Larrotta
@@ -84,7 +83,7 @@ namespace WebServiceBancos
         string fecha = "_" + DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
         DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
         string fecha_otroArc = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
-        DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') ;
+        DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0');
         string encabezado = "";
         String EstadoContrato = "";
         int CantArchivoOrigen = 0;
@@ -173,7 +172,10 @@ namespace WebServiceBancos
         string respu = "";
 
         ArchivoEN archivoLinea = new ArchivoEN();
+        ArchNoAPSICOEN archNoAPSICOEN = new ArchNoAPSICOEN();
+        ParametrosEN parametrosEN = new ParametrosEN();
         ArchivoLN archivoLN = new ArchivoLN();
+        ParametrosLN parametrosLN = new ParametrosLN();
         /// <summary>
         /// Metodo que consulta la referencia cupo en SICO
         /// </summary>
@@ -509,8 +511,8 @@ namespace WebServiceBancos
                                     archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
                                     return " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE SICO : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico;
                                 }
-                                
-                                error_mensaje = "NO COINCIDE LA FECHA : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico+ " " + RutaArchivo + NombreArchivo;
+
+                                error_mensaje = "NO COINCIDE LA FECHA : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico + " " + RutaArchivo + NombreArchivo;
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, "");
                                 archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
@@ -573,11 +575,13 @@ namespace WebServiceBancos
                         #region SAU Fecha usura
                         // 
                         FechaUsuraLN usura = new FechaUsuraLN();
-                        IList<FechaUsuraEN> parametroUsura = usura.ConsultarFechaUsuraLN();
+                        parametrosEN.NombreParametro = "FECHA_USURA";
+                        parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                        List<ParametrosEN> parametroUsura = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
 
                         if (parametroUsura.Count > 0)
                         {
-                            String fechaFilaUsura = parametroUsura[0].fechaUsura;
+                            String fechaFilaUsura = parametroUsura[0].ValorParametro;
                             RptPagosLN pagosLN = new RptPagosLN();
                             // Fecha en formato año mes
                             if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
@@ -588,7 +592,7 @@ namespace WebServiceBancos
                                     File.Delete(RutaArchivo + NombreArchivo);
                                     error_mensaje = " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
                                         + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
-                                    
+
                                     archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
 
                                     pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
@@ -619,7 +623,7 @@ namespace WebServiceBancos
                                     return error_mensaje;
                                 }
 
-                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura +" "+ RutaArchivo + NombreArchivo;
+                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura + " " + RutaArchivo + NombreArchivo;
 
                                 pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
                                 //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
@@ -1117,7 +1121,7 @@ namespace WebServiceBancos
                                                 }
                                                 resQueryLog = String.Empty;
 
-                                                
+
                                                 error_mensaje = String.Empty;
                                             }
                                         }
@@ -2085,7 +2089,30 @@ namespace WebServiceBancos
                                 /*PAGOS*/
                                 //Se encarga de aplicar directamente en SICO
                                 string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
-                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+
+                                parametrosEN.NombreParametro = "APLICACION_SICO";
+                                parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                if (listaParamSico != null)
+                                {
+                                    if (listaParamSico.Count > 0)
+                                    {
+                                        String Aplicar = listaParamSico[0].ValorParametro;
+                                        if (Aplicar == "SI")
+                                        {
+                                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    }
+                                }
+                                else
+                                {
+                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                }
 
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 // Para pruebas
@@ -2139,7 +2166,30 @@ namespace WebServiceBancos
                                 comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    }
+
                                 }
                                 catch (Exception ex)
                                 {
@@ -2169,20 +2219,29 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar. " + exporasico,
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
-                                
+
                                 String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
 
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 if (resQueryLog == "1")
                                 {
-                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 else
                                 {
-                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBanco);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaOriginal;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoSico;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
                             }
                         }
 
@@ -2208,7 +2267,29 @@ namespace WebServiceBancos
                                 comando = NombreComando + NombrePrograma + " " + NombreArchivoVisaMAstercardSICO;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -2250,6 +2331,15 @@ namespace WebServiceBancos
                                     pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoVisaMarterCardSICO);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoVisaMAstercardSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
                             }
                         }
                         if (CountDinners > 0)
@@ -2271,7 +2361,29 @@ namespace WebServiceBancos
                                 comando = NombreComando + NombrePrograma + " " + NombreArchivoDinnersSICO;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -2313,6 +2425,15 @@ namespace WebServiceBancos
                                     pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoDinnersSico);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoDinnersSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
                             }
                         }
                         if (CountAmex > 0)
@@ -2334,7 +2455,29 @@ namespace WebServiceBancos
                                 comando = NombreComando + NombrePrograma + " " + NombreArchivoAmexSICO;
                                 try
                                 {
-                                    Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -2342,6 +2485,7 @@ namespace WebServiceBancos
                                           "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
                                          ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                          ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
                                 }
                                 ultimoCodigoBancoOnline = CodBancoAmexSICO;
                                 objt.pCodBanco = ultimoCodigoBancoOnline;
@@ -2377,6 +2521,15 @@ namespace WebServiceBancos
                                     pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoAmexSICO);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoAmexSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
                             }
                         }
                     }
@@ -2496,7 +2649,7 @@ namespace WebServiceBancos
                 }
                 pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
 
-                if (parteFijaAbstracta != "" && this.FechaRecaudo != null && this.CodBanco != null )
+                if (parteFijaAbstracta != "" && this.FechaRecaudo != null && this.CodBanco != null)
                 {
                     String resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
                     if (resQueryLog == "1")
@@ -2510,7 +2663,7 @@ namespace WebServiceBancos
                     resQueryLog = String.Empty;
                 }
 
-                
+
 
                 // Sacar el archivo del directorio actual
                 //RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
@@ -2533,7 +2686,7 @@ namespace WebServiceBancos
         {
             try
             {
-                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx") )
+                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx"))
                 {
                     RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                     String rutaFin = RutaArchivo;
@@ -3021,6 +3174,82 @@ namespace WebServiceBancos
 
                 }
             }
+        }
+
+        public string ProcesarPagosSinSubir(string usuario, string password)
+        {
+            List<ArchNoAPSICOEN> listaArchivos = new List<ArchNoAPSICOEN>();
+            int contador = 0;
+            try
+            {
+                String comando;
+
+                archNoAPSICOEN.codBanco = 0;
+                archNoAPSICOEN.fechaRecaudo = DateTime.Now.ToString();
+                archNoAPSICOEN.fechaModificacion = DateTime.Now;
+                archNoAPSICOEN.parteFija = "";
+                archNoAPSICOEN.rutaArchivo = "";
+                archNoAPSICOEN.nombreArchivo = "";
+
+                listaArchivos = archivoLN.ConsultarArchNoAplicadosSICOLN(archNoAPSICOEN, "C").ToList();
+                // Ordena por fecha
+                listaArchivos.Sort(delegate (ArchNoAPSICOEN x, ArchNoAPSICOEN y)
+                {
+                    if (x.fechaModificacion == null && y.fechaModificacion == null) return 0;
+                    else if (x.fechaModificacion == null) return -1;
+                    else if (y.fechaModificacion == null) return 1;
+                    else return x.fechaModificacion.CompareTo(y.fechaModificacion);
+                });
+
+                foreach (var item in listaArchivos)
+                {
+                    exporasico = Util.UploadFTP(item.rutaArchivo + item.nombreArchivo, RutaSico, UsuFTP, PassFTP);
+                    if (exporasico == "OK")
+                    {
+                        informacion = informacion + "Nombre archivo para SICO: " + item.nombreArchivo + ". \n";
+                        /*PAGOS*/
+                        //Se encarga de aplicar directamente en SICO
+                        comando = NombreComando + NombrePrograma + " " + item.nombreArchivo;
+                        try
+                        {
+                            Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                        }
+                        catch (Exception ex)
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + item.codBanco + "\n\n",
+                                  "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                        }
+                        //Almacena pagos consistentes e inconsistentes de SICO                                
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        pagosLN.almacenaRegistroSicoLN(Util, ServidorSico, item.nombreArchivo, PathSystem, UsuFTP, PassFTP,
+                                                    item.codBanco, item.fechaRecaudo, item.fechaModificacion, item.parteFija);
+
+                        archivoLN.EliminarArchNoAplicadosSICOLN(item, "D");
+
+                    }
+                    else
+                    {
+                        contador++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+
+            if (contador == 0)
+            {
+                return "PROCESO REALIZADO EXITOSAMENTE";
+            }
+            else
+            {
+                return "No se procesaron " + contador + " de" + listaArchivos.Count + " Archivos";
+            }
+
         }
 
         public bool insertarRecaudo { get; set; }

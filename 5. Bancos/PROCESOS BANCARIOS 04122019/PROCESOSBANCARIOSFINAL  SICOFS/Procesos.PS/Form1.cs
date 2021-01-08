@@ -337,9 +337,6 @@ namespace Procesos.PS
                             RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError, listaRutaArchivosOrdenados);
 
                             #region Limpia bolsa archivos pagos
-                            //archivoEN.Fecha = System.DateTime.Now;
-                            //archivoEN.RutaArchivo = "";
-                            //archivoLN.eliminarArchivoBolsaLN(archivoEN);
                             listaRutaArchivosOrdenados.Clear();
                             listaRutaArchivos_ax.Clear();
                             lista.Clear();
@@ -482,9 +479,6 @@ namespace Procesos.PS
                             Recaudo objRecaudo = new Recaudo();
                             RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError, listaRutaArchivosOrdenados);
                             #region Limpia bolsa archivos pagos
-                            //archivoEN.Fecha = System.DateTime.Now;
-                            //archivoEN.RutaArchivo = "";
-                            //archivoLN.eliminarArchivoBolsaLN(archivoEN);
                             listaRutaArchivosOrdenados.Clear();
                             listaRutaArchivos_ax.Clear();
                             lista.Clear();

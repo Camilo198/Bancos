@@ -1,4 +1,5 @@
-﻿using Pagos.LN;
+﻿using Pagos.EN.Tablas;
+using Pagos.LN;
 using Pagos.LN.Consulta;
 using Renci.SshNet;
 using SSH;
@@ -23,11 +24,11 @@ namespace WebServiceBancos
             //Descomentariar pruebas
             //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_01012018_PO31122017_0000.txt", "S");
             //Comentariar a produccion
-            //string resultado = prueba.LecturaPagos("", "", "\\\\sbogche016v\\ARCHPLANOS\\Pagos\\Fiducia1\\Recaudo\\Bogota\\Recibidos\\", "05003146.OW3", "N");
-            //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "S");
-            //string resultado = prueba.LecturaPagos("", "", @"C:\Users\steven.aguilar\Downloads\", "BDIU1000053_20201025_TEST.txt", "N");
+            string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\BBVA\Recibidos\", @"20110522479CO.MR5", "N");
 
-            string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "11122020_17_41_21_Prueba_SA_01.12.2020.xlsx");
+            //string res = prueba.ProcesarPagosSinSubir("", "");
+
+            //string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "11122020_17_41_21_Prueba_SA_01.12.2020.xlsx");
 
         }
         public void testArchivo()
