@@ -2125,6 +2125,29 @@ namespace WebServiceBancos
                                   "Se presento un error al crear el archivo a SICO. Por favor validar.",
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(this.CodBanco);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaOriginal;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoSico;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
                             }
                         }
                     }
