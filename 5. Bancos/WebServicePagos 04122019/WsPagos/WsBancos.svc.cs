@@ -281,6 +281,8 @@ namespace WebServiceBancos
 
             try
             {
+                System.Threading.Thread.Sleep(1000);
+
                 archivoLinea.fechaProceso = DateTime.Now;
                 var listaArchivo = archivoLN.almacenaLineasArchivoLN(RutaArchivo, NombreArchivo, PagosOnline, archivoLinea);
 
@@ -427,24 +429,6 @@ namespace WebServiceBancos
                 //PAGREP
                 //buscar en la base de datos antes de empezar a recorrerlo 
                 #region LECTURA DE ARCHIVO
-                //if (new FileInfo(RutaArchivo + NombreArchivo).Length == 0) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
-                //{
-                //    RptPagosLN pagosLN = new RptPagosLN();
-                //    error_mensaje = "Error Archívo vacío: " + RutaArchivo + NombreArchivo + DateTime.Now.ToString();
-
-                //    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
-
-                //    if (sr != null)
-                //    {
-                //        sr.Close();
-                //    }
-                //    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
-                //    String rutaProc = RutaArchivo.Replace("Recibidos", "Procesados");
-                //    RutaDestino = System.IO.Path.Combine(rutaProc + NombreArchivo);
-                //    System.IO.File.Move(RutaOrigen, RutaDestino);
-                //    return error_mensaje;
-                //}
-
                 //Lee el archivo mientras existan lineas
 
                 //while (sr.EndOfStream == false)  //04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
@@ -574,7 +558,7 @@ namespace WebServiceBancos
                         //--------------
                         #region SAU Fecha usura
                         // 
-                        FechaUsuraLN usura = new FechaUsuraLN();
+                        //FechaUsuraLN usura = new FechaUsuraLN(); SAU 05/01/2020 SE CAMBIA POR QUE SE LEE DE TABLA PARAMETRICA BAN_PARAMETROS
                         parametrosEN.NombreParametro = "FECHA_USURA";
                         parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
                         List<ParametrosEN> parametroUsura = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
@@ -1120,8 +1104,6 @@ namespace WebServiceBancos
                                                     pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
                                                 }
                                                 resQueryLog = String.Empty;
-
-
                                                 error_mensaje = String.Empty;
                                             }
                                         }
@@ -2161,11 +2143,6 @@ namespace WebServiceBancos
                     if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC")) { }
                     else
                     {
-
-                        ///
-
-                        ////
-
                         TiemposLN tln = new TiemposLN();
                         ObjetoTablas objt = new ObjetoTablas();
                         objt.pCodBanco = this.CodBanco;
@@ -2341,17 +2318,17 @@ namespace WebServiceBancos
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
 
-                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoVisaMAstercardSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
 
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 if (resQueryLog == "1")
                                 {
-                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 else
                                 {
-                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
 
@@ -2435,17 +2412,17 @@ namespace WebServiceBancos
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
 
-                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoDinnersSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
 
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 if (resQueryLog == "1")
                                 {
-                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 else
                                 {
-                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
 
@@ -2531,17 +2508,17 @@ namespace WebServiceBancos
                                  ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
                                  ConfigurationManager.AppSettings["CorreoCC"].ToString());
 
-                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoAmexSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
 
                                 RptPagosLN pagosLN = new RptPagosLN();
                                 resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 if (resQueryLog == "1")
                                 {
-                                    pagosLN.actualizaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 else
                                 {
-                                    pagosLN.insertaLogErroresLN("DA: " + msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
                                 }
                                 resQueryLog = String.Empty;
 
@@ -2670,21 +2647,19 @@ namespace WebServiceBancos
                 {
                     parteFijaAbstracta = NombreArchivo;
                 }
-                pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
 
-                if (parteFijaAbstracta != "" && this.FechaRecaudo != null && this.CodBanco != null)
+                String resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                if (resQueryLog == "1")
                 {
-                    String resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                    if (resQueryLog == "1")
-                    {
-                        pagosLN.actualizaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                    }
-                    else
-                    {
-                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
-                    }
-                    resQueryLog = String.Empty;
+                    pagosLN.actualizaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
                 }
+                else
+                {
+                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                }
+                resQueryLog = String.Empty;
+
+
 
 
 
@@ -3199,6 +3174,8 @@ namespace WebServiceBancos
             }
         }
 
+        public bool insertarRecaudo { get; set; }
+
         public string ProcesarPagosSinSubir(string usuario, string password)
         {
             List<ArchNoAPSICOEN> listaArchivos = new List<ArchNoAPSICOEN>();
@@ -3274,7 +3251,5 @@ namespace WebServiceBancos
             }
 
         }
-
-        public bool insertarRecaudo { get; set; }
     }
 }

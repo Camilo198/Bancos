@@ -597,7 +597,7 @@ namespace Pagos.LN
             }
             catch (Exception ex)
             {
-                File.Delete(Repositorio + NombreArchivo);
+                //File.Delete(Repositorio + NombreArchivo);
                 return new List<string>();
             }
             return texto;

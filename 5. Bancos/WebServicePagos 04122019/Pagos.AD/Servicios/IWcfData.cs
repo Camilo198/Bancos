@@ -43,5 +43,8 @@ namespace Pagos.AD.Servicios
 
         [OperationContract]
         DataSet ConsultaOdbc(string NomTabla, string sentenciaSql, string key);
+
+        [OperationContract]
+        string ejecutarQueryDataTable(DataTable dt, string procedimiento, string strConn, string tipoTabla);
     }
 }
