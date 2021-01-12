@@ -24,11 +24,20 @@ namespace WebServiceBancos
             //Descomentariar pruebas
             //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_01012018_PO31122017_0000.txt", "S");
             //Comentariar a produccion
-            string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\BBVA\Recibidos\", @"20110522479CO.MR5", "N");
+            //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\BBVA\Recibidos\", @"20110522479CO.MR5", "N");
 
             //string res = prueba.ProcesarPagosSinSubir("", "");
 
             //string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "11122020_17_41_21_Prueba_SA_01.12.2020.xlsx");
+
+
+            //string ServidorSico = ConfigurationManager.AppSettings["server"].ToString();            /*PAGOS*/
+            //string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS*/
+            //string PasswordSico = ConfigurationManager.AppSettings["password"].ToString();          /*PAGOS*/
+
+            //String comando = "/bin/sh /usr2/sico/backend/run_util.sh " + "itfvtasf3auS" + " 006331";
+            //SSHConect Conexion = new SSHConect();  /*PAGOS*/
+            //Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
 
         }
         public void testArchivo()
@@ -37,7 +46,7 @@ namespace WebServiceBancos
             string ServidorSico = "172.16.30.7";
             //IR023201001220048 
             //R023201001220048
-            string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS*/
+            string UsuarioSico = ConfigurationManager.AppSettings["user"].ToString();               /*PAGOS
             string PasswordSico = ConfigurationManager.AppSettings["password"].ToString();          /*PAGOS*/
             string NombreArchivoSico = "023201001220048.txt";
             string RutaSico = "ftp://172.16.30.7/";

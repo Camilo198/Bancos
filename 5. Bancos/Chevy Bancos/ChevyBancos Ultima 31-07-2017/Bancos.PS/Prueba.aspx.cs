@@ -33,13 +33,13 @@ namespace Bancos.PS
             //"00", "304", "00", "TAREA PROGRAMADA",
             //"\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Occidente\\Historico\\",
             //"TCR1");
-            Recaudo rec = new Recaudo();
+            //Recaudo rec = new Recaudo();
             // GNB  Parciales
-            msg = rec.ServicioRecaudoDiario("Lugar Pago 23", "50", "00022",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\Parciales\\",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\Recibidos\\",
-                arrMail, "steven.aguilar@chevyplan.com.co", "00", "1", "00", "TAREA PROGRAMADA",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\SICO\\", "ABR1");
+            //msg = rec.ServicioRecaudoDiario("Lugar Pago 23", "50", "00022",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\Parciales\\",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\Recibidos\\",
+            //    arrMail, "steven.aguilar@chevyplan.com.co", "00", "1", "00", "TAREA PROGRAMADA",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\GNB\\SICO\\", "ABR1");
             // Dvivienda parciales
             //msg = rec.ServicioRecaudoDiario("Lugar Pago 19", "47", "00010",
             //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\Davivienda\\Parciales\\",
@@ -51,16 +51,16 @@ namespace Bancos.PS
             //msg = pol.ServicioPagosOnline("Lugar Pago 66", "00015", "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\PagosOnline\\Recibidos\\", arrMail, "00", "016525785990", "00", "steven.aguilar@chevyplan.com.co", "TAREA PROGRAMADA", "POL1");
 
             ////// TARJETA CODENSA NUEVA
-            //msg = tc.ServicioTarjetasCredito("TCR", "64", "00031",
-            //    //"\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Recibidos\\",
-            //    //"\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Procesados\\",
-            //    "D:\\Codensa\\Recibidos\\",
-            //    "D:\\Codensa\\Procesados\\",
-            //    arrMail, "steven.aguilar@chevyplan.com.co",
-            //    "00", "95", "00", "TAREA PROGRAMADA",
-            //    "D:\\Codensa\\Historico\\",
-            //    //"\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Historico\\",
-            //    "TCR1");
+            msg = tc.ServicioTarjetasCredito("TCR", "64", "00031",
+                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Recibidos\\",
+                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Procesados\\",
+                //"D:\\Codensa\\Recibidos\\",
+                //"D:\\Codensa\\Procesados\\",
+                arrMail, "steven.aguilar@chevyplan.com.co",
+                "00", "95", "00", "TAREA PROGRAMADA",
+                //"D:\\Codensa\\Historico\\",
+                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Historico\\",
+                "TCR1");
 
             //// TARJETA ALKOSTO REVISION
             //msg = tc.ServicioTarjetasCredito("TCR", "63", "00026",

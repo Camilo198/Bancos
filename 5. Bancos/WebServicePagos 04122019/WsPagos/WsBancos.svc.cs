@@ -2684,7 +2684,7 @@ namespace WebServiceBancos
         {
             try
             {
-                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx"))
+                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx") || NombreArchivo.Contains(".csv"))
                 {
                     RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
                     String rutaFin = RutaArchivo;
@@ -2696,7 +2696,7 @@ namespace WebServiceBancos
                     RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
 
                     System.IO.File.Move(RutaOrigen, RutaDestino);
-                    return "Archivo con formato excel no admitido movido";
+                    return "Archivo con formato diferente al admitido movido";
                 }
 
                 int TipoOperacion;

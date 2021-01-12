@@ -97,6 +97,7 @@ namespace Procesos.PS.Procesos
                     System.IO.FileInfo[] fileNames = dirInfo.GetFiles("*.*").Where(file => !file.FullName.EndsWith(".xls")).ToArray();
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".xlsx")).ToArray();
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".db")).ToArray();
+                    fileNames = fileNames.Where(file => !file.FullName.EndsWith(".csv")).ToArray();
 
                     //foreach (System.IO.FileInfo archivos in fileNames)
                     //{
@@ -106,6 +107,7 @@ namespace Procesos.PS.Procesos
                     Parallel.ForEach<FileInfo>(fileNames, archivos =>
                     {
                         mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
+                        //RespuestaProceso.Add(mensaje);
                     }
                         
                     );
