@@ -916,14 +916,6 @@ namespace WebServiceBancos
                                 {
                                     ValdObjetos.pReferenciaPago = Convert.ToString(Referencia);
                                 }
-
-                                // SAU
-                                /* Consultar si existe un banco con esa fecha de pago
-                                 * si existe, retornar cantidad de pagos que tiene, cant_pagos = query SP
-                                Si no existe Insert a tabla cod banco, fecha de pago, fecha proceso por SP(get date)
-                                // SAU Monto insertado
-                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
-                                */
                                 /// <summary>
                                 /// Se encarga de evaluar si es de una fiducia errada y si lo es lo guarda en una tabla de Pagos Errados
                                 /// </summary>
@@ -1007,6 +999,13 @@ namespace WebServiceBancos
 
 
                                 #endregion
+                                // SAU
+                                /* Consultar si existe un banco con esa fecha de pago
+                                 * si existe, retornar cantidad de pagos que tiene, cant_pagos = query SP
+                                Si no existe Insert a tabla cod banco, fecha de pago, fecha proceso por SP(get date)
+                                // SAU Monto insertado
+                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
+                                */
                                 RptPagosEN pagosEN = new RptPagosEN();
 
                                 pagosEN.fechaModificacionArch = FeModificacion;
@@ -2822,6 +2821,7 @@ namespace WebServiceBancos
                             ValdObjetos.pCodBanco = CodBanco;
                             ValdObjetos.pValVenta = Convert.ToInt32(linea.Substring(50, 12));
                             ValdObjetos.pNumAutorizacion = linea.Substring(74, 12).TrimStart('0');
+                            ValdObjetos.pNumAutorizacion = ValdObjetos.pNumAutorizacion.Trim();
                             ValdObjetos.pCodUnico = Convert.ToInt32(linea.Substring(179, 20));
                             ValdObjetos.pCuenta = linea.Substring(199, 20);
                             ValdObjetos.pFecVale = linea.Substring(241, 4) + "/" + linea.Substring(245, 2) + "/" + linea.Substring(247, 2);

@@ -86,7 +86,7 @@ namespace Procesos.PS.Procesos
                         procesoConError = true;
                     }
 
-                    RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                    //RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
 
                     CorreosControl.Clear();
 
@@ -120,7 +120,7 @@ namespace Procesos.PS.Procesos
             catch (Exception ex)
             {
                 procesoConError = true;
-                RespuestaProceso.Add(ex.Message);
+               // RespuestaProceso.Add(ex.Message);
                 return RespuestaProceso;
             }
 

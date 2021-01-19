@@ -78,7 +78,7 @@ namespace Procesos.PS.Procesos
                 BancoLN objBancoLN = new BancoLN();
                 lista = objBancoLN.consultar(objB);
                 //OBTIENE LAS RUTAS DE LOS BANCOS
-                objCorreo = ObtenerCorreos();
+                //objCorreo = ObtenerCorreos(); DESCOMENTAREAR A PRD
                 objCorreoRes = objCorreo;
                 RutaLN objRutaLN = new RutaLN();
                 Ruta objRuta = new Ruta();
@@ -173,7 +173,7 @@ namespace Procesos.PS.Procesos
                             }
                             catch (Exception ex)
                             {
-                                RespuestaProceso.Add(bank.pNombreCuenta + ": " + ex.Message);
+                                //RespuestaProceso.Add(bank.pNombreCuenta + ": " + ex.Message);
                                 procesoConError = true;
                                 goto line;
                             }
@@ -229,7 +229,7 @@ namespace Procesos.PS.Procesos
                                     ProcesoPagos.Timeout = 300000;
                                     mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", RutaEntrada, archivos.Name, "N");
 
-                                    RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                                    //RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
                                     if (mensaje == "PROCESO REALIZADO CON EXITO")
                                     {
                                         ArchivoLN archivoLN = new ArchivoLN();
@@ -258,7 +258,7 @@ namespace Procesos.PS.Procesos
             }
             catch (Exception ex)
             {
-                RespuestaProceso.Add(ex.Message);
+                //RespuestaProceso.Add(ex.Message);
                 return RespuestaProceso;
             }
         }

@@ -48,6 +48,8 @@
             this.gboxProcesos = new System.Windows.Forms.GroupBox();
             this.cmbProcesos = new System.Windows.Forms.ComboBox();
             this.gboxDatos = new System.Windows.Forms.GroupBox();
+            this.txbCorreo = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.nudHoras = new System.Windows.Forms.NumericUpDown();
             this.txbProcedimiento = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -60,8 +62,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.Temporizador = new System.Windows.Forms.Timer(this.components);
-            this.txbCorreo = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.lblEspera = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -80,7 +81,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(684, 362);
+            this.tabControl1.Size = new System.Drawing.Size(684, 361);
             this.tabControl1.TabIndex = 0;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
@@ -97,7 +98,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(676, 336);
+            this.tabPage1.Size = new System.Drawing.Size(676, 335);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Procesos";
             // 
@@ -164,6 +165,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel1.Controls.Add(this.lblEspera);
             this.panel1.Controls.Add(this.btnStop);
             this.panel1.Controls.Add(this.btnStart);
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -205,7 +207,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(676, 336);
+            this.tabPage2.Size = new System.Drawing.Size(676, 335);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Configuración";
             // 
@@ -296,6 +298,23 @@
             this.gboxDatos.TabIndex = 0;
             this.gboxDatos.TabStop = false;
             this.gboxDatos.Text = "Datos Procesos";
+            // 
+            // txbCorreo
+            // 
+            this.txbCorreo.Location = new System.Drawing.Point(107, 150);
+            this.txbCorreo.Name = "txbCorreo";
+            this.txbCorreo.Size = new System.Drawing.Size(176, 20);
+            this.txbCorreo.TabIndex = 12;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(21, 153);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(80, 13);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "Correo Control :";
             // 
             // nudHoras
             // 
@@ -407,29 +426,20 @@
             this.Temporizador.Interval = 10000;
             this.Temporizador.Tick += new System.EventHandler(this.Temporizador_Tick);
             // 
-            // txbCorreo
+            // lblEspera
             // 
-            this.txbCorreo.Location = new System.Drawing.Point(107, 150);
-            this.txbCorreo.Name = "txbCorreo";
-            this.txbCorreo.Size = new System.Drawing.Size(176, 20);
-            this.txbCorreo.TabIndex = 12;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(21, 153);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 13);
-            this.label6.TabIndex = 11;
-            this.label6.Text = "Correo Control :";
+            this.lblEspera.AutoSize = true;
+            this.lblEspera.Location = new System.Drawing.Point(13, 12);
+            this.lblEspera.Name = "lblEspera";
+            this.lblEspera.Size = new System.Drawing.Size(0, 13);
+            this.lblEspera.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(684, 362);
+            this.ClientSize = new System.Drawing.Size(684, 361);
             this.Controls.Add(this.tabControl1);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(700, 400);
@@ -440,10 +450,12 @@
             this.Text = "Procesos Bancarios";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.Form1_Shown);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.gboxProcesos.ResumeLayout(false);
             this.gboxDatos.ResumeLayout(false);
@@ -488,6 +500,7 @@
         private System.Windows.Forms.NumericUpDown nudHoras;
         private System.Windows.Forms.TextBox txbCorreo;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label lblEspera;
     }
 }
 

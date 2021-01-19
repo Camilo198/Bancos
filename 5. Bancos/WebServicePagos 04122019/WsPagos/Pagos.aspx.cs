@@ -28,7 +28,7 @@ namespace WebServiceBancos
 
             //string res = prueba.ProcesarPagosSinSubir("", "");
 
-            //string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "11122020_17_41_21_Prueba_SA_01.12.2020.xlsx");
+            string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "00015_18012021_TC_01012021_172459_A.txt");
 
 
             //string ServidorSico = ConfigurationManager.AppSettings["server"].ToString();            /*PAGOS*/

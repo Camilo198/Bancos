@@ -253,14 +253,14 @@ namespace Bancos.PS.Servicios
                     #region LECTURA ARCHIVO PLANO
                     else
                     {
-                        if (archivo.Contains(".csv"))
-                        {
-                            lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
-                        }
-                        else
-                        {
+                        //if (archivo.Contains(".csv"))
+                        //{
+                        //    lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
+                        //}
+                        //else
+                        //{
                             lineasArchivo = objLector.leerArchivoTarjetas(archivo);
-                        }
+                        //}
                        
                     }
                     #endregion
@@ -392,7 +392,7 @@ namespace Bancos.PS.Servicios
                             objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : Archivo " + tipoArchivo + " con fecha de transaccion " + nombreArchivo.Substring(18, 8) + " fue generado correctamente";
                             objL.pTipoArchivo = TipoProcesoXCuenta;
                             objL.pTipoProceso = "GEN";
-                            //new LogsLN().insertar(objL); DESCOMENTAREAR A PRD
+                            //new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
                             nombreArchivo = String.Empty;
                             registrosLote = 0;
                         }

@@ -13,11 +13,11 @@ namespace Bancos.PS
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            ArrayList arrMail = new ArrayList();
-            TarjetasCredito tc = new TarjetasCredito();
-            string msg;
-            // Tarjetas
-            ////// AMEX NUEVA
+            //ArrayList arrMail = new ArrayList();
+            //TarjetasCredito tc = new TarjetasCredito();
+            //string msg;
+            //// Tarjetas
+            //////// AMEX NUEVA
             //msg = tc.ServicioTarjetasCredito("TCR", "14", "00015",
             //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Recibidos\\",
             //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Procesados\\",
@@ -51,16 +51,16 @@ namespace Bancos.PS
             //msg = pol.ServicioPagosOnline("Lugar Pago 66", "00015", "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\PagosOnline\\Recibidos\\", arrMail, "00", "016525785990", "00", "steven.aguilar@chevyplan.com.co", "TAREA PROGRAMADA", "POL1");
 
             ////// TARJETA CODENSA NUEVA
-            msg = tc.ServicioTarjetasCredito("TCR", "64", "00031",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Recibidos\\",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Procesados\\",
-                //"D:\\Codensa\\Recibidos\\",
-                //"D:\\Codensa\\Procesados\\",
-                arrMail, "steven.aguilar@chevyplan.com.co",
-                "00", "95", "00", "TAREA PROGRAMADA",
-                //"D:\\Codensa\\Historico\\",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Historico\\",
-                "TCR1");
+            //msg = tc.ServicioTarjetasCredito("TCR", "64", "00031",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Recibidos\\",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Procesados\\",
+            //    //"D:\\Codensa\\Recibidos\\",
+            //    //"D:\\Codensa\\Procesados\\",
+            //    arrMail, "steven.aguilar@chevyplan.com.co",
+            //    "00", "95", "00", "TAREA PROGRAMADA",
+            //    //"D:\\Codensa\\Historico\\",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Historico\\",
+            //    "TCR1");
 
             //// TARJETA ALKOSTO REVISION
             //msg = tc.ServicioTarjetasCredito("TCR", "63", "00026",

@@ -97,7 +97,7 @@ namespace Procesos.PS.Procesos
                         {
                             mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, archivos.Name, "S");
                             //   mensaje = ProcesoPagos.LecturaPagos("", "", ArchivoSalida, archivos.Name, "S");
-                            RespuestaProceso.Add("PagosOnline: " + mensaje);
+                            //RespuestaProceso.Add("PagosOnline: " + mensaje);
                             if (mensaje == "PROCESO REALIZADO CON EXITO")
                             {
                                 ArchivoLN archivoLN = new ArchivoLN();
@@ -115,7 +115,7 @@ namespace Procesos.PS.Procesos
             catch (Exception ex)
             {
                 procesoConError = true;
-                RespuestaProceso.Add(ex.Message);
+                //RespuestaProceso.Add(ex.Message);
                 return RespuestaProceso;
             }
 

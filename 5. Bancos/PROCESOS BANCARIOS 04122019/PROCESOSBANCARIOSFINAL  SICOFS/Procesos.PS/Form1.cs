@@ -33,6 +33,10 @@ namespace Procesos.PS
         DateTime tiempoServidor; // LA FECHA Y HORA DEL SERVIDOR   
         LogLN log = new LogLN(); // Logs de error
 
+        private System.Windows.Forms.Timer tempCierra;
+        private int contador = 12;
+        private bool btnProcesos_Clicked = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -191,6 +195,7 @@ namespace Procesos.PS
 
         private void btnCargar_Click(object sender, EventArgs e)
         {
+            btnProcesos_Clicked = true;
             cargarProcesos();
             this.gboxDatos.Enabled = false;
             this.gboxProcesos.Enabled = true;
@@ -232,270 +237,176 @@ namespace Procesos.PS
                 ArchivoLN archivoLN = new ArchivoLN();
                 ArchivoEN archivoEN = new ArchivoEN();
 
-                foreach (DataRow fila in procesos.Rows)
+                if (procesos != null)
                 {
-                    Tarea = new Tareas();
-                    Tarea.pId = Convertidor.aEntero32(fila["Id"]);
-                    Tarea.pNombreTarea = Convertidor.aCadena(fila["NombreTarea"]);
-                    Tarea.pPeriodo = Convertidor.aCadena(fila["Periodo"]);
-                    Tarea.pTiempoIntervalo = Convertidor.aCadena(fila["TiempoIntervalo"]);
-                    Tarea.pInicio = Convertidor.aCadena(fila["Inicio"]);
-                    Tarea.pOperacion = Convertidor.aCadena(fila["Proceso"]);
-                    Tarea.pCorreoControl = Convertidor.aCadena(fila["CorreoControl"]);
 
-                    Codigo.EnviarCorreo enviarNotifiacion = new Codigo.EnviarCorreo();
-
-                    tiempoProceso = Convert.ToDateTime(Tarea.pInicio);
-                    if (tiempoProceso <= tiempoServidor)
+                    foreach (DataRow fila in procesos.Rows)
                     {
-                        #region SAU Pagos cierre mes - orden de pagos por fecha de la bolsa de archivos
-                        EN.Tablas.Banco objB = new EN.Tablas.Banco();
+                        Tarea = new Tareas();
+                        Tarea.pId = Convertidor.aEntero32(fila["Id"]);
+                        Tarea.pNombreTarea = Convertidor.aCadena(fila["NombreTarea"]);
+                        Tarea.pPeriodo = Convertidor.aCadena(fila["Periodo"]);
+                        Tarea.pTiempoIntervalo = Convertidor.aCadena(fila["TiempoIntervalo"]);
+                        Tarea.pInicio = Convertidor.aCadena(fila["Inicio"]);
+                        Tarea.pOperacion = Convertidor.aCadena(fila["Proceso"]);
+                        Tarea.pCorreoControl = Convertidor.aCadena(fila["CorreoControl"]);
 
-                        objB.pActivo = true;
-                        objB.pTipoProceso = "POL_";  // Pagos Online
+                        Codigo.EnviarCorreo enviarNotifiacion = new Codigo.EnviarCorreo();
 
-                        lista = objBancoLN.consultar(objB);
-
-                        objB.pTipoProceso = "ABR_"; // Recaudo diario
-
-                        lista_ax = objBancoLN.consultar(objB);
-
-                        lista.AddRange(lista_ax);
-
-                        foreach (Banco bank in lista)
+                        tiempoProceso = Convert.ToDateTime(Tarea.pInicio);
+                        if (tiempoProceso <= tiempoServidor)
                         {
-                            objRuta.pOid = bank.pRutaArchivosEntrada;
-                            RutaEntrada = objRutaLN.consultar(objRuta)[0].pRuta;
-                            List<String> listaRutaArchivos = objLector_ax.listarDirectorio(RutaEntrada);
-                            if (listaRutaArchivos_ax.Find(x => x.Contains(RutaEntrada)) == null)
+                            #region SAU Pagos cierre mes - orden de pagos por fecha de la bolsa de archivos
+                            EN.Tablas.Banco objB = new EN.Tablas.Banco();
+
+                            objB.pActivo = true;
+                            objB.pTipoProceso = "POL_";  // Pagos Online
+
+                            lista = objBancoLN.consultar(objB);
+
+                            objB.pTipoProceso = "ABR_"; // Recaudo diario
+
+                            lista_ax = objBancoLN.consultar(objB);
+
+                            lista.AddRange(lista_ax);
+
+                            foreach (Banco bank in lista)
                             {
-                                listaRutaArchivos_ax.AddRange(listaRutaArchivos);
-                            }
-                        }
-                        listaRutaArchivosOrdenados = objLector_ax.procesarArchivosFecha(listaRutaArchivos_ax);
-                        objRuta.pOid = 0;
-                        #endregion
-                        #region TAREA ASOBANCAIRA SIN USO
-
-
-                        //**********************************************************
-                        //SE REALIZA EL PROCESO DE ASOBANCARIA PARA TODOS LOS BANCOS
-                        if (Tarea.pOperacion.Equals("Asobancaria"))
-                        {
-                            bool procesoConError = false;
-                            List<String> RespuestaProceso = new List<string>();
-                            this.label10.Text = Tarea.pNombreTarea;
-                            Pausa(2);
-                            Asobancaria objAso = new Asobancaria();
-                            RespuestaProceso = objAso.obtenerBancosAsobancaria(ref procesoConError);
-
-                            TareaLN objTareasLN = new TareaLN();
-                            int valor = 0;
-
-                            if (RespuestaProceso.Count > 0)
-                            {
-                                foreach (String procesoBanco in RespuestaProceso)
+                                objRuta.pOid = bank.pRutaArchivosEntrada;
+                                RutaEntrada = objRutaLN.consultar(objRuta)[0].pRuta;
+                                List<String> listaRutaArchivos = objLector_ax.listarDirectorio(RutaEntrada);
+                                if (listaRutaArchivos_ax.Find(x => x.Contains(RutaEntrada)) == null)
                                 {
-                                    this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
-                                }
-
-                                if (procesoConError == true)
-                                {
-                                    // AQUI  Tarea.pTiempoIntervalo = "30";
-                                    valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                    else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
-                                }
-                                else
-                                {
-                                    valor = objTareasLN.actualizarIncioProceso(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                    else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
+                                    listaRutaArchivos_ax.AddRange(listaRutaArchivos);
                                 }
                             }
-                            Pausa(6);
-                            this.label10.Text = "";
+                            listaRutaArchivosOrdenados = objLector_ax.procesarArchivosFecha(listaRutaArchivos_ax);
+                            objRuta.pOid = 0;
+                            #endregion
+                            #region TAREA ASOBANCAIRA SIN USO
 
-                        }
-                        #endregion
 
-                        #region TAREA PAGOSONLINE
+                            //**********************************************************
+                            //SE REALIZA EL PROCESO DE ASOBANCARIA PARA TODOS LOS BANCOS
+                            if (Tarea.pOperacion.Equals("Asobancaria"))
+                            {
+                                bool procesoConError = false;
+                                List<String> RespuestaProceso = new List<string>();
+                                this.label10.Text = Tarea.pNombreTarea;
+                                Pausa(2);
+                                Asobancaria objAso = new Asobancaria();
+                                RespuestaProceso = objAso.obtenerBancosAsobancaria(ref procesoConError);
 
-                        //************************************************************
-                        //SE REALIZA EL PROCESO DE PAGOS ONLINE PARA TODOS LOS BANCOS
-                        if (Tarea.pOperacion.Equals("PagosOnline"))
-                        {
-                            bool procesoConError = false;
-                            List<String> RespuestaProceso = new List<string>();
-                            this.label10.Text = Tarea.pNombreTarea;
-                            Pausa(2);
-                            PagosOnline objPagOnline = new PagosOnline();
-                            RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError, listaRutaArchivosOrdenados);
+                                TareaLN objTareasLN = new TareaLN();
+                                int valor = 0;
 
-                            #region Limpia bolsa archivos pagos
-                            listaRutaArchivosOrdenados.Clear();
-                            listaRutaArchivos_ax.Clear();
-                            lista.Clear();
+                                if (RespuestaProceso.Count > 0)
+                                {
+                                    foreach (String procesoBanco in RespuestaProceso)
+                                    {
+                                        this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
+                                    }
+
+                                    if (procesoConError == true)
+                                    {
+                                        // AQUI  Tarea.pTiempoIntervalo = "30";
+                                        valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                    else
+                                    {
+                                        valor = objTareasLN.actualizarIncioProceso(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                }
+                                Pausa(6);
+                                this.label10.Text = "";
+
+                            }
                             #endregion
 
-                            TareaLN objTareasLN = new TareaLN();
-                            int valor = 0;
+                            #region TAREA PAGOSONLINE
 
-                            if (RespuestaProceso.Count > 0)
+                            //************************************************************
+                            //SE REALIZA EL PROCESO DE PAGOS ONLINE PARA TODOS LOS BANCOS
+                            if (Tarea.pOperacion.Equals("PagosOnline"))
                             {
-                                foreach (String procesoBanco in RespuestaProceso)
-                                {
-                                    this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
-                                }
+                                bool procesoConError = false;
+                                List<String> RespuestaProceso = new List<string>();
+                                this.label10.Text = Tarea.pNombreTarea;
+                                Pausa(2);
+                                PagosOnline objPagOnline = new PagosOnline();
+                                RespuestaProceso = objPagOnline.obtenerBancosPagosOnline(ref procesoConError, listaRutaArchivosOrdenados);
 
-                                if (procesoConError == true)
+                                #region Limpia bolsa archivos pagos
+                                listaRutaArchivosOrdenados.Clear();
+                                listaRutaArchivos_ax.Clear();
+                                lista.Clear();
+                                #endregion
+
+                                TareaLN objTareasLN = new TareaLN();
+                                int valor = 0;
+
+                                if (RespuestaProceso.Count > 0)
                                 {
-                                    // AQUI Tarea.pTiempoIntervalo = "30";
-                                    valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                    foreach (String procesoBanco in RespuestaProceso)
+                                    {
+                                        this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
+                                    }
+
+                                    if (procesoConError == true)
+                                    {
+                                        // AQUI Tarea.pTiempoIntervalo = "30";
+                                        valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
+                                    }
                                     else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
+                                    {
+                                        valor = objTareasLN.actualizarIncioProceso(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
+                                    }
                                 }
-                                else
-                                {
-                                    valor = objTareasLN.actualizarIncioProceso(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                    else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
-                                }
+                                Pausa(6);
+                                this.label10.Text = "";
                             }
-                            Pausa(6);
-                            this.label10.Text = "";
-                        }
-                        #endregion
-
-                        #region TAREA MOVERFTP
-
-                        //************************************************************
-                        //SE REALIZA EL PROCESO DE MOVER ARCHIVOS QUE SE ENCUENTRAN EN UNA FTP A CUALQUIER RUTA ESTABLECIDA
-                        if (Tarea.pOperacion.Equals("MoverFtp"))
-                        {
-
-                            bool procesoConError = false;
-                            String RespuestaProceso = String.Empty;
-                            this.label10.Text = Tarea.pNombreTarea;
-                            Pausa(2);
-                            MoverArchivos objmFTP = new MoverArchivos();
-                            RespuestaProceso = objmFTP.moverAFtp(ref procesoConError);
-
-                            TareaLN objTareasLN = new TareaLN();
-                            int valor = 0;
-
-                            if (procesoConError == true)
-                            {
-                                this.listBox1.Items.Add(this.label10.Text + " " + RespuestaProceso + " Hora: " + DateTime.Now.ToString());
-
-                                // AQUI Tarea.pTiempoIntervalo = "30";
-                                valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
-
-                                if (valor <= 0)
-                                    this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                else
-                                    this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
-                            }
-                            else
-                            {
-                                valor = objTareasLN.actualizarIncioProceso(Tarea);
-                                if (valor <= 0)
-                                    this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                else
-                                    this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
-                            }
-
-                            Pausa(6);
-                            this.label10.Text = "";
-                        }
-                        #endregion
-
-                        #region TAREA TARJETAS CREDITO
-
-                        //************************************************************
-                        //SE REALIZA EL PROCESAMIENTO DE LOS ARCHIVOS TARJETAS DE CREDITO PARA TODOS LOS BANCOS
-                        if (Tarea.pOperacion.Equals("TarjetasCredito"))
-                        {
-
-                            bool procesoConError = false;
-                            List<String> RespuestaProceso = new List<string>();
-                            this.label10.Text = Tarea.pNombreTarea;
-                            Pausa(2);
-                            TarjetaCredito objRecaudo = new TarjetaCredito();
-                            RespuestaProceso = objRecaudo.obtenerBancosTarjetasCredito(ref procesoConError);
-
-                            TareaLN objTareasLN = new TareaLN();
-                            int valor = 0;
-
-                            if (RespuestaProceso.Count > 0)
-                            {
-                                foreach (String procesoBanco in RespuestaProceso)
-                                {
-                                    this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
-                                }
-
-                                if (procesoConError == true)
-                                {
-                                    // AQUI Tarea.pTiempoIntervalo = "30";
-                                    valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                    else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
-                                }
-                                else
-                                {
-                                    valor = objTareasLN.actualizarIncioProceso(Tarea);
-                                    if (valor <= 0)
-                                        this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
-                                    else
-                                        this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
-                                }
-                            }
-
-                            Pausa(6);
-                            this.label10.Text = "";
-                        }
-                        #endregion
-
-                        #region TAREA RECUADO DIARIO
-
-                        //************************************************************
-                        //SE REALIZA EL PROCESAMIENTO DE LOS ARCHIVOS DE RECAUDO DIARIO PARA TODOS LOS BANCOS
-                        if (Tarea.pOperacion.Equals("RecaudoDiario"))
-                        {
-                            bool procesoConError = false;
-                            List<String> RespuestaProceso = new List<string>();
-                            this.label10.Text = Tarea.pNombreTarea;
-                            Pausa(2);
-                            Recaudo objRecaudo = new Recaudo();
-                            RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError, listaRutaArchivosOrdenados);
-                            #region Limpia bolsa archivos pagos
-                            listaRutaArchivosOrdenados.Clear();
-                            listaRutaArchivos_ax.Clear();
-                            lista.Clear();
                             #endregion
-                            TareaLN objTareasLN = new TareaLN();
-                            int valor = 0;
 
-                            if (RespuestaProceso.Count > 0)
+                            #region TAREA MOVERFTP
+
+                            //************************************************************
+                            //SE REALIZA EL PROCESO DE MOVER ARCHIVOS QUE SE ENCUENTRAN EN UNA FTP A CUALQUIER RUTA ESTABLECIDA
+                            if (Tarea.pOperacion.Equals("MoverFtp"))
                             {
-                                foreach (String procesoBanco in RespuestaProceso)
-                                {
-                                    this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
-                                }
+
+                                bool procesoConError = false;
+                                String RespuestaProceso = String.Empty;
+                                this.label10.Text = Tarea.pNombreTarea;
+                                Pausa(2);
+                                MoverArchivos objmFTP = new MoverArchivos();
+                                RespuestaProceso = objmFTP.moverAFtp(ref procesoConError);
+
+                                TareaLN objTareasLN = new TareaLN();
+                                int valor = 0;
+
                                 if (procesoConError == true)
                                 {
-                                    // AQUI  Tarea.pTiempoIntervalo = "30";
+                                    this.listBox1.Items.Add(this.label10.Text + " " + RespuestaProceso + " Hora: " + DateTime.Now.ToString());
+
+                                    // AQUI Tarea.pTiempoIntervalo = "30";
                                     valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
+
                                     if (valor <= 0)
                                         this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
                                     else
@@ -509,12 +420,110 @@ namespace Procesos.PS
                                     else
                                         this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
                                 }
-                            }
-                            Pausa(6);
-                            this.label10.Text = "";
-                        }
-                        #endregion
 
+                                Pausa(6);
+                                this.label10.Text = "";
+                            }
+                            #endregion
+
+                            #region TAREA TARJETAS CREDITO
+
+                            //************************************************************
+                            //SE REALIZA EL PROCESAMIENTO DE LOS ARCHIVOS TARJETAS DE CREDITO PARA TODOS LOS BANCOS
+                            if (Tarea.pOperacion.Equals("TarjetasCredito"))
+                            {
+
+                                bool procesoConError = false;
+                                List<String> RespuestaProceso = new List<string>();
+                                this.label10.Text = Tarea.pNombreTarea;
+                                Pausa(2);
+                                TarjetaCredito objRecaudo = new TarjetaCredito();
+                                RespuestaProceso = objRecaudo.obtenerBancosTarjetasCredito(ref procesoConError);
+
+                                TareaLN objTareasLN = new TareaLN();
+                                int valor = 0;
+
+                                if (RespuestaProceso.Count > 0)
+                                {
+                                    foreach (String procesoBanco in RespuestaProceso)
+                                    {
+                                        this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
+                                    }
+
+                                    if (procesoConError == true)
+                                    {
+                                        // AQUI Tarea.pTiempoIntervalo = "30";
+                                        valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                    else
+                                    {
+                                        valor = objTareasLN.actualizarIncioProceso(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                }
+
+                                Pausa(6);
+                                this.label10.Text = "";
+                            }
+                            #endregion
+
+                            #region TAREA RECUADO DIARIO
+
+                            //************************************************************
+                            //SE REALIZA EL PROCESAMIENTO DE LOS ARCHIVOS DE RECAUDO DIARIO PARA TODOS LOS BANCOS
+                            if (Tarea.pOperacion.Equals("RecaudoDiario"))
+                            {
+                                bool procesoConError = false;
+                                List<String> RespuestaProceso = new List<string>();
+                                this.label10.Text = Tarea.pNombreTarea;
+                                Pausa(2);
+                                Recaudo objRecaudo = new Recaudo();
+                                RespuestaProceso = objRecaudo.obtenerBancosRecaudoDiario(ref procesoConError, listaRutaArchivosOrdenados);
+                                #region Limpia bolsa archivos pagos
+                                listaRutaArchivosOrdenados.Clear();
+                                listaRutaArchivos_ax.Clear();
+                                lista.Clear();
+                                #endregion
+                                TareaLN objTareasLN = new TareaLN();
+                                int valor = 0;
+
+                                if (RespuestaProceso.Count > 0)
+                                {
+                                    foreach (String procesoBanco in RespuestaProceso)
+                                    {
+                                        this.listBox1.Items.Add(this.label10.Text + " " + procesoBanco + " Hora: " + DateTime.Now.ToString());
+                                    }
+                                    if (procesoConError == true)
+                                    {
+                                        // AQUI  Tarea.pTiempoIntervalo = "30";
+                                        valor = objTareasLN.actualizarIncioProcesoConError(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar pero con errores!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                    else
+                                    {
+                                        valor = objTareasLN.actualizarIncioProceso(Tarea);
+                                        if (valor <= 0)
+                                            this.listBox1.Items.Add(this.label10.Text + " ¡¡Ocurrio un Error al actualizar la Fecha!! Hora: " + DateTime.Now.ToString());
+                                        else
+                                            this.listBox1.Items.Add(this.label10.Text + " se termino de ejecutar con exito!!! Hora: " + DateTime.Now.ToString());
+                                    }
+                                }
+                                Pausa(6);
+                                this.label10.Text = "";
+                            }
+                            #endregion
+
+                        }
                     }
                 }
                 Temporizador.Enabled = true;
@@ -524,7 +533,7 @@ namespace Procesos.PS
             }
             catch (Exception ex)
             {
-                log.insertaLogErroresLN("Procesos Bancarios: "+ex.ToString(), DateTime.Now.ToString());
+                log.insertaLogErroresLN("Procesos Bancarios: " + ex.ToString(), DateTime.Now.ToString());
                 //this.listBox1.Items.Add(this.label10.Text + ex.Message + " Hora: " + DateTime.Now.ToString());
                 string email = ConfigurationManager.AppSettings["correoSoporte"];
                 string email_dev = ConfigurationManager.AppSettings["correoSoporte"];
@@ -546,6 +555,8 @@ namespace Procesos.PS
         //BOTON PARA INICIAR LAS TAREAS
         private void btnStart_Click(object sender, EventArgs e)
         {
+            tempCierra.Stop();
+            btnProcesos_Clicked = false;
             this.btnStart.Enabled = false;
             this.btnStop.Enabled = true;
             Temporizador.Enabled = true;
@@ -608,10 +619,45 @@ namespace Procesos.PS
             }
             catch (Exception)
             {
-                
+
             }
         }
 
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            tempCierra = new System.Windows.Forms.Timer();
+            tempCierra.Tick += new EventHandler(tempEspera_Tick);
+            tempCierra.Interval = 1000; // 1 second
+            tempCierra.Start();
+            lblEspera.Text = contador.ToString();
+        }
+        private void tempEspera_Tick(object sender, EventArgs e)
+        {
+            if (btnProcesos_Clicked)
+            {
+                contador = 12;
+            }
+            else
+            {
+                contador--;
+            }
+            if (contador == 0)
+            {
+                tempCierra.Stop();
+                this.btnStart.Enabled = false;
+                this.btnStop.Enabled = true;
+                Temporizador.Enabled = true;
+                this.tabPage2.Parent = null;
+                this.Visible = false;
+                ArchivoLN archivoLN = new ArchivoLN();
+                ArchivoEN archivoEN = new ArchivoEN();
+                archivoEN.Fecha = System.DateTime.Now;
+                archivoEN.RutaArchivo = "";
+                archivoLN.eliminarArchivoBolsaLN(archivoEN, "T");
+            }
+
+            lblEspera.Text = contador.ToString();
+        }
     }
 }
 
