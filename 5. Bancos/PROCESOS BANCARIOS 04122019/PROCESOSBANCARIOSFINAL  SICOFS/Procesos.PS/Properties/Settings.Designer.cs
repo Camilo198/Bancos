@@ -86,20 +86,20 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8092/Servicios/TarjetasCredito.svc")]
-        public string Procesos_PS_ServicioTarjetaCredito_TarjetasCredito {
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8082/WsBancos.svc")]
+        public string Procesos_PS_ServicioBancos_WsBancos {
             get {
-                return ((string)(this["Procesos_PS_ServicioTarjetaCredito_TarjetasCredito"]));
+                return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9085/WsBancos.svc")]
-        public string Procesos_PS_ServicioBancos_WsBancos {
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:51647/Servicios/TarjetasCredito.svc")]
+        public string Procesos_PS_ServicioTarjetasCredito_TarjetasCredito {
             get {
-                return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
+                return ((string)(this["Procesos_PS_ServicioTarjetasCredito_TarjetasCredito"]));
             }
         }
     }

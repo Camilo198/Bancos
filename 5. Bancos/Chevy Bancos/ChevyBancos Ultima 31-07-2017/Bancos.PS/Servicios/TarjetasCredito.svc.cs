@@ -12,12 +12,12 @@ using Bancos.EN.Definicion;
 using Bancos.PS.Servicios.Ftp;
 using Bancos.PS.Servicios.Correo;
 using Bancos.PS.Servicios.Archivos;
-using Excel = Microsoft.Office.Interop.Excel;
 
 using System.Data.Common;
-using System.Data.OleDb;
+//using System.Data.OleDb;
 
 using System.Text.RegularExpressions;
+using SpreadsheetLight;
 
 namespace Bancos.PS.Servicios
 {
@@ -161,7 +161,8 @@ namespace Bancos.PS.Servicios
             ListaEquivalenciaArchivo = new List<Bancos.EN.Tablas.InterpreteArchivo>();
             ListaEquivalenciaArchivo.AddRange(obtenerTransformacionArchivo(IdCuentaBancoEpicor));
             //*********************************************************************************
-
+            FileStream fs;
+            SLDocument sl;
             try
             {
                 LectorArchivos objLector = new LectorArchivos();
@@ -175,52 +176,102 @@ namespace Bancos.PS.Servicios
                     System.Data.DataSet DsExcel = new System.Data.DataSet();
                     if (EsExcel)
                     {
+                        System.Data.DataTable DtExcel = new System.Data.DataTable();
+                        System.Data.DataRow DrExcel = null;
                         string path = System.IO.Path.GetFullPath(archivo);
 
                         //  OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=" + "'" + "Excel 12.0;HDR=YES;IMEX=0;" + "'");
                         //OleDbConnection oledbConn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source="   + path + ";Extended Properties=""Excel 8.0;HDR=Yes;IMEX=1"");
-                        OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;'");
+
                         try
                         {
+                            //OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;'");
+                            fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            sl = new SLDocument(fs);
 
-                            oledbConn.Open();
+                            String[] hojas = sl.GetSheetNames().ToArray();
 
-                            OleDbCommand cmd = new OleDbCommand();
-
-                            OleDbDataAdapter oleda = new OleDbDataAdapter();
-
-                            DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-
-                            string sheetName = string.Empty;
-
-                            if (dt != null)
+                            if (RutaEntrada.Contains("Falabella"))
                             {
-
-                                sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
-
+                                sl.SelectWorksheet(NomHoja);
+                            }
+                            else
+                            {
+                                sl.SelectWorksheet(hojas[NumeroHoja]);
                             }
 
-                            cmd.Connection = oledbConn;
+                            SLWorksheetStatistics stats = sl.GetWorksheetStatistics();
 
-                            cmd.CommandType = CommandType.Text;
-                            if (RutaEntrada.Contains("Falabella"))
-                                cmd.CommandText = "SELECT * FROM [" + NomHoja + "]";
-                            else
-                                cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
+                            int ultimaCol = stats.EndColumnIndex;
+                            int ultimaFil = stats.EndRowIndex;
+                            int columnaInicio = stats.StartColumnIndex;
+                            int filaInicio = stats.StartRowIndex;
 
-                            oleda = new OleDbDataAdapter(cmd);
+                            for (int h = 1; h <= stats.EndColumnIndex; h++)
+                            {
+                                DtExcel.Columns.Add(h.ToString());
+                            }
 
-                            oleda.Fill(DsExcel, "excelData");
+                            for (int i = filaInicio; i <= ultimaFil; i++)
+                            {
+                                DrExcel = DtExcel.NewRow();
+                                for (int j = columnaInicio; j < ultimaCol; j++)
+                                {
+                                    //tomamos los valores de las celdas para el datatable
+                                    if (sl.GetCellValueAsString(i, j) != null)
+                                    {
+                                        string val = sl.GetCellValueAsString(i, j);
+                                        DrExcel[j.ToString()] = val;
+                                    }
+
+                                }
+                                DtExcel.Rows.Add(DrExcel);
+                            }
+                            DsExcel.Tables.Add(DtExcel);
+
+                            fs.Close();
+                            sl.Dispose();
+                            //oledbConn.Open();
+
+                            //OleDbCommand cmd = new OleDbCommand();
+
+                            //OleDbDataAdapter oleda = new OleDbDataAdapter();
+
+                            //DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+
+                            //string sheetName = string.Empty;
+
+                            //if (dt != null)
+                            //{
+
+                            //    sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
+
+                            //}
+
+                            //cmd.Connection = oledbConn;
+
+                            //cmd.CommandType = CommandType.Text;
+                            //if (RutaEntrada.Contains("Falabella"))
+                            //    cmd.CommandText = "SELECT * FROM [" + NomHoja + "]";
+                            //else
+                            //    cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
+
+                            //oleda = new OleDbDataAdapter(cmd);
+
+                            //oleda.Fill(DsExcel, "excelData");
+
+                            //oledbConn.Close();
 
                         }
                         catch (Exception ex)
                         {
+                            Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo + " " + archivo);
                             return ex.Message;
                         }
-                        finally
-                        {
-                            oledbConn.Close();
-                        }
+                        //finally
+                        //{
+                        //    oledbConn.Close();
+                        //}
                         //Llenamos una lista de String con todas las filas del dataset, agregando ceros o espacion segun su parametrizacion
                         foreach (DataRow row in DsExcel.Tables[0].Rows)
                         {
@@ -259,9 +310,9 @@ namespace Bancos.PS.Servicios
                         //}
                         //else
                         //{
-                            lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        lineasArchivo = objLector.leerArchivoTarjetas(archivo);
                         //}
-                       
+
                     }
                     #endregion
 
@@ -392,7 +443,7 @@ namespace Bancos.PS.Servicios
                             objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : Archivo " + tipoArchivo + " con fecha de transaccion " + nombreArchivo.Substring(18, 8) + " fue generado correctamente";
                             objL.pTipoArchivo = TipoProcesoXCuenta;
                             objL.pTipoProceso = "GEN";
-                            //new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
+                            new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
                             nombreArchivo = String.Empty;
                             registrosLote = 0;
                         }
@@ -428,7 +479,7 @@ namespace Bancos.PS.Servicios
                 objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : " + ex.Message;
                 objL.pTipoArchivo = TipoProcesoXCuenta;
                 objL.pTipoProceso = "GEN";
-                //new LogsLN().insertar(objL);   // DESCOMENTAREAR A PRD
+                new LogsLN().insertar(objL);   // DESCOMENTAREAR A PRD
                 return ex.Message;
             }
         }

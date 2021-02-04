@@ -2965,6 +2965,10 @@ namespace WebServiceBancos
                     {
                         System.IO.Directory.CreateDirectory(rutaFin);
                     }
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
                     RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
 
                     System.IO.File.Move(RutaOrigen, RutaDestino);
@@ -2977,9 +2981,11 @@ namespace WebServiceBancos
                 string resultsuma = Convert.ToString(suma);
                 resultsuma = valor.ToString("0,0", CultureInfo.InvariantCulture);
                 resultsuma = String.Format(CultureInfo.InvariantCulture, "{0:0,0}", valor);
-
-                RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
-                RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
+                if (RegistrosProcesados.BaseStream != null)
+                {
+                    RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
+                    RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
+                }
                 if (RegistrosProcesados != null)
                 {
                     RegistrosProcesados.Close();

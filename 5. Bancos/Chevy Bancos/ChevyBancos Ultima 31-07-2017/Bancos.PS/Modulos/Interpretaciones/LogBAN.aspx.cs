@@ -11,7 +11,6 @@ using Bancos.LN.Consultas;
 using Bancos.EN.Definicion;
 
 using System.Data;
-using Microsoft.Office.Interop.Excel;
 
 
 namespace Bancos.PS.Modulos.Interpretaciones

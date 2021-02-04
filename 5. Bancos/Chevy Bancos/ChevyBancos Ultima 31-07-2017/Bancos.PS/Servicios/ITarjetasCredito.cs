@@ -13,7 +13,7 @@ namespace Bancos.PS.Servicios
     public interface ITarjetasCredito
     {
         [OperationContract]
-        String ServicioTarjetasCredito(String NombreBanco, String IdCuentaBanco, String IdCuentaBancoEpicor, String RutaEntrada,
+        String ServicioTarjetasCredito(String NombreCuenta, String IdCuentaBanco, String IdCuentaBancoEpicor, String RutaEntrada,
                                        String RutaSalida, ArrayList CorreosControl, String Remitente,
                                        String CodigoTransito, String NumCuenta, String TipoCuenta,
                                        String Usuario, String RutaProcesado, String TipoProceso);

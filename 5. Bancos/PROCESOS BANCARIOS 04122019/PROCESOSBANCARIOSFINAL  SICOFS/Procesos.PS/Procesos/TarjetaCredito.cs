@@ -62,7 +62,7 @@ namespace Procesos.PS.Procesos
                     foreach (string cc in CorreoControlB)
                     {
                         if (string.IsNullOrEmpty(cc)) break;
-                        //CorreosControl.Add(cc); DESCOMENTAREAR A PRD
+                        CorreosControl.Add(cc);// DESCOMENTAREAR A PRD
                     }
 
                     CodigoBanco = bank.pCodigoBanco;
@@ -99,18 +99,21 @@ namespace Procesos.PS.Procesos
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".db")).ToArray();
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".csv")).ToArray();
 
-                    //foreach (System.IO.FileInfo archivos in fileNames)
-                    //{
-                    //    mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
-                    //    RespuestaProceso.Add("Proceso Pagos TC: " + mensaje);
-                    //}
-                    Parallel.ForEach<FileInfo>(fileNames, archivos =>
+                    try
                     {
-                        mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
-                        //RespuestaProceso.Add(mensaje);
+                        foreach (System.IO.FileInfo archivos in fileNames)
+                        {
+                            mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
+                            //RespuestaProceso.Add("Proceso Pagos TC: " + mensaje);
+                        }
+
                     }
-                        
-                    );
+                    catch (Exception ex)
+                    {
+
+                        mensaje = ex.ToString();
+                    }
+
 
                 }
 
@@ -120,7 +123,7 @@ namespace Procesos.PS.Procesos
             catch (Exception ex)
             {
                 procesoConError = true;
-               // RespuestaProceso.Add(ex.Message);
+                // RespuestaProceso.Add(ex.Message);
                 return RespuestaProceso;
             }
 
@@ -133,11 +136,11 @@ namespace Procesos.PS.Procesos
             String mens;
             try
             {
-                ServicioTarjetaCredito.TarjetasCredito procesoTC = new ServicioTarjetaCredito.TarjetasCredito();
+                ServicioTarjetasCredito.TarjetasCredito procesoTC = new ServicioTarjetasCredito.TarjetasCredito();
                 mens = procesoTC.ServicioTarjetasCredito("TCR", IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaSalida,
-                                                        (String[])CorreosControl.ToArray(typeof(String)),
-                                                        Remitente, CodigoBanco, NumCuenta, TipoCuenta,
-                                                        "TAREA PROGRAMADA", RutaProcesado, TipoProceso);
+                                                    (String[])CorreosControl.ToArray(typeof(String)),
+                                                    Remitente, CodigoBanco, NumCuenta, TipoCuenta,
+                                                    "TAREA PROGRAMADA", RutaProcesado, TipoProceso);
                 return mens;
             }
             catch (Exception ex)

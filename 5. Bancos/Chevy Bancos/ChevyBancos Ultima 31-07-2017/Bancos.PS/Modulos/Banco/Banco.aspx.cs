@@ -23,7 +23,6 @@ using Bancos.PS.Servicios.Correo;
 using Bancos.PS.Servicios.Archivos;
 using Bancos.PS.Servicios;
 //************
-using Excel = Microsoft.Office.Interop.Excel;
 
 using System.Data.Common;
 using System.Data.OleDb;

@@ -78,7 +78,7 @@ namespace Procesos.PS.Procesos
                 BancoLN objBancoLN = new BancoLN();
                 lista = objBancoLN.consultar(objB);
                 //OBTIENE LAS RUTAS DE LOS BANCOS
-                //objCorreo = ObtenerCorreos(); DESCOMENTAREAR A PRD
+                objCorreo = ObtenerCorreos(); //DESCOMENTAREAR A PRD
                 objCorreoRes = objCorreo;
                 RutaLN objRutaLN = new RutaLN();
                 Ruta objRuta = new Ruta();

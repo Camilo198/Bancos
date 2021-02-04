@@ -12,12 +12,12 @@ using Bancos.EN.Definicion;
 using Bancos.PS.Servicios.Ftp;
 using Bancos.PS.Servicios.Correo;
 using Bancos.PS.Servicios.Archivos;
-using Excel = Microsoft.Office.Interop.Excel;
 
 using System.Data.Common;
 using System.Data.OleDb;
 
 using System.Text.RegularExpressions;
+using SpreadsheetLight;
 
 namespace Bancos.PS.Servicios
 {
@@ -72,7 +72,7 @@ namespace Bancos.PS.Servicios
                                               String Usuario, String RutaProcesado, String TipoProceso)
         {
 
-            TipoProcesoXCuenta = TipoProceso; 
+            TipoProcesoXCuenta = TipoProceso;
 
             switch (TipoCuenta)
             {
@@ -158,7 +158,8 @@ namespace Bancos.PS.Servicios
             ListaEquivalenciaArchivo = new List<Bancos.EN.Tablas.InterpreteArchivo>();
             ListaEquivalenciaArchivo.AddRange(obtenerTransformacionArchivo(IdCuentaBancoEpicor));
             //*********************************************************************************
-
+            FileStream fs;
+            SLDocument sl;
             try
             {
                 LectorArchivos objLector = new LectorArchivos();
@@ -178,47 +179,86 @@ namespace Bancos.PS.Servicios
                     if (EsExcel)
                     {
                         string path = System.IO.Path.GetFullPath(archivo);
-                     
-                        OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';");
+                        System.Data.DataTable DtExcel = new System.Data.DataTable();
+                        System.Data.DataRow DrExcel = null;
+
+                        //OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';");
                         try
                         {
+                            fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            sl = new SLDocument(fs);
 
-                            oledbConn.Open();
+                            String[] hojas = sl.GetSheetNames().ToArray();
 
-                            OleDbCommand cmd = new OleDbCommand(); ;
+                            sl.SelectWorksheet(hojas[NumeroHoja]);
 
-                            OleDbDataAdapter oleda = new OleDbDataAdapter();
+                            SLWorksheetStatistics stats = sl.GetWorksheetStatistics();
 
-                            DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+                            int ultimaCol = stats.EndColumnIndex;
+                            int ultimaFil = stats.EndRowIndex;
+                            int columnaInicio = stats.StartColumnIndex;
+                            int filaInicio = stats.StartRowIndex;
 
-                            string sheetName = string.Empty;
-
-                            if (dt != null)
+                            for (int h = 1; h <= stats.EndColumnIndex; h++)
                             {
-
-                                sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
-
+                                DtExcel.Columns.Add(h.ToString());
                             }
 
-                            cmd.Connection = oledbConn;
+                            for (int i = filaInicio; i <= ultimaFil; i++)
+                            {
+                                DrExcel = DtExcel.NewRow();
+                                for (int j = columnaInicio; j < ultimaCol; j++)
+                                {
+                                    //tomamos los valores de las celdas para el datatable
+                                    if (sl.GetCellValueAsString(i, j) != null)
+                                    {
+                                        string val = sl.GetCellValueAsString(i, j);
+                                        DrExcel[j.ToString()] = val;
+                                    }
 
-                            cmd.CommandType = CommandType.Text;
+                                }
+                                DtExcel.Rows.Add(DrExcel);
+                            }
+                            DsExcel.Tables.Add(DtExcel);
+                            fs.Close();
+                            sl.Dispose();
+                            //oledbConn.Open();
 
-                            cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
+                            //OleDbCommand cmd = new OleDbCommand(); ;
 
-                            oleda = new OleDbDataAdapter(cmd);
+                            //OleDbDataAdapter oleda = new OleDbDataAdapter();
 
-                            oleda.Fill(DsExcel, "excelData");
+                            //DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+
+                            //string sheetName = string.Empty;
+
+                            //if (dt != null)
+                            //{
+
+                            //    sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
+
+                            //}
+
+                            //cmd.Connection = oledbConn;
+
+                            //cmd.CommandType = CommandType.Text;
+
+                            //cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
+
+                            //oleda = new OleDbDataAdapter(cmd);
+
+                            //oleda.Fill(DsExcel, "excelData");
 
                         }
                         catch (Exception ex)
                         {
+                            Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo+" "+archivo);
                             return ex.Message;
                         }
-                        finally
-                        {
-                            oledbConn.Close();
-                        }
+                        //finally
+                        //{
+                        //    oledbConn.Close();
+                        //}
                         //Llenamos una lista de String con todas las filas del dataset, agregando ceros o espacion segun su parametrizacion
                         foreach (DataRow row in DsExcel.Tables[0].Rows)
                         {
@@ -354,7 +394,7 @@ namespace Bancos.PS.Servicios
                     ds1.Tables.Add(dt1);
                     //**************************************************************************
                     //**************************************************************************
-                                        
+
                     //SE CREA LA CARPETA DONDE VAN A QUEDAR LOS ARCHIVOS DE RECAUDO DIARIO SI NO EXISTE
                     if (!Directory.Exists(Directorio))
                     {
@@ -380,7 +420,7 @@ namespace Bancos.PS.Servicios
                             objL.pTipoArchivo = TipoProcesoXCuenta;
                             objL.pTipoProceso = "GEN";
                             new LogsLN().insertar(objL);
-                        //    nombreArchivo = String.Empty; Se comentarea linea para traer el nombre del archivo
+                            //    nombreArchivo = String.Empty; Se comentarea linea para traer el nombre del archivo
                             registrosLote = 0;
                         }
                         ciclo = 0;
@@ -388,7 +428,7 @@ namespace Bancos.PS.Servicios
                     }
 
                     //AQUI Validar porque genera error y descomentariar
-                 
+
                     //foreach (DataRow row in LineasArmadasdt.Rows)
                     //{
                     //    guardarLineas(row[0].ToString(), row[1].ToString(), row[2].ToString(),
@@ -400,7 +440,7 @@ namespace Bancos.PS.Servicios
                     //File.Move(archivo, RutaSalida + nombre);
 
                     System.Threading.Thread.Sleep(1000);
-                    
+
                 }
 
                 return "Proceso " + tipoArchivo + " ejecutado con exito!!";
@@ -416,7 +456,7 @@ namespace Bancos.PS.Servicios
                 objL.pTipoProceso = "GEN";
                 new LogsLN().insertar(objL);
                 return ex.Message;
-                
+
             }
         }
 
@@ -484,13 +524,13 @@ namespace Bancos.PS.Servicios
                                               Convert.ToString(Convert.ToDateTime(FechaTransaccion).ToString("ddMMyyyy")),
                                               "_", writeMilitaryTime(DateTime.Now), "_", ConsecutivoArchivo, ".txt");
                 //MRT Cambio nombre asignado por el sistema por nombre original
-              //  nombreArchivo = NombreOriginal.Trim()+ ".txt";
+                //  nombreArchivo = NombreOriginal.Trim()+ ".txt";
                 //SE CREA ESTE SLEEP PARA QUE NO SOBRESCRIBA EL ARCHIVO Y GENERE LOS N ARCHIVOS POR FECHA
                 System.Threading.Thread.Sleep(2000);
-             //   nombreArchivo = NombreOriginal.Trim() + DateTime.Now.ToString().Replace("/", "").Replace(".", "").Replace(" ", "").Replace(":", "") + ".txt";
+                //   nombreArchivo = NombreOriginal.Trim() + DateTime.Now.ToString().Replace("/", "").Replace(".", "").Replace(" ", "").Replace(":", "") + ".txt";
                 nombreArchivo = NombreOriginal.Trim() + Convert.ToString(Convert.ToDateTime(FechaTransaccion).ToString("ddMMyyyy")) + ".txt";
                 sw = new StreamWriter(Directorio + nombreArchivo, false);
-                
+
                 #region Armar Linea Encabezado Archivo
 
                 asignacionCampos.Add(0, "1EA");
@@ -506,7 +546,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-                
+
                 #region Armar Linea Encabezado Lote
 
                 asignacionCampos.Add(0, "2EL");
@@ -517,7 +557,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-               
+
                 #region Armar Linea Detalle
 
                 for (int i = ciclo; i < ciclo + Limite; i++)
@@ -553,7 +593,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-               
+
                 #region Armar Linea Control Lote
 
                 asignacionCampos.Add(0, "4CL");
@@ -566,7 +606,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-               
+
                 #region Armar Linea Control Archivo
 
                 asignacionCampos.Add(0, "5CA");
@@ -579,7 +619,7 @@ namespace Bancos.PS.Servicios
                 asignacionCampos.Clear();
 
                 #endregion
-                
+
                 sw.Close();
             }
             catch (Exception ex)
@@ -649,9 +689,9 @@ namespace Bancos.PS.Servicios
                         caracterRelleno = ' ';
                     //Aqui MRT
                     string Valor_ = lineaDatos[i].ToString();
-                    
+
                     decimal ValorD = 0;
-                   if (objAso.pTipoDato == "DE")
+                    if (objAso.pTipoDato == "DE")
                     {
                         if (objAso.pTipoDato == "DE" && lineaDatos[i].Contains(CaracterDecimal))
                         {
@@ -671,7 +711,7 @@ namespace Bancos.PS.Servicios
                     {
                         linea += rellenarCampo(lineaDatos[i].ToString().Trim(), objAso.pAlineacion, Convert.ToInt32(objAso.pLongitud), caracterRelleno);
                     }
-                    
+
                     i++;
                 }
                 return linea;
@@ -713,7 +753,7 @@ namespace Bancos.PS.Servicios
                                 valor = armarCampo(objAso, campos[1]);
                             else if (objAso.pNombreCampo.Equals("Número de cuenta"))
                                 valor = armarCampo(objAso, campos[2]);
-                            else if (objAso.pNombreCampo.Equals("Hora de grabación del Archivo"))                                                                 
+                            else if (objAso.pNombreCampo.Equals("Hora de grabación del Archivo"))
                                 valor = armarCampo(objAso, String.Empty);
                             else if (objAso.pNombreCampo.Equals("Modificador de archivo"))
                                 valor = armarCampo(objAso, campos[4]);
@@ -764,7 +804,7 @@ namespace Bancos.PS.Servicios
                         {
                             valor = "02";
                         }
-                    
+
                     }
 
 
@@ -1015,7 +1055,7 @@ namespace Bancos.PS.Servicios
             string j = "w";
             if (objBan.pNombreCampo == "Forma de Pago" || objBan.pNombreCampo == "Medios de Pago")
                 j = "w";
-      
+
             String campo = String.Empty;
             switch (objBan.pTipoDato)
             {
@@ -1102,7 +1142,7 @@ namespace Bancos.PS.Servicios
                 f[2] = fecha.Substring(format[0].Length + format[1].Length + 2 * x, format[2].Length);
             }
 
-           
+
             for (int i = 0; i < format.Length; i++)
             {
                 if (format[i].ToString().Equals("yyyy") || format[i].ToString().Equals("yy"))

@@ -6,6 +6,8 @@ using System.Web;
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Data;
+using System.Configuration;
 
 namespace Bancos.PS.Servicios.Correo
 {
@@ -24,13 +26,13 @@ namespace Bancos.PS.Servicios.Correo
                 foreach (String correo in correosEnvio)
                 {
                     if (email_valido(correo))
-                    _Correo.To.Add(correo);
+                        _Correo.To.Add(correo);
                 }
                 if (_Correo.To.Count == 0)
                     return;
                 _Correo.Subject = "Archivo " + tipoArchivo;
                 _Correo.Priority = MailPriority.High;
-                _Correo.Body = "Buenos Días, \n \n" + "Se adjunta el siguiente Archivo " + tipoArchivo  + " : \n \n" +
+                _Correo.Body = "Buenos Días, \n \n" + "Se adjunta el siguiente Archivo " + tipoArchivo + " : \n \n" +
                                "Nombre del Archivo : " + nombreArchivo + " \n \n" +
                                "Número de Lineas : " + Convert.ToInt32(lineasArchivo);
                 _Correo.Attachments.Add(new Attachment(@archivoSalida + nombreArchivo));
@@ -61,12 +63,12 @@ namespace Bancos.PS.Servicios.Correo
                 foreach (String correo in correosControl)
                 {
                     if (email_valido(correo))
-                    _Correo.To.Add(correo);
+                        _Correo.To.Add(correo);
                 }
                 foreach (String correo in correosEnvio)
                 {
                     if (email_valido(correo))
-                    Destinatarios = Destinatarios + correo + "\n";
+                        Destinatarios = Destinatarios + correo + "\n";
                 }
                 if (_Correo.To.Count == 0)
                     return;
@@ -104,7 +106,7 @@ namespace Bancos.PS.Servicios.Correo
                 foreach (String correo in correosControl)
                 {
                     if (email_valido(correo))
-                    _Correo.To.Add(correo);
+                        _Correo.To.Add(correo);
                 }
                 if (_Correo.To.Count == 0)
                     return;
@@ -173,7 +175,7 @@ namespace Bancos.PS.Servicios.Correo
                 foreach (String correo in correosControl)
                 {
                     if (email_valido(correo))
-                    _Correo.To.Add(correo);
+                        _Correo.To.Add(correo);
                 }
                 if (_Correo.To.Count == 0)
                     return;
@@ -192,7 +194,7 @@ namespace Bancos.PS.Servicios.Correo
             }
             catch
             {
-                throw new System.Exception("Ocurrio un error al enviar archivo por correo");
+
             }
         }
         //ENVIA LOS CORREOS NOTIFICANDO LOS ERRORES CUANDO SE IBAN A CREAR LOS ARCHIVOS PAGOS ONLINE
@@ -202,31 +204,37 @@ namespace Bancos.PS.Servicios.Correo
         {
             try
             {
-                String Destinatarios = String.Empty;
-                MailMessage _Correo = new MailMessage();
-                _Correo.From = new MailAddress(remitente);
+                //String Destinatarios = String.Empty;
+                //MailMessage _Correo = new MailMessage();
+                //_Correo.From = new MailAddress(remitente);
 
-                foreach (String correo in correosControl)
-                {
-                    if (email_valido(correo))
-                    _Correo.To.Add(correo);
-                }
-                if (_Correo.To.Count == 0)
-                    return;
-                _Correo.Subject = "Archivo " + tipoArchivo + " - Error en el Proceso";
-                _Correo.Priority = MailPriority.High;
-                _Correo.Body = "Buenos Días, \n \n" + "Ocurrio un error en el proceso de generación del archivo " + tipoArchivo + " del Banco: \n \n" +
+                //foreach (String correo in correosControl)
+                //{
+                //    if (email_valido(correo))
+                //        _Correo.To.Add(correo);
+                //}
+                //if (_Correo.To.Count == 0)
+                //    return;
+                //_Correo.Subject = "Archivo " + tipoArchivo + " - Error en el Proceso";
+                //_Correo.Priority = MailPriority.High;
+                //_Correo.Body = "Buenos Días, \n \n" + "Ocurrio un error en el proceso de generación del archivo " + tipoArchivo + " del Banco: \n \n" +
+                //                    nombreBanco.ToUpper() + " \n \n" +
+                //                   "Fallo : " + error + " \n \n";
+                //SmtpClient objSmtpClient = new SmtpClient("exchange");
+                //objSmtpClient.Host = "chevyplan-com-co.mail.protection.outlook.com";
+                //objSmtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+                //objSmtpClient.Send(_Correo);
+
+                string email = ConfigurationManager.AppSettings["correoSoporte"];
+
+                EnvioMail("", "Archivo " + tipoArchivo + " - Error en el Proceso", "Buenos Días, \n \n" + "Ocurrio un error en el proceso de generación del archivo " + tipoArchivo + " del Banco: \n \n" +
                                     nombreBanco.ToUpper() + " \n \n" +
-                                   "Fallo : " + error + " \n \n";
-                SmtpClient objSmtpClient = new SmtpClient("exchange");
-                objSmtpClient.Host = "chevyplan-com-co.mail.protection.outlook.com";
-                objSmtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-                objSmtpClient.Send(_Correo);
+                                   "Fallo : " + error + " \n \n", email, email, email);
             }
             catch
             {
-                throw new System.Exception("Ocurrio un error al enviar correo");
+
             }
         }
         private Boolean email_valido(String email)
@@ -247,6 +255,35 @@ namespace Bancos.PS.Servicios.Correo
             else
             {
                 return false;
+            }
+        }
+        private void EnvioMail(string _Adjunto, string _Asunto, string _Mensaje, string _Para, string _Desde, string _Copia)
+        {
+            wsenviocorreos.Service EnvioCorreo = new wsenviocorreos.Service();
+            DataRow rowC;
+            try
+            {
+                DataSet DsCorreos = new DataSet();
+                DsCorreos.Tables.Add("Reportes");
+                DsCorreos.Tables["Reportes"].Columns.Add("strTo");
+                DsCorreos.Tables["Reportes"].Columns.Add("strCc");
+                DsCorreos.Tables["Reportes"].Columns.Add("strCo");
+                DsCorreos.Tables["Reportes"].Columns.Add("strSubject");
+                DsCorreos.Tables["Reportes"].Columns.Add("strMessaje");
+                DsCorreos.Tables["Reportes"].Columns.Add("strPath");
+
+                rowC = DsCorreos.Tables["Reportes"].NewRow();
+                rowC["strTo"] = _Para;
+                rowC["strCo"] = _Copia;
+                rowC["strSubject"] = _Asunto;
+                rowC["strMessaje"] = _Mensaje;
+                rowC["strPath"] = _Adjunto.Trim();
+                DsCorreos.Tables["Reportes"].Rows.Add(rowC);
+                EnvioCorreo.EnvioCorreos(DsCorreos, _Desde, false);
+            }
+            catch (Exception)
+            {
+
             }
         }
 

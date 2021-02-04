@@ -157,7 +157,8 @@ namespace Bancos.PS.Servicios.Archivos
                 lista.AddRange(Directory.GetFiles(directorio, "*.OW3"));
                 lista.AddRange(Directory.GetFiles(directorio, "*.RDC"));
                 lista.AddRange(Directory.GetFiles(directorio, "*."));
-                lista.AddRange(Directory.GetFiles(directorio, "*.xls"));
+                //lista.AddRange(Directory.GetFiles(directorio, "*.xls")); /*SAU DEBE SER SUPERIOR A 2003 */
+                lista.AddRange(Directory.GetFiles(directorio, "*.xlsx"));
                 lista.AddRange(Directory.GetFiles(directorio, "*.csv"));
                 lista.AddRange(Directory.GetFiles(directorio, "*.FIL"));
                 lista.AddRange(Directory.GetFiles(directorio, "*.inf"));

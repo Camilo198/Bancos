@@ -21,14 +21,14 @@ namespace WebServiceBancos
             //Pagina para realizar debug al servicio
             WebServiceBancos.WsBancos prueba = new WebServiceBancos.WsBancos();
 
-            //Descomentariar pruebas
-            //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_01012018_PO31122017_0000.txt", "S");
-            //Comentariar a produccion
-            //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\BBVA\Recibidos\", @"20110522479CO.MR5", "N");
-
+            ////Descomentariar pruebas
+            ////string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE020V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", "00015_01012018_PO31122017_0000.txt", "S");
+            ////Comentariar a produccion
+            //string resultado = prueba.LecturaPagos("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\Recaudo\PagosOnline\Recibidos\", @"00015_2601202X_PO26012021_0001.txt", "S");
+            string resultado = prueba.LecturaPagos("", "", @"\C:\Users\steven.aguilar\Desktop\", @"new.txt", "S");
             //string res = prueba.ProcesarPagosSinSubir("", "");
 
-            string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Bancolombia\Procesados\", "00015_18012021_TC_01012021_172459_A.txt");
+            //  string resultado = prueba.PagosTarjeta("", "", @"\\SBOGCHE016V\ArchPlanos\PAGOS\Fiducia1\TC\Occidente\Procesados\", "27012021_10_25_41_ADQ21OCC0127008525.TXT");
 
 
             //string ServidorSico = ConfigurationManager.AppSettings["server"].ToString();            /*PAGOS*/
