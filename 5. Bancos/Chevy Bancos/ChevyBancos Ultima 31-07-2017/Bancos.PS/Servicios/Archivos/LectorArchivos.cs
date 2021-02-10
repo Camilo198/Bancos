@@ -62,9 +62,10 @@ namespace Bancos.PS.Servicios.Archivos
         public List<String> leerArchivoTarjetasCSV(String rutaArchivo, List<Bancos.EN.Tablas.EstructuraArchivo> ListaDeEstructuraArchivoBanco)
         {
             List<String> listaLineas = new List<String>();
+            StreamReader objLector = null;
             try
             {
-                StreamReader objLector = new StreamReader(rutaArchivo, System.Text.Encoding.GetEncoding(1252));
+                objLector = new StreamReader(rutaArchivo, System.Text.Encoding.GetEncoding(1252));
                 String strLinea = "";
                 int cont = 0;
                 while (strLinea != null)
@@ -72,9 +73,6 @@ namespace Bancos.PS.Servicios.Archivos
                     strLinea = objLector.ReadLine();
                     if (strLinea != null && strLinea != String.Empty)
                     {
-                        //strLinea = strLinea.Replace(@";", " ");
-                        //strLinea = strLinea.Replace(@",", " ");
-
                         string[] listaLinea = strLinea.Split(',');
 
                         for (int i = 0; i < listaLinea.Length; i++)
@@ -96,13 +94,21 @@ namespace Bancos.PS.Servicios.Archivos
                         {
                             strLinea = strLinea + listaLinea[i];
                         }
-                        listaLineas.Add(strLinea);//REVISAR ARCHIVOS AL QUITARLES LA COMA
+                        if (!string.IsNullOrWhiteSpace(strLinea)) // Cuando viene con , vacia
+                        {
+                            listaLineas.Add(strLinea);//REVISAR ARCHIVOS AL QUITARLES LA COMA
+                        }
+
                     }
                 }
                 objLector.Close();
             }
             catch (Exception ex)
             {
+                if (objLector != null)
+                {
+                    objLector.Close();
+                }
                 objLog.Error(ex.Message);
             }
             return listaLineas;
@@ -124,8 +130,8 @@ namespace Bancos.PS.Servicios.Archivos
         {
             try
             {
-                if (rutaArchivo.Contains(".xls"))
-                    File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + ".xls");
+                if (rutaArchivo.Contains(".xlsx"))
+                    File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + ".xlsx");
                 else
                     File.Move(rutaArchivo, RutaProcesado + "Recaudo_" + DateTime.Now.ToString("yyyyMMdd") + "_" + writeMilitaryTime(DateTime.Now) + DateTime.Now.ToString("ss") + NombreArchivo + ".txt");
             }

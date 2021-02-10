@@ -50,7 +50,7 @@ namespace Bancos.PS
             //PagosOnline pol = new PagosOnline();
             //msg = pol.ServicioPagosOnline("Lugar Pago 66", "00015", "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\Recaudo\\PagosOnline\\Recibidos\\", arrMail, "00", "016525785990", "00", "steven.aguilar@chevyplan.com.co", "TAREA PROGRAMADA", "POL1");
 
-            ////// TARJETA CODENSA NUEVA
+            //// TARJETA CODENSA NUEVA
             //msg = tc.ServicioTarjetasCredito("TCR", "64", "00031",
             //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Recibidos\\",
             //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Codensa\\Procesados\\",

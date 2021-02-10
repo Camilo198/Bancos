@@ -304,14 +304,14 @@ namespace Bancos.PS.Servicios
                     #region LECTURA ARCHIVO PLANO
                     else
                     {
-                        //if (archivo.Contains(".csv"))
-                        //{
-                        //    lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
-                        //}
-                        //else
-                        //{
-                        lineasArchivo = objLector.leerArchivoTarjetas(archivo);
-                        //}
+                        if (archivo.Contains(".csv"))
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
+                        }
+                        else
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        }
 
                     }
                     #endregion
@@ -424,14 +424,27 @@ namespace Bancos.PS.Servicios
                     {
                         System.IO.Directory.CreateDirectory(Directorio);
                     }
-
+                    int limite = 0;
+                    bool valido = false;
                     //EN ESTE IF SE CREAN LOS ARCHIVOS CON LOS PAGOS 
                     if (ds1.Tables[0].Rows.Count > 0)
                     {
                         LimitesSuperior = obtenerLimites(ds1);
                         for (int i = 0; i < LimitesSuperior.Count; i++)
                         {
-                            armarArchivo(ds1, Convert.ToInt16(LimitesSuperior[i]), IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
+                            valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
+                            if (valido)
+                            {
+                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
+                            }
+                            else
+                            {
+                                limite = (int)LimitesSuperior[i];
+                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
+                            }
+
+                            limite = 0;
+                            valido = false;
 
                             if (CorreosControl.Count > 0)
                                 Correo.enviarNotificaciones(Directorio, (String[])CorreosControl.ToArray(typeof(String)), nombreArchivo, Remitente,
@@ -472,8 +485,10 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                if (CorreosControl.Count > 0)
-                    Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo);
+                //if (CorreosControl.Count > 0)
+
+                Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.ToString(), tipoArchivo + " " + nombreArchivo);
+
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
                 objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : " + ex.Message;
@@ -841,21 +856,29 @@ namespace Bancos.PS.Servicios
         private Dictionary<Int32, String> valorCampo(String Linea, List<Bancos.EN.Tablas.EstructuraArchivo> ListaDeEstructuraArchivoBanco)
         {
             Dictionary<Int32, String> asignacion = new Dictionary<Int32, String>();
-            asignacion.Add(0, "3DT");
-            Int32 inicio = 0;
-            String valor = String.Empty;
-            //aqui
-            string j = "";
-            foreach (Bancos.EN.Tablas.EstructuraArchivo objEst in ListaDeEstructuraArchivoBanco)
+            try
             {
-                if (objEst.pNombreCampo == "Código Autorización")
-                    j = "";
-                valor = String.Empty;
-                valor = armarCampoBanco(objEst, evaluarCampo(objEst, Linea.Substring(inicio, objEst.pLongitud.Value).Trim()));
-                asignacion.Add(objEst.pOid.Value, valor);
-                inicio = inicio + objEst.pLongitud.Value;
+                asignacion.Add(0, "3DT");
+                Int32 inicio = 0;
+                String valor = String.Empty;
+                //aqui
+                string j = "";
+                foreach (Bancos.EN.Tablas.EstructuraArchivo objEst in ListaDeEstructuraArchivoBanco)
+                {
+                    if (objEst.pNombreCampo == "Código Autorización")
+                        j = "";
+                    valor = String.Empty;
+                    valor = armarCampoBanco(objEst, evaluarCampo(objEst, Linea.Substring(inicio, objEst.pLongitud.Value).Trim()));
+                    asignacion.Add(objEst.pOid.Value, valor);
+                    inicio = inicio + objEst.pLongitud.Value;
+                }
+                return asignacion;
             }
-            return asignacion;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+
         }
 
         //EN ESTA RUTINA SE EVALUA EL CAMPO PARA HACERLE SUMATORIA SI EN UN CAMPO QUE SE DEBE SUMAR, SI ES UNA CAMPO QUE REQUIERE
@@ -864,11 +887,14 @@ namespace Bancos.PS.Servicios
         {
 
             //CUANDO EL OBJETO REQUIERE TRANSFORMACION BUSCA UN CODIGO EN UNA TABLA PRECARGADA
-            if (objEA.pRequiereCambio == true)
+            if (objEA.pRequiereCambio == true && tablaE.Rows.Count > 0)
             {
                 return obtenerEquivalencia(objEA, Convert.ToString(valor), true);//RETORNA
             }
-
+            if (objEA.pRequiereCambio == true && valor.Contains("0000/00/00")) // SAU FECHA DE CODENSA
+            {
+                valor = DateTime.Now.ToString(objEA.pFormatoFecha);
+            }
             return valor;
         }
 

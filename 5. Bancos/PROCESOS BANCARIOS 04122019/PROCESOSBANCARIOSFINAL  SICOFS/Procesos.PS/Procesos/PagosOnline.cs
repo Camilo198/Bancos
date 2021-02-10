@@ -70,7 +70,7 @@ namespace Procesos.PS.Procesos
                     {
                         procesoConError = true;
                     }
-                    RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
+                    //RespuestaProceso.Add(bank.pNombreCuenta + ": " + mensaje);
                     CorreosControl.Clear();
                 }
 
@@ -134,8 +134,8 @@ namespace Procesos.PS.Procesos
                                                             (String[])CorreosControl.ToArray(typeof(String)),
                                                             CodigoBanco, NumCuenta, TipoCuenta, Remitente,
                                                             "TAREA PROGRAMADA", TipoProceso);
-                ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos();
-                mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, ArchivoSalida, "S");
+                //ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos(); SAU: CODIGO MUERTO WSBANCOS LEE 1 A 1 MAS ADELANTE
+                //mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, ArchivoSalida, "S");
 
                 return mens + "-" + mensaje;
             }
