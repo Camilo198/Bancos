@@ -443,9 +443,6 @@ namespace Bancos.PS.Servicios
                                 armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
                             }
 
-                            limite = 0;
-                            valido = false;
-
                             if (CorreosControl.Count > 0)
                                 Correo.enviarNotificaciones(Directorio, (String[])CorreosControl.ToArray(typeof(String)), nombreArchivo, Remitente,
                                                             registrosLote, tipoArchivo);
@@ -459,6 +456,9 @@ namespace Bancos.PS.Servicios
                             new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
                             nombreArchivo = String.Empty;
                             registrosLote = 0;
+
+                            limite = 0;
+                            valido = false;
                         }
                         ciclo = 0;
                         LimitesSuperior.Clear();

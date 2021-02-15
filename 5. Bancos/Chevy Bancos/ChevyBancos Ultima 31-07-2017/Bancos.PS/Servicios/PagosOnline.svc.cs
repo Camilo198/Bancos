@@ -30,7 +30,7 @@ using System.Threading;
 namespace Bancos.PS.Servicios
 {
     // NOTA: puede usar el comando "Rename" del menú "Refactorizar" para cambiar el nombre de clase "PagosOnline" en el código, en svc y en el archivo de configuración a la vez.
-    
+
     public class PagosOnline : IPagosOnline
     {
 
@@ -41,7 +41,7 @@ namespace Bancos.PS.Servicios
         private List<Bancos.EN.Tablas.EstructuraArchivo> ListaLinea4CL { get; set; }
         private List<Bancos.EN.Tablas.EstructuraArchivo> ListaLinea5CA { get; set; }
         private List<Bancos.EN.Tablas.EstructuraArchivo> ListaEstructuraArchivoBancoEncabezadoArchivo { get; set; }//LISTA QUE TRAE EL DATO DE LA FECHA DE CORTE
-        
+
         StreamWriter sw;
         String LineaArmada1EA = String.Empty; // CONTIENE LA LINEA ARMADA DEL ENCABEZADO ARCHIVO
         String LineaArmada2EL = String.Empty; // CONTIENE LA LINEA ARMADA DEL ENCABEZADO LOTE
@@ -59,7 +59,7 @@ namespace Bancos.PS.Servicios
         String tipocuentabanco = String.Empty;
         String TipoProcesoXCuenta = String.Empty;
 
-        String[] CorreosNoti = new  String[1];
+        String[] CorreosNoti = new String[1];
         #endregion
 
         #region TABLA CON LINEAS PARA GUARDAR EN LA BD
@@ -73,29 +73,32 @@ namespace Bancos.PS.Servicios
             TipoProcesoXCuenta = TipoProceso;
             switch (TipoCuenta)
             {
-                case "Ahorros": 
-                    { tipocuentabanco = "1";
-                    break;
+                case "Ahorros":
+                    {
+                        tipocuentabanco = "1";
+                        break;
                     }
-                case "Corriente": 
-                    { tipocuentabanco = "2";
-                    break;
-                    }                
-                default: 
-                    { tipocuentabanco = "0";
-                    break;
-                    }                    
+                case "Corriente":
+                    {
+                        tipocuentabanco = "2";
+                        break;
+                    }
+                default:
+                    {
+                        tipocuentabanco = "0";
+                        break;
+                    }
             }
 
 
-           
+
             DataSet tablaContratos = new DataSet();
             PagosOnlineLN PagosOnlineABR1 = new PagosOnlineLN();
             tablaContratos = PagosOnlineABR1.consultar(); // AQUI MRT consultar en paginaweb,chp_confirmacion_pago
-           // contratos.Timeout = -1;
+                                                          // contratos.Timeout = -1;
             Logs objL = new Logs();
             EnviarCorreo Correo = new EnviarCorreo();
-            
+
             if (tablaContratos.Tables.Count == 0 || tablaContratos.Tables[0].Rows.Count == 0)
             {
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
@@ -103,7 +106,7 @@ namespace Bancos.PS.Servicios
                 objL.pDetalle = NombreCuenta + ", Pagos Online : No se encontraron registros para procesar";
                 objL.pTipoArchivo = TipoProcesoXCuenta;
                 objL.pTipoProceso = "GEN";
-                new LogsLN().insertar(objL);  
+                new LogsLN().insertar(objL);
                 return "No se encontraron registros para procesar";
             }
 
@@ -113,11 +116,11 @@ namespace Bancos.PS.Servicios
             ListaEstructuraArchivoBancoEncabezadoArchivo.AddRange(consultarEstructuraArchivoBanco(IdCuentaBancoEpicor, "1EA"));
             //*********************************************************************************
 
-          // AQUI se elima porque el contro no va a ser la fecha sino los registros sin procesar. Y este registro en la tabla de estructura archivo estaba generando inconsistencia al generar el encabexado de archivo
+            // AQUI se elima porque el contro no va a ser la fecha sino los registros sin procesar. Y este registro en la tabla de estructura archivo estaba generando inconsistencia al generar el encabexado de archivo
             //DateTime fechaLimite = new DateTime(Convert.ToInt32(ListaEstructuraArchivoBancoEncabezadoArchivo[0].pValor.Substring(0, 4)),
             //                                   Convert.ToInt32(ListaEstructuraArchivoBancoEncabezadoArchivo[0].pValor.Substring(5, 2)),
             //                                   Convert.ToInt32(ListaEstructuraArchivoBancoEncabezadoArchivo[0].pValor.Substring(8, 2)));
-       
+
 
             DataSet ds1 = new DataSet();
             DataTable dt1 = new DataTable();
@@ -174,22 +177,34 @@ namespace Bancos.PS.Servicios
 
             try
             {
+                int limite = 0;
+                bool valido = false;
+
                 if (ds1.Tables[0].Rows.Count != 0)
                 {
                     LimitesSuperior = obtenerLimites(ds1);
                     for (int i = 0; i < LimitesSuperior.Count; i++)
                     {
-
-                        escribirArchivo(CodigoBanco, IdCuentaBancoEpicor, NumCuenta, tipocuentabanco,
-                                        ds1, Convert.ToInt16(LimitesSuperior[i]));
+                        valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
+                        if (valido)
+                        {
+                            escribirArchivo(CodigoBanco, IdCuentaBancoEpicor, NumCuenta, tipocuentabanco,
+                                        ds1, limite);
+                        }
+                        else
+                        {
+                            limite = (int)LimitesSuperior[i];
+                            escribirArchivo(CodigoBanco, IdCuentaBancoEpicor, NumCuenta, tipocuentabanco,
+                                        ds1, limite);
+                        }
 
                         int cicloArchivos = 0;
-                        for (int j = ciclo; j < ciclo + Convert.ToInt64(LimitesSuperior[i]); j++)
+                        for (int j = ciclo; j < ciclo + limite; j++)
                         {
-                           //AQUI
+                            //AQUI
                             // contratos.Pagosonline_Actualizacion(ds1.Tables[0].Rows[j].ItemArray[0].ToString(),
-                              //                            ds1.Tables[0].Rows[j].ItemArray[1].ToString(),
-                              //                             DateTime.Now.ToString("yyMMdd"));
+                            //                            ds1.Tables[0].Rows[j].ItemArray[1].ToString(),
+                            //                             DateTime.Now.ToString("yyMMdd"));
                             cicloArchivos += 1;
                         }
 
@@ -200,16 +215,16 @@ namespace Bancos.PS.Servicios
                         }
 
                         LineasArmadasdt.Clear();
-                       
+
                         //AQUI MRT
 
-                         CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
-// Cambiar al pasar a produccion
+                        CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
+                        // Cambiar al pasar a produccion
                         //CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
-                            Correo.enviarNotificaciones(Directorio, CorreosNoti , nombreArchivo, Remitente,
-                                                     registrosLote, tipoArchivo);
+                        Correo.enviarNotificaciones(Directorio, CorreosNoti, nombreArchivo, Remitente,
+                                                 registrosLote, tipoArchivo);
 
-                        ciclo = ciclo + Convert.ToInt16(LimitesSuperior[i]);
+                        ciclo = ciclo + limite;
 
                         //SE GUARDA EL ESTADO DEL PROCESO
                         objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
@@ -225,6 +240,9 @@ namespace Bancos.PS.Servicios
 
                         string Actualiza = PagosOnlineABR1.Ejecutar();
 
+                        limite = 0;
+                        valido = false;
+
                         Thread.Sleep(1000);
                     }
                     ciclo = 0;
@@ -234,14 +252,14 @@ namespace Bancos.PS.Servicios
             catch (Exception ex)
             {
                 CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
- // Cambiar paso produccion            //CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
-                Correo.enviarNotificacionesError(NombreCuenta,CorreosNoti, Remitente, ex.Message, tipoArchivo);
+                // Cambiar paso produccion            //CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
+                Correo.enviarNotificacionesError(NombreCuenta, CorreosNoti, Remitente, ex.Message, tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
                 objL.pDetalle = NombreCuenta + ", Pagos Online : " + ex.Message;
                 objL.pTipoArchivo = TipoProcesoXCuenta;
                 objL.pTipoProceso = "GEN";
-                new LogsLN().insertar(objL);                  
+                new LogsLN().insertar(objL);
                 return ex.Message;
             }
 
@@ -335,7 +353,7 @@ namespace Bancos.PS.Servicios
                     ConsecutivoArchivo = "A";
                 else
                     ConsecutivoArchivo = consecutivo(numColumnas);
-                
+
 
                 #region Armar Linea Encabezado Archivo
 
@@ -359,10 +377,10 @@ namespace Bancos.PS.Servicios
                 #region Armar Linea Detalle
 
                 for (int i = ciclo; i < ciclo + Limite; i++)
-                {          
+                {
 
                     line3DT.Add("3DT");
-                    if(String.IsNullOrEmpty(tabla.Tables[0].Rows[i].ItemArray[4].ToString().Trim()))
+                    if (String.IsNullOrEmpty(tabla.Tables[0].Rows[i].ItemArray[4].ToString().Trim()))
                         line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[0].ToString().Trim());//CONTRATO
                     else
                         line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[4].ToString().Trim());//CONTRATO
@@ -398,8 +416,8 @@ namespace Bancos.PS.Servicios
                     {
                         line3DT.Add(tabla.Tables[0].Rows[i].ItemArray[7].ToString().Trim());//Codigo Autorizacion
                     }
-//---------------------------------
-                    
+                    //---------------------------------
+
                     LineaArmada3DT = armarLineas(line3DT, ListaLinea3DT);
                     sw.WriteLine(LineaArmada3DT);
                     llenarTablaParaActualizados(Fecha, Contrato.ToString("dd/MM/yyyy"), IdCuentaBancoEpicor, ConsecutivoArchivo, LineaArmada3DT);
@@ -443,7 +461,7 @@ namespace Bancos.PS.Servicios
 
                 //AQUI
 
-               // Invocar servicio BancoDtlArchivosProcesados pagos
+                // Invocar servicio BancoDtlArchivosProcesados pagos
 
 
             }
@@ -550,29 +568,31 @@ namespace Bancos.PS.Servicios
                         case "2EL":
                             break;
                         case "3DT":
-                            if (lineaDatos.Count==3){
-                            if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
-                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
-                            else if (objAso.pNombreCampo.Equals("Valor recaudado"))
-                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
+                            if (lineaDatos.Count == 3)
+                            {
+                                if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
+                                else if (objAso.pNombreCampo.Equals("Valor recaudado"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
                             }
-                           
+
                             //Tarjeta Credito       
-                              else{
-                                  if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
-                                      valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
-                                  else if (objAso.pNombreCampo.Equals("Valor recaudado"))
-                                      valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
-                            else if (objAso.pNombreCampo.Equals("Codigo de la sucursal"))
-                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[3]));//Medio PAgo Aplica Sico
-                            else if (objAso.pNombreCampo.Equals("Codigo de la entidad financiera debitada") )
-                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[4]));//Medio PAgo Aplica Ventas
-                            else if (objAso.pNombreCampo.Equals("No. de Autorizacion") )
-                                valor = armarCampo(objAso, Convert.ToString(lineaDatos[5]));//Codigo Autorizacion
+                            else
+                            {
+                                if (objAso.pNombreCampo.Equals("Referencia principal del usuario"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[1]));
+                                else if (objAso.pNombreCampo.Equals("Valor recaudado"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[2]));
+                                else if (objAso.pNombreCampo.Equals("Codigo de la sucursal"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[3]));//Medio PAgo Aplica Sico
+                                else if (objAso.pNombreCampo.Equals("Codigo de la entidad financiera debitada"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[4]));//Medio PAgo Aplica Ventas
+                                else if (objAso.pNombreCampo.Equals("No. de Autorizacion"))
+                                    valor = armarCampo(objAso, Convert.ToString(lineaDatos[5]));//Codigo Autorizacion
                             }
                             //-------
                             break;
-                        
+
 
                         case "4CL":
                             if (objAso.pNombreCampo.Equals("Total registros en lote"))

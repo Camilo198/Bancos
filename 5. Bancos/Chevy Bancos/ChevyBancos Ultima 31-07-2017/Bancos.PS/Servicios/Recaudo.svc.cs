@@ -252,7 +252,7 @@ namespace Bancos.PS.Servicios
                         }
                         catch (Exception ex)
                         {
-                            Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo+" "+archivo);
+                            Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo + " " + archivo);
                             return ex.Message;
                         }
                         //finally
@@ -400,14 +400,26 @@ namespace Bancos.PS.Servicios
                     {
                         System.IO.Directory.CreateDirectory(Directorio);
                     }
-
+                    int limite = 0;
+                    bool valido = false;
                     //EN ESTE IF SE CREAN LOS ARCHIVOS CON LOS PAGOS 
                     if (ds1.Tables[0].Rows.Count > 0)
                     {
                         LimitesSuperior = obtenerLimites(ds1);
                         for (int i = 0; i < LimitesSuperior.Count; i++)
                         {
-                            armarArchivo(ds1, Convert.ToInt16(LimitesSuperior[i]), IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
+
+                            valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
+                            if (valido)
+                            {
+                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
+                            }
+                            else
+                            {
+                                limite = (int)LimitesSuperior[i];
+                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
+                            }
+                            
                             if (CorreosControl.Count > 0)
                                 Correo.enviarNotificaciones(Directorio, (String[])CorreosControl.ToArray(typeof(String)), nombreArchivo, Remitente,
                                                             registrosLote, tipoArchivo);
@@ -422,6 +434,8 @@ namespace Bancos.PS.Servicios
                             new LogsLN().insertar(objL);
                             //    nombreArchivo = String.Empty; Se comentarea linea para traer el nombre del archivo
                             registrosLote = 0;
+                            limite = 0;
+                            valido = false;
                         }
                         ciclo = 0;
                         LimitesSuperior.Clear();
@@ -448,7 +462,7 @@ namespace Bancos.PS.Servicios
             catch (Exception ex)
             {
                 if (CorreosControl.Count > 0)
-                    Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo);
+                    Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.ToString(), tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
                 objL.pDetalle = NombreCuenta + ",  " + tipoArchivo + " : " + ex.Message;
@@ -1053,6 +1067,8 @@ namespace Bancos.PS.Servicios
         private String armarCampoBanco(Bancos.EN.Tablas.EstructuraArchivo objBan, String valor)
         {
             string j = "w";
+            int valorNuevo = 0;
+            bool valido = false;
             if (objBan.pNombreCampo == "Forma de Pago" || objBan.pNombreCampo == "Medios de Pago")
                 j = "w";
 
@@ -1063,7 +1079,17 @@ namespace Bancos.PS.Servicios
                     campo = valor.Trim(); //AQUI valor.TrimStart('0');
                     break;
                 case "DE":
-                    campo = numeroTransformado(valor, objBan.pCantidadDecimales.Value);
+                    valido = int.TryParse(objBan.pCantidadDecimales.ToString(), out valorNuevo);
+                    if (valido)
+                    {
+                        campo = numeroTransformado(valor, valorNuevo);
+                    }
+                    else
+                    {
+                        valorNuevo = (int)objBan.pCantidadDecimales.Value;
+                        campo = numeroTransformado(valor, valorNuevo);
+                    }
+                    
                     break;
                 case "FE":
                     char[] xd = valor.ToCharArray();
@@ -1099,9 +1125,23 @@ namespace Bancos.PS.Servicios
         //DESPUES DE LA COMA.
         private String numeroTransformado(string numero, int decimales)
         {
+            int valorNuevo = 0;
+            bool valido = false;
+            decimal valor = 0;
 
             int divisor = Convert.ToInt32(Math.Pow(10, decimales));
-            decimal valor = Convert.ToDecimal((numero)) / divisor;
+
+            valido = int.TryParse(numero, out valorNuevo);
+            if (valido)
+            {
+                valor = Convert.ToDecimal((numero)) / divisor;
+            }
+            else
+            {
+                valorNuevo = int.Parse(numero, System.Globalization.NumberStyles.AllowLeadingWhite | System.Globalization.NumberStyles.AllowTrailingWhite);
+                valor = Convert.ToDecimal(valorNuevo) / divisor;
+            }
+
             return Convert.ToString(decimal.Round(valor, 2));
 
         }
