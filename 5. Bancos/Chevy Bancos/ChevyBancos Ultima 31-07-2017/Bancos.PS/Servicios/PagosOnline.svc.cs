@@ -253,7 +253,7 @@ namespace Bancos.PS.Servicios
             {
                 CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
                 // Cambiar paso produccion            //CorreosNoti[0]  = "marina.ramirez@chevyplan.com.co";
-                Correo.enviarNotificacionesError(NombreCuenta, CorreosNoti, Remitente, ex.Message, tipoArchivo);
+                Correo.enviarNotificacionesError(NombreCuenta, CorreosNoti, Remitente, ex.ToString(), tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
                 objL.pDetalle = NombreCuenta + ", Pagos Online : " + ex.Message;

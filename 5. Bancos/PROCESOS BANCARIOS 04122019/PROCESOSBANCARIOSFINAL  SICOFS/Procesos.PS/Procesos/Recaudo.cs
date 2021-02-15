@@ -270,6 +270,7 @@ namespace Procesos.PS.Procesos
             String mens;
             try
             {
+                CorreosControl = new ArrayList();
                 ServicioRecaudo.Recaudo procesoRD = new ServicioRecaudo.Recaudo();
                 mens = procesoRD.ServicioRecaudoDiario(NombreCuenta, IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaSalidaEpicor,
                                                         (String[])CorreosControl.ToArray(typeof(String)),

@@ -416,8 +416,7 @@ namespace Bancos.PS.Servicios
                             }
                             else
                             {
-                                limite = (int)LimitesSuperior[i];
-                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
+                                armarArchivo(ds1, Convert.ToInt64(LimitesSuperior[i]), IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
                             }
                             
                             if (CorreosControl.Count > 0)
@@ -461,8 +460,8 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                if (CorreosControl.Count > 0)
-                    Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.ToString(), tipoArchivo);
+                //if (CorreosControl.Count > 0)
+                Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.ToString(), tipoArchivo);
                 objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
                 objL.pUsuario = Usuario;
                 objL.pDetalle = NombreCuenta + ",  " + tipoArchivo + " : " + ex.Message;
@@ -505,7 +504,7 @@ namespace Bancos.PS.Servicios
             return limite;
         }
 
-        private void armarArchivo(DataSet tabla, int Limite, String IdCuentaBanco, String IdCuentaBancoEpicor, String CodigoBanco,
+        private void armarArchivo(DataSet tabla, long Limite, String IdCuentaBanco, String IdCuentaBancoEpicor, String CodigoBanco,
                                      String NumCuenta, String TipoCuenta, string NombreOriginal)
         {
 
@@ -1079,17 +1078,7 @@ namespace Bancos.PS.Servicios
                     campo = valor.Trim(); //AQUI valor.TrimStart('0');
                     break;
                 case "DE":
-                    valido = int.TryParse(objBan.pCantidadDecimales.ToString(), out valorNuevo);
-                    if (valido)
-                    {
-                        campo = numeroTransformado(valor, valorNuevo);
-                    }
-                    else
-                    {
-                        valorNuevo = (int)objBan.pCantidadDecimales.Value;
-                        campo = numeroTransformado(valor, valorNuevo);
-                    }
-                    
+                        campo = numeroTransformado(valor, objBan.pCantidadDecimales.Value);
                     break;
                 case "FE":
                     char[] xd = valor.ToCharArray();
@@ -1134,12 +1123,11 @@ namespace Bancos.PS.Servicios
             valido = int.TryParse(numero, out valorNuevo);
             if (valido)
             {
-                valor = Convert.ToDecimal((numero)) / divisor;
+                valor = Convert.ToDecimal((valorNuevo)) / divisor;
             }
             else
             {
-                valorNuevo = int.Parse(numero, System.Globalization.NumberStyles.AllowLeadingWhite | System.Globalization.NumberStyles.AllowTrailingWhite);
-                valor = Convert.ToDecimal(valorNuevo) / divisor;
+                valor = Convert.ToDecimal(Convert.ToInt64(numero)) / divisor;
             }
 
             return Convert.ToString(decimal.Round(valor, 2));
