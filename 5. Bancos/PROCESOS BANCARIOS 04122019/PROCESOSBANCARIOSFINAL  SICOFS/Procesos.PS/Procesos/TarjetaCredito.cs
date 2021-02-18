@@ -136,7 +136,6 @@ namespace Procesos.PS.Procesos
             String mens;
             try
             {
-                CorreosControl = new ArrayList();
                 ServicioTarjetasCredito.TarjetasCredito procesoTC = new ServicioTarjetasCredito.TarjetasCredito();
                 mens = procesoTC.ServicioTarjetasCredito("TCR", IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaSalida,
                                                     (String[])CorreosControl.ToArray(typeof(String)),

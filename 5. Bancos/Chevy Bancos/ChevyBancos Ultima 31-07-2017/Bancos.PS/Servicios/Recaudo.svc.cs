@@ -163,6 +163,8 @@ namespace Bancos.PS.Servicios
             String archivo = "";
             int errores = 0;
             string err_log = "";
+
+            int cont_control = 0;
             try
             {
                 LectorArchivos objLector = new LectorArchivos();
@@ -419,10 +421,12 @@ namespace Bancos.PS.Servicios
                                 valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
                                 if (valido)
                                 {
+                                    cont_control++;
                                     armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
                                 }
                                 else
                                 {
+                                    cont_control++;
                                     limite = (int)LimitesSuperior[i];
                                     armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco, nombreOriginal);
                                 }
@@ -465,19 +469,19 @@ namespace Bancos.PS.Servicios
                     catch (Exception ex)
                     {
                         errores += 1;
-                        err_log = err_log + " --- " + ex.ToString();
+                        err_log = err_log + " --- " + " Conteo " + cont_control + "\n" + ex.ToString();
                     }
 
                 }
                 if (errores > 0)
                 {
-                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en "+ listaArchivos.Count.ToString() + " archivos procesados " + err_log );
+                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en " + listaArchivos.Count.ToString() + " archivos procesados " + err_log);
                 }
                 else
                 {
                     return "Proceso " + tipoArchivo + " ejecutado con exito!!";
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -658,9 +662,12 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                sw.Close();
+                if (sw != null)
+                {
+                    sw.Close();
+                }
                 File.Delete(Directorio + nombreArchivo);
-                throw new System.Exception(ex.Message);
+                throw new Exception(Directorio + nombreArchivo + " \n " + ex.ToString());
             }
         }
 
@@ -1222,13 +1229,34 @@ namespace Bancos.PS.Servicios
 
         private String convertirNumero(String numero, int decimales)
         {
-
+            String reemplazado = "";
+            long numero_reem = 0;
+            long res = 0;
+            long dec = 0;
             String[] numeros = numero.Split(',');
             if (!numero.Contains(","))
-                return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
-            else
-                return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem); 
+                dec = (long)Math.Pow(10, decimales);
+                res = numero_reem * dec;
 
+                return res.ToString();
+            }
+            else
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem);
+                dec = (long)Math.Pow(10, decimales - numeros[1].Length);
+                res = numero_reem * dec;
+
+                return res.ToString();
+            }
+            //String[] numeros = numero.Split(',');
+            //if (!numero.Contains(","))
+            //    return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
+            //else
+            //    return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
         }
 
         private String consecutivo(int columna)

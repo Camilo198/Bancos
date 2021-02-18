@@ -134,7 +134,7 @@ namespace Procesos.PS.Procesos
                                                             (String[])CorreosControl.ToArray(typeof(String)),
                                                             CodigoBanco, NumCuenta, TipoCuenta, Remitente,
                                                             "TAREA PROGRAMADA", TipoProceso);
-                //ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos(); SAU: CODIGO MUERTO WSBANCOS LEE 1 A 1 MAS ADELANTE
+                //ServicioBancos.WsBancos ProcesoPagos = new ServicioBancos.WsBancos(); SAU: CODIGO MUERTO WSBANCOS LEE 1 A 1 MAS ADELANTE Y ADEMÁS ASÍ NO RESPETA EL PROCESAMIENTO DE ARCHIVOS POR FECHA
                 //mensaje = ProcesoPagos.LecturaPagos("usuario", "Pasword", ArchivoSalida, ArchivoSalida, "S");
 
                 return mens + "-" + mensaje;

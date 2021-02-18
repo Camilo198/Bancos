@@ -174,10 +174,10 @@
     <Content Include="Servicios\PagosOnline.svc" />
     <Content Include="Servicios\Recaudo.svc" />
     <Content Include="Servicios\TarjetasCredito.svc" />
-    <Content Include="Web References\wsenviocorreos\Reference.map">
+    <None Include="Web References\wsenviocorreos\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
-    </Content>
+    </None>
     <None Include="Web References\wsenviocorreos\service.disco" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
