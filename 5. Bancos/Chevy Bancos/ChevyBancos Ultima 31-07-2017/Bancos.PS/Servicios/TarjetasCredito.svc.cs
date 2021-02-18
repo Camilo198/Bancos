@@ -163,6 +163,8 @@ namespace Bancos.PS.Servicios
             //*********************************************************************************
             FileStream fs;
             SLDocument sl;
+            int errores = 0;
+            string err_log = "";
             try
             {
                 LectorArchivos objLector = new LectorArchivos();
@@ -170,318 +172,337 @@ namespace Bancos.PS.Servicios
 
                 foreach (String archivo in listaArchivos)
                 {
-                    List<String> lineasArchivo = new List<string>();
-                    nombre = System.IO.Path.GetFileName(archivo);
-                    #region LECTURA ARCHIVO EXCEL
-                    System.Data.DataSet DsExcel = new System.Data.DataSet();
-                    if (EsExcel)
+                    try
                     {
-                        System.Data.DataTable DtExcel = new System.Data.DataTable();
-                        System.Data.DataRow DrExcel = null;
-                        string path = System.IO.Path.GetFullPath(archivo);
 
-                        //  OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=" + "'" + "Excel 12.0;HDR=YES;IMEX=0;" + "'");
-                        //OleDbConnection oledbConn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source="   + path + ";Extended Properties=""Excel 8.0;HDR=Yes;IMEX=1"");
 
-                        try
+                        List<String> lineasArchivo = new List<string>();
+                        nombre = System.IO.Path.GetFileName(archivo);
+                        #region LECTURA ARCHIVO EXCEL
+                        System.Data.DataSet DsExcel = new System.Data.DataSet();
+                        if (EsExcel)
                         {
-                            //OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;'");
-                            fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                            sl = new SLDocument(fs);
+                            System.Data.DataTable DtExcel = new System.Data.DataTable();
+                            System.Data.DataRow DrExcel = null;
+                            string path = System.IO.Path.GetFullPath(archivo);
 
-                            String[] hojas = sl.GetSheetNames().ToArray();
+                            //  OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=" + "'" + "Excel 12.0;HDR=YES;IMEX=0;" + "'");
+                            //OleDbConnection oledbConn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source="   + path + ";Extended Properties=""Excel 8.0;HDR=Yes;IMEX=1"");
 
-                            if (RutaEntrada.Contains("Falabella"))
+                            try
                             {
-                                sl.SelectWorksheet(NomHoja);
+                                //OleDbConnection oledbConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;'");
+                                fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                                sl = new SLDocument(fs);
+
+                                String[] hojas = sl.GetSheetNames().ToArray();
+
+                                if (RutaEntrada.Contains("Falabella"))
+                                {
+                                    sl.SelectWorksheet(NomHoja);
+                                }
+                                else
+                                {
+                                    sl.SelectWorksheet(hojas[NumeroHoja]);
+                                }
+
+                                SLWorksheetStatistics stats = sl.GetWorksheetStatistics();
+
+                                int ultimaCol = stats.EndColumnIndex;
+                                int ultimaFil = stats.EndRowIndex;
+                                int columnaInicio = stats.StartColumnIndex;
+                                int filaInicio = stats.StartRowIndex;
+
+                                for (int h = 1; h <= stats.EndColumnIndex; h++)
+                                {
+                                    DtExcel.Columns.Add(h.ToString());
+                                }
+
+                                for (int i = filaInicio; i <= ultimaFil; i++)
+                                {
+                                    DrExcel = DtExcel.NewRow();
+                                    for (int j = columnaInicio; j < ultimaCol; j++)
+                                    {
+                                        //tomamos los valores de las celdas para el datatable
+                                        if (sl.GetCellValueAsString(i, j) != null)
+                                        {
+                                            string val = sl.GetCellValueAsString(i, j);
+                                            DrExcel[j.ToString()] = val;
+                                        }
+
+                                    }
+                                    DtExcel.Rows.Add(DrExcel);
+                                }
+                                DsExcel.Tables.Add(DtExcel);
+
+                                fs.Close();
+                                sl.Dispose();
+                                //oledbConn.Open();
+
+                                //OleDbCommand cmd = new OleDbCommand();
+
+                                //OleDbDataAdapter oleda = new OleDbDataAdapter();
+
+                                //DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+
+                                //string sheetName = string.Empty;
+
+                                //if (dt != null)
+                                //{
+
+                                //    sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
+
+                                //}
+
+                                //cmd.Connection = oledbConn;
+
+                                //cmd.CommandType = CommandType.Text;
+                                //if (RutaEntrada.Contains("Falabella"))
+                                //    cmd.CommandText = "SELECT * FROM [" + NomHoja + "]";
+                                //else
+                                //    cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
+
+                                //oleda = new OleDbDataAdapter(cmd);
+
+                                //oleda.Fill(DsExcel, "excelData");
+
+                                //oledbConn.Close();
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo + " " + archivo);
+                                return ex.Message;
+                            }
+                            //finally
+                            //{
+                            //    oledbConn.Close();
+                            //}
+                            //Llenamos una lista de String con todas las filas del dataset, agregando ceros o espacion segun su parametrizacion
+                            foreach (DataRow row in DsExcel.Tables[0].Rows)
+                            {
+                                String lineaExcel = String.Empty;
+                                List<String> lineaDatos = new List<String>();
+
+                                for (int i = 0; i < row.ItemArray.Length; i++)
+                                {
+
+                                    lineaExcel = lineaExcel + row[i].ToString();
+                                    lineaDatos.Add(row[i].ToString().Replace(@"$", "").Replace(@"-", "")); //.Replace(@".", "")); //.Replace(@",", "") se quita para no elimar la parte decimal y luego poder redondear
+                                }
+
+                                if (lineaExcel != null && lineaExcel != String.Empty)
+                                {
+                                    if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0 && lineasArchivo.Count == 0)
+                                        lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoArchivo, CaracterDecimal);
+                                    else if ((ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 0) ||
+                                    (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 1 && ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0))
+                                        lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoLote, CaracterDecimal);
+                                    else
+                                        lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoDetalle, CaracterDecimal);
+
+                                    lineasArchivo.Add(lineaExcel);
+                                }
+                            }
+                        }
+
+                        #endregion
+                        #region LECTURA ARCHIVO PLANO
+                        else
+                        {
+                            if (archivo.Contains(".csv"))
+                            {
+                                lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
                             }
                             else
                             {
-                                sl.SelectWorksheet(hojas[NumeroHoja]);
+                                lineasArchivo = objLector.leerArchivoTarjetas(archivo);
                             }
 
-                            SLWorksheetStatistics stats = sl.GetWorksheetStatistics();
+                        }
+                        #endregion
 
-                            int ultimaCol = stats.EndColumnIndex;
-                            int ultimaFil = stats.EndRowIndex;
-                            int columnaInicio = stats.StartColumnIndex;
-                            int filaInicio = stats.StartRowIndex;
+                        DataSet ds1 = new DataSet(); // DATASET CON LOS PAGOS
+                        DataTable dt1 = new DataTable();
+                        dt1.Columns.Add("fecha");
+                        dt1.Columns.Add("linea");
 
-                            for (int h = 1; h <= stats.EndColumnIndex; h++)
+                        if (lineasArchivo.Count > 0)
+                        {
+
+                            lineasArchivo.RemoveRange(0, LineaExcluidaIncio);//ELIMINA TODAS LAS LINEAS DEL INICIO QUE SON EXCLUIDAS POR CONFIGURACION
+
+                            String fechaRecaudoGeneral = String.Empty;
+                            if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
                             {
-                                DtExcel.Columns.Add(h.ToString());
-                            }
-
-                            for (int i = filaInicio; i <= ultimaFil; i++)
-                            {
-                                DrExcel = DtExcel.NewRow();
-                                for (int j = columnaInicio; j < ultimaCol; j++)
+                                //ESTE CODIGO SIRVE PARA SACAR LA FECHA DEL RECAUDO SI VIENE EN EL ENCABEZADO                            
+                                Dictionary<Int32, String> CamposEncab = new Dictionary<Int32, String>();
+                                //LOS SIGUIENTES DOS FOREACH SE CREA PARA BUSCAR LA FECHA DE RECAUDO EN LA 
+                                //LINEA DEL ARCHIVO 
+                                //**************************************************************************                      
+                                foreach (Bancos.EN.Tablas.EstructuraArchivo objAso in ListaEstructuraArchivoBancoEncabezadoArchivo)
                                 {
-                                    //tomamos los valores de las celdas para el datatable
-                                    if (sl.GetCellValueAsString(i, j) != null)
+                                    foreach (Bancos.EN.Tablas.InterpreteArchivo objEq in ListaEquivalenciaArchivo)
                                     {
-                                        string val = sl.GetCellValueAsString(i, j);
-                                        DrExcel[j.ToString()] = val;
-                                    }
-
-                                }
-                                DtExcel.Rows.Add(DrExcel);
-                            }
-                            DsExcel.Tables.Add(DtExcel);
-
-                            fs.Close();
-                            sl.Dispose();
-                            //oledbConn.Open();
-
-                            //OleDbCommand cmd = new OleDbCommand();
-
-                            //OleDbDataAdapter oleda = new OleDbDataAdapter();
-
-                            //DataTable dt = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-
-                            //string sheetName = string.Empty;
-
-                            //if (dt != null)
-                            //{
-
-                            //    sheetName = dt.Rows[NumeroHoja]["TABLE_NAME"].ToString();
-
-                            //}
-
-                            //cmd.Connection = oledbConn;
-
-                            //cmd.CommandType = CommandType.Text;
-                            //if (RutaEntrada.Contains("Falabella"))
-                            //    cmd.CommandText = "SELECT * FROM [" + NomHoja + "]";
-                            //else
-                            //    cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
-
-                            //oleda = new OleDbDataAdapter(cmd);
-
-                            //oleda.Fill(DsExcel, "excelData");
-
-                            //oledbConn.Close();
-
-                        }
-                        catch (Exception ex)
-                        {
-                            Correo.enviarNotificacionesError(NombreCuenta, (String[])CorreosControl.ToArray(typeof(String)), Remitente, ex.Message, tipoArchivo + " " + archivo);
-                            return ex.Message;
-                        }
-                        //finally
-                        //{
-                        //    oledbConn.Close();
-                        //}
-                        //Llenamos una lista de String con todas las filas del dataset, agregando ceros o espacion segun su parametrizacion
-                        foreach (DataRow row in DsExcel.Tables[0].Rows)
-                        {
-                            String lineaExcel = String.Empty;
-                            List<String> lineaDatos = new List<String>();
-
-                            for (int i = 0; i < row.ItemArray.Length; i++)
-                            {
-
-                                lineaExcel = lineaExcel + row[i].ToString();
-                                lineaDatos.Add(row[i].ToString().Replace(@"$", "").Replace(@"-", "")); //.Replace(@".", "")); //.Replace(@",", "") se quita para no elimar la parte decimal y luego poder redondear
-                            }
-
-                            if (lineaExcel != null && lineaExcel != String.Empty)
-                            {
-                                if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0 && lineasArchivo.Count == 0)
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoArchivo, CaracterDecimal);
-                                else if ((ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 0) ||
-                                (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0 && lineasArchivo.Count == 1 && ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0))
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoEncabezadoLote, CaracterDecimal);
-                                else
-                                    lineaExcel = armarLineasExcel(lineaDatos, ListaEstructuraArchivoBancoDetalle, CaracterDecimal);
-
-                                lineasArchivo.Add(lineaExcel);
-                            }
-                        }
-                    }
-
-                    #endregion
-                    #region LECTURA ARCHIVO PLANO
-                    else
-                    {
-                        if (archivo.Contains(".csv"))
-                        {
-                            lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
-                        }
-                        else
-                        {
-                            lineasArchivo = objLector.leerArchivoTarjetas(archivo);
-                        }
-
-                    }
-                    #endregion
-
-                    DataSet ds1 = new DataSet(); // DATASET CON LOS PAGOS
-                    DataTable dt1 = new DataTable();
-                    dt1.Columns.Add("fecha");
-                    dt1.Columns.Add("linea");
-
-                    if (lineasArchivo.Count > 0)
-                    {
-
-                        lineasArchivo.RemoveRange(0, LineaExcluidaIncio);//ELIMINA TODAS LAS LINEAS DEL INICIO QUE SON EXCLUIDAS POR CONFIGURACION
-
-                        String fechaRecaudoGeneral = String.Empty;
-                        if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
-                        {
-                            //ESTE CODIGO SIRVE PARA SACAR LA FECHA DEL RECAUDO SI VIENE EN EL ENCABEZADO                            
-                            Dictionary<Int32, String> CamposEncab = new Dictionary<Int32, String>();
-                            //LOS SIGUIENTES DOS FOREACH SE CREA PARA BUSCAR LA FECHA DE RECAUDO EN LA 
-                            //LINEA DEL ARCHIVO 
-                            //**************************************************************************                      
-                            foreach (Bancos.EN.Tablas.EstructuraArchivo objAso in ListaEstructuraArchivoBancoEncabezadoArchivo)
-                            {
-                                foreach (Bancos.EN.Tablas.InterpreteArchivo objEq in ListaEquivalenciaArchivo)
-                                {
-                                    if (objEq.pCampoBanco == objAso.pOid)
-                                    {
-                                        if (objEq.pNombreCampoAsobancaria.Equals("Fecha del recaudo"))
+                                        if (objEq.pCampoBanco == objAso.pOid)
                                         {
-                                            CamposEncab = valorCampo(lineasArchivo[0], ListaEstructuraArchivoBancoEncabezadoArchivo);
-                                            fechaRecaudoGeneral = CamposEncab[objEq.pCampoBanco.Value];
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            //**************************************************************************
-                        }
-
-
-                        //if (NombreCuenta != "TCR")
-                        //{
-                        if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
-                            lineasArchivo.RemoveAt(0);
-                        if (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0)
-                            lineasArchivo.RemoveAt(0);
-                        if (ListaEstructuraArchivoBancoControlArchivo.Count > 0)
-                            lineasArchivo.RemoveAt(lineasArchivo.Count - 2);
-                        if (ListaEstructuraArchivoBancoControlLote.Count > 0)
-                            lineasArchivo.RemoveAt(lineasArchivo.Count - 1);
-
-                        lineasArchivo.RemoveRange(lineasArchivo.Count - LineaExcluidaFin, LineaExcluidaFin);//ELIMINA TODAS LAS LINEAS DEL FIN QUE SON EXCLUIDAS POR CONFIGURACION    
-                                                                                                            //}
-
-
-                        foreach (String linea in lineasArchivo)
-                        {
-                            if (linea != null)
-                            {
-                                String fechaRecaudo = String.Empty;
-                                if (String.IsNullOrEmpty(fechaRecaudoGeneral))
-                                {
-                                    Dictionary<Int32, String> Campos = new Dictionary<Int32, String>();
-                                    Campos = valorCampo(linea, ListaEstructuraArchivoBancoDetalle);
-                                    //LOS SIGUIENTES DOS FOREACH SE CREA PARA BUSCAR LA FECHA DE RECAUDO EN CADA 
-                                    //LINEA DEL ARCHIVO PARA SEPARAR EL ARCHIVO POR FECHAS                               
-                                    //**************************************************************************
-                                    //**************************************************************************
-
-                                    foreach (Bancos.EN.Tablas.EstructuraArchivo objAso in ListaLinea1EA)
-                                    {
-                                        foreach (Bancos.EN.Tablas.InterpreteArchivo objEq in ListaEquivalenciaArchivo)
-                                        {
-                                            if (objEq.pCampoAsobancaria == objAso.pOid)
+                                            if (objEq.pNombreCampoAsobancaria.Equals("Fecha del recaudo"))
                                             {
-                                                if (objAso.pNombreCampo.Equals("Fecha del recaudo"))
-                                                {
-                                                    fechaRecaudo = Campos[objEq.pCampoBanco.Value];
-                                                    break;
-                                                }
+                                                CamposEncab = valorCampo(lineasArchivo[0], ListaEstructuraArchivoBancoEncabezadoArchivo);
+                                                fechaRecaudoGeneral = CamposEncab[objEq.pCampoBanco.Value];
+                                                break;
                                             }
                                         }
                                     }
-                                    //**************************************************************************
-                                    //**************************************************************************
                                 }
-                                DataRow dr1 = dt1.NewRow();
-                                if (String.IsNullOrEmpty(fechaRecaudo))
-                                    dr1["fecha"] = fechaRecaudoGeneral;
-                                else
-                                    dr1["fecha"] = fechaRecaudo;
-                                dr1["linea"] = linea;
-                                dt1.Rows.Add(dr1);
+                                //**************************************************************************
+                            }
+
+
+                            //if (NombreCuenta != "TCR")
+                            //{
+                            if (ListaEstructuraArchivoBancoEncabezadoArchivo.Count > 0)
+                                lineasArchivo.RemoveAt(0);
+                            if (ListaEstructuraArchivoBancoEncabezadoLote.Count > 0)
+                                lineasArchivo.RemoveAt(0);
+                            if (ListaEstructuraArchivoBancoControlArchivo.Count > 0)
+                                lineasArchivo.RemoveAt(lineasArchivo.Count - 2);
+                            if (ListaEstructuraArchivoBancoControlLote.Count > 0)
+                                lineasArchivo.RemoveAt(lineasArchivo.Count - 1);
+
+                            lineasArchivo.RemoveRange(lineasArchivo.Count - LineaExcluidaFin, LineaExcluidaFin);//ELIMINA TODAS LAS LINEAS DEL FIN QUE SON EXCLUIDAS POR CONFIGURACION    
+                                                                                                                //}
+
+
+                            foreach (String linea in lineasArchivo)
+                            {
+                                if (linea != null)
+                                {
+                                    String fechaRecaudo = String.Empty;
+                                    if (String.IsNullOrEmpty(fechaRecaudoGeneral))
+                                    {
+                                        Dictionary<Int32, String> Campos = new Dictionary<Int32, String>();
+                                        Campos = valorCampo(linea, ListaEstructuraArchivoBancoDetalle);
+                                        //LOS SIGUIENTES DOS FOREACH SE CREA PARA BUSCAR LA FECHA DE RECAUDO EN CADA 
+                                        //LINEA DEL ARCHIVO PARA SEPARAR EL ARCHIVO POR FECHAS                               
+                                        //**************************************************************************
+                                        //**************************************************************************
+
+                                        foreach (Bancos.EN.Tablas.EstructuraArchivo objAso in ListaLinea1EA)
+                                        {
+                                            foreach (Bancos.EN.Tablas.InterpreteArchivo objEq in ListaEquivalenciaArchivo)
+                                            {
+                                                if (objEq.pCampoAsobancaria == objAso.pOid)
+                                                {
+                                                    if (objAso.pNombreCampo.Equals("Fecha del recaudo"))
+                                                    {
+                                                        fechaRecaudo = Campos[objEq.pCampoBanco.Value];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //**************************************************************************
+                                        //**************************************************************************
+                                    }
+                                    DataRow dr1 = dt1.NewRow();
+                                    if (String.IsNullOrEmpty(fechaRecaudo))
+                                        dr1["fecha"] = fechaRecaudoGeneral;
+                                    else
+                                        dr1["fecha"] = fechaRecaudo;
+                                    dr1["linea"] = linea;
+                                    dt1.Rows.Add(dr1);
+                                }
                             }
                         }
-                    }
-                    DataView dv = dt1.DefaultView;
-                    dv.Sort = "fecha";
-                    dt1 = dv.ToTable();
-                    ds1.Tables.Add(dt1);
-                    //**************************************************************************
-                    //**************************************************************************
+                        DataView dv = dt1.DefaultView;
+                        dv.Sort = "fecha";
+                        dt1 = dv.ToTable();
+                        ds1.Tables.Add(dt1);
+                        //**************************************************************************
+                        //**************************************************************************
 
-                    Dictionary<Int32, String> asignacionCampos = new Dictionary<Int32, String>();
-                    asignacionCampos = valorCampo(dt1.Rows[0].ItemArray[1].ToString(), ListaEstructuraArchivoBancoDetalle);
+                        Dictionary<Int32, String> asignacionCampos = new Dictionary<Int32, String>();
+                        asignacionCampos = valorCampo(dt1.Rows[0].ItemArray[1].ToString(), ListaEstructuraArchivoBancoDetalle);
 
-                    //SE CREA LA CARPETA DONDE VAN A QUEDAR LOS ARCHIVOS DE TARJETAS CREDITO SI NO EXISTE
-                    if (!Directory.Exists(Directorio))
-                    {
-                        System.IO.Directory.CreateDirectory(Directorio);
-                    }
-                    int limite = 0;
-                    bool valido = false;
-                    //EN ESTE IF SE CREAN LOS ARCHIVOS CON LOS PAGOS 
-                    if (ds1.Tables[0].Rows.Count > 0)
-                    {
-                        LimitesSuperior = obtenerLimites(ds1);
-                        for (int i = 0; i < LimitesSuperior.Count; i++)
+                        //SE CREA LA CARPETA DONDE VAN A QUEDAR LOS ARCHIVOS DE TARJETAS CREDITO SI NO EXISTE
+                        if (!Directory.Exists(Directorio))
                         {
-                            valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
-                            if (valido)
-                            {
-                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
-                            }
-                            else
-                            {
-                                limite = (int)LimitesSuperior[i];
-                                armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
-                            }
-
-                            if (CorreosControl.Count > 0)
-                                Correo.enviarNotificaciones(Directorio, (String[])CorreosControl.ToArray(typeof(String)), nombreArchivo, Remitente,
-                                                            registrosLote, tipoArchivo);
-                            ciclo = ciclo + Convert.ToInt16(LimitesSuperior[i]);
-                            //SE GUARDA EL ESTADO DEL PROCESO
-                            objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
-                            objL.pUsuario = Usuario;
-                            objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : Archivo " + tipoArchivo + " con fecha de transaccion " + nombreArchivo.Substring(18, 8) + " fue generado correctamente";
-                            objL.pTipoArchivo = TipoProcesoXCuenta;
-                            objL.pTipoProceso = "GEN";
-                            new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
-                            nombreArchivo = String.Empty;
-                            registrosLote = 0;
-
-                            limite = 0;
-                            valido = false;
+                            System.IO.Directory.CreateDirectory(Directorio);
                         }
-                        ciclo = 0;
-                        LimitesSuperior.Clear();
+                        int limite = 0;
+                        bool valido = false;
+                        //EN ESTE IF SE CREAN LOS ARCHIVOS CON LOS PAGOS 
+                        if (ds1.Tables[0].Rows.Count > 0)
+                        {
+                            LimitesSuperior = obtenerLimites(ds1);
+                            for (int i = 0; i < LimitesSuperior.Count; i++)
+                            {
+                                valido = int.TryParse(LimitesSuperior[i].ToString(), out limite);
+                                if (valido)
+                                {
+                                    armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
+                                }
+                                else
+                                {
+                                    limite = (int)LimitesSuperior[i];
+                                    armarArchivo(ds1, limite, IdCuentaBanco, IdCuentaBancoEpicor, CodigoBanco, NumCuenta, tipocuentabanco);
+                                }
+
+                                if (CorreosControl.Count > 0)
+                                    Correo.enviarNotificaciones(Directorio, (String[])CorreosControl.ToArray(typeof(String)), nombreArchivo, Remitente,
+                                                                registrosLote, tipoArchivo);
+                                ciclo = ciclo + Convert.ToInt16(LimitesSuperior[i]);
+                                //SE GUARDA EL ESTADO DEL PROCESO
+                                objL.pFecha = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd") + " " + DateTime.Now.ToString("H:mm:ss"));
+                                objL.pUsuario = Usuario;
+                                objL.pDetalle = NombreCuenta + ", " + tipoArchivo + " : Archivo " + tipoArchivo + " con fecha de transaccion " + nombreArchivo.Substring(18, 8) + " fue generado correctamente";
+                                objL.pTipoArchivo = TipoProcesoXCuenta;
+                                objL.pTipoProceso = "GEN";
+                                new LogsLN().insertar(objL); // DESCOMENTAREAR A PRD
+                                nombreArchivo = String.Empty;
+                                registrosLote = 0;
+
+                                limite = 0;
+                                valido = false;
+                            }
+                            ciclo = 0;
+                            LimitesSuperior.Clear();
+                        }
+
+                        //AQUI Validar porque genera error y descomentariar
+                        //foreach (DataRow row in LineasArmadasdt.Rows)
+                        //{
+                        //    guardarLineas(row[0].ToString(), row[1].ToString(), row[2].ToString(),
+                        //                  row[3].ToString(), row[4].ToString());
+                        //}
+                        LineasArmadasdt.Clear();
+
+                        // objLector.borrarArchivo(archivo);
+
+                        System.Threading.Thread.Sleep(1000);
+                        string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+                          DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + "_";
+
+                        File.Move(archivo, RutaSalida + fecha + nombre);
+
                     }
+                    catch (Exception ex)
+                    {
+                        errores += 1;
+                        err_log = err_log + " --- " + ex.ToString();
 
-                    //AQUI Validar porque genera error y descomentariar
-                    //foreach (DataRow row in LineasArmadasdt.Rows)
-                    //{
-                    //    guardarLineas(row[0].ToString(), row[1].ToString(), row[2].ToString(),
-                    //                  row[3].ToString(), row[4].ToString());
-                    //}
-                    LineasArmadasdt.Clear();
-
-                    // objLector.borrarArchivo(archivo);
-
-                    System.Threading.Thread.Sleep(1000);
-                    string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
-                      DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + "_";
-
-                    File.Move(archivo, RutaSalida + fecha + nombre);
+                    }
                 }
 
-                return "Proceso " + tipoArchivo + " ejecutado con exito!!";
+                if (errores > 0)
+                {
+                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en "+ listaArchivos.Count.ToString() + " archivos procesados " + err_log );
+                }
+                else
+                {
+                    return "Proceso " + tipoArchivo + " ejecutado con exito!!";
+                }
             }
             catch (Exception ex)
             {

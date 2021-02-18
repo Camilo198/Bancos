@@ -326,10 +326,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioPagosOnline_PagosOnline</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://localhost:9090/Servicios/Recaudo.svc%3fwsdl">
+    <WebReferenceUrl Include="http://sbogche048vp:9087/Servicios/Recaudo.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioRecaudo\</RelPath>
-      <UpdateFromURL>http://localhost:9090/Servicios/Recaudo.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://sbogche048vp:9087/Servicios/Recaudo.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

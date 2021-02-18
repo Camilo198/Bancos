@@ -6,7 +6,7 @@
       <Value Profile="(Default)">http://sbogche016v/AdministracionFtp/Servicios/moverArchivosFTP.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioRecaudo_Recaudo" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://localhost:9090/Servicios/Recaudo.svc</Value>
+      <Value Profile="(Default)">http://sbogche048vp:9087/Servicios/Recaudo.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_wsenviocorreos_Service" Type="(Web Service URL)" Scope="Application">
       <Value Profile="(Default)">http://wsenviocorreos.chevyplan.col/service.asmx</Value>
