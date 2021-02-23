@@ -281,7 +281,7 @@ namespace Bancos.PS.Servicios.Correo
                 DsCorreos.Tables["Reportes"].Rows.Add(rowC);
                 EnvioCorreo.EnvioCorreos(DsCorreos, _Desde, false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }

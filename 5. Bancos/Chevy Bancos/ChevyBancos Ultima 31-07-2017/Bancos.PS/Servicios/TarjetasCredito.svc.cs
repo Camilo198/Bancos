@@ -497,7 +497,7 @@ namespace Bancos.PS.Servicios
 
                 if (errores > 0)
                 {
-                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en " + listaArchivos.Count.ToString() + " archivos procesados " + err_log);
+                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en "+ listaArchivos.Count.ToString() + " archivos procesados " + err_log );
                 }
                 else
                 {
@@ -683,7 +683,7 @@ namespace Bancos.PS.Servicios
             {
                 sw.Close();
                 File.Delete(Directorio + nombreArchivo);
-                throw new System.Exception(Directorio + nombreArchivo + " \n " + ex.ToString());
+                throw new System.Exception(ex.Message);
             }
         }
 
@@ -1202,38 +1202,11 @@ namespace Bancos.PS.Servicios
         private String convertirNumero(String numero, int decimales)
         {
 
-            //String[] numeros = numero.Split(',');
-            //if (!numero.Contains(","))
-            //    return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
-            //else
-            //    return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
-            String reemplazado = "";
-            long numero_reem = 0;
-            long res = 0;
-            long dec = 0;
             String[] numeros = numero.Split(',');
             if (!numero.Contains(","))
-            {
-                reemplazado = numero.Replace(",", "");
-                Int64.TryParse(numero, out numero_reem);
-                dec = (long)Math.Pow(10, decimales);
-                res = numero_reem * dec;
-
-                return res.ToString();
-
-                //return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales))).ToString();
-            }
+                return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
             else
-            {
-                reemplazado = numero.Replace(",", "");
-                Int64.TryParse(numero, out numero_reem);
-                dec = (long)Math.Pow(10, decimales - numeros[1].Length);
-                res = numero_reem * dec;
-
-                return res.ToString();
-
-                // return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
-            }
+                return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
 
         }
 
