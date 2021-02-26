@@ -18,6 +18,7 @@ using System.Data.Common;
 
 using System.Text.RegularExpressions;
 using SpreadsheetLight;
+using System.Globalization;
 
 namespace Bancos.PS.Servicios
 {
@@ -218,6 +219,10 @@ namespace Bancos.PS.Servicios
                                     DtExcel.Columns.Add(h.ToString());
                                 }
 
+                                string val = String.Empty;
+                                int pivote = 0;
+                                bool esEntero = false;
+
                                 for (int i = filaInicio; i <= ultimaFil; i++)
                                 {
                                     DrExcel = DtExcel.NewRow();
@@ -226,8 +231,22 @@ namespace Bancos.PS.Servicios
                                         //tomamos los valores de las celdas para el datatable
                                         if (sl.GetCellValueAsString(i, j) != null)
                                         {
-                                            string val = sl.GetCellValueAsString(i, j);
+                                            var formato = sl.GetCellStyle(i, j).FormatCode;
+                                            val = sl.GetCellValueAsString(i, j);
+                                            esEntero = int.TryParse(val, out pivote);
+
+                                            if ((formato.Contains("m/d/yyyy") || formato.Contains("d/mm/yyyy")) && esEntero)
+                                            {
+                                                val = sl.GetCellValueAsDateTime(i, j).ToString("d", new CultureInfo("es-CO"));
+                                            }
+                                            else
+                                            {
+                                                val = sl.GetCellValueAsString(i, j);
+                                            }
                                             DrExcel[j.ToString()] = val;
+                                            esEntero = false;
+                                            pivote = 0;
+                                            val = String.Empty;
                                         }
 
                                     }
