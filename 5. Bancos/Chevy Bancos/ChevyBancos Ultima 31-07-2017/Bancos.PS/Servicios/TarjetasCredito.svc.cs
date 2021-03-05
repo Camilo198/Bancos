@@ -253,7 +253,14 @@ namespace Bancos.PS.Servicios
                     #region LECTURA ARCHIVO PLANO
                     else
                     {
-                        lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        if (archivo.Contains(".csv"))
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetasCSV(archivo, ListaEstructuraArchivoBancoDetalle);
+                        }
+                        else
+                        {
+                            lineasArchivo = objLector.leerArchivoTarjetas(archivo);
+                        }
                     }
                     #endregion
 
