@@ -96,7 +96,7 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9090/Servicios/TarjetasCredito.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche048vp:9087/Servicios/TarjetasCredito.svc")]
         public string Procesos_PS_ServicioTarjetasCredito_TarjetasCredito {
             get {
                 return ((string)(this["Procesos_PS_ServicioTarjetasCredito_TarjetasCredito"]));

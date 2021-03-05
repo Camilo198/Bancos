@@ -304,17 +304,6 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioBancos_WsBancos</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche048vp:9087/Servicios/TarjetasCredito.svc%3fwsdl">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\ServicioTarjetasCredito\</RelPath>
-      <UpdateFromURL>http://sbogche048vp:9087/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>Procesos_PS_ServicioTarjetasCredito_TarjetasCredito</CachedSettingsPropName>
-    </WebReferenceUrl>
     <WebReferenceUrl Include="http://sbogche048vp:9087/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
@@ -347,6 +336,17 @@
       </CachedDynamicPropName>
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://sbogche048vp:9087/Servicios/TarjetasCredito.svc%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\ServicioTarjetasCredito\</RelPath>
+      <UpdateFromURL>http://sbogche048vp:9087/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Procesos_PS_ServicioTarjetasCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
     <WebReferenceUrl Include="http://wsenviocorreos.chevyplan.col/service.asmx">
       <UrlBehavior>Dynamic</UrlBehavior>
