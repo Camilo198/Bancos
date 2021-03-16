@@ -98,6 +98,8 @@ namespace Procesos.PS.Procesos
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".xlsx")).ToArray();
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".db")).ToArray();
                     fileNames = fileNames.Where(file => !file.FullName.EndsWith(".csv")).ToArray();
+                    fileNames = fileNames.Where(file => !file.FullName.EndsWith(".XLS")).ToArray();
+                    fileNames = fileNames.Where(file => !file.FullName.EndsWith(".XLSX")).ToArray();
 
                     try
                     {

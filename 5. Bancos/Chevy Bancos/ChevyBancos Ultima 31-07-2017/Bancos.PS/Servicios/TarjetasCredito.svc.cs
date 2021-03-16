@@ -221,7 +221,9 @@ namespace Bancos.PS.Servicios
 
                                 string val = String.Empty;
                                 int pivote = 0;
+                                decimal pivoted = 0;
                                 bool esEntero = false;
+                                bool esDecimal = false;
 
                                 for (int i = filaInicio; i <= ultimaFil; i++)
                                 {
@@ -234,8 +236,9 @@ namespace Bancos.PS.Servicios
                                             var formato = sl.GetCellStyle(i, j).FormatCode;
                                             val = sl.GetCellValueAsString(i, j);
                                             esEntero = int.TryParse(val, out pivote);
+                                            esDecimal = decimal.TryParse(val, out pivoted);
 
-                                            if ((formato.Contains("m/d/yyyy") || formato.Contains("d/mm/yyyy")) && esEntero)
+                                            if ((formato.Contains("m/d/yyyy") || formato.Contains("d/mm/yyyy") || formato.Contains("m/d/yy") || formato.Contains("h:mm")) && (esEntero || esDecimal))
                                             {
                                                 val = sl.GetCellValueAsDateTime(i, j).ToString("d", new CultureInfo("es-CO"));
                                             }

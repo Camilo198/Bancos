@@ -66,7 +66,7 @@ namespace Procesos.PS.Procesos
 
                     mensaje = CorrerPagosOnline(NombreCuenta, CodigoCuenta, ArchivoSalida, CorreosControl,
                                                 CodigoBanco, NumCuenta, TipoCuenta, Remitente, TipoProceso);
-                    if (!mensaje.Equals("Proceso Pagos Online ejecutado con exito!!"))
+                    if(!mensaje.Equals("Proceso Pagos Online ejecutado con exito!!"))
                     {
                         procesoConError = true;
                     }

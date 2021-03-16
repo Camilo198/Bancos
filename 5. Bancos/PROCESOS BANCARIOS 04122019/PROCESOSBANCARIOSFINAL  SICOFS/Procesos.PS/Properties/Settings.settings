@@ -21,10 +21,10 @@
       <Value Profile="(Default)">http://sbogche048v/Administracionftp/Servicios/moverArchivosFTP.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioBancos_WsBancos" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://sbogche048vp:9084/WsBancos.svc</Value>
+      <Value Profile="(Default)">http://sbogche048vp:9090/WsBancos.svc</Value>
     </Setting>
     <Setting Name="Procesos_PS_ServicioTarjetasCredito_TarjetasCredito" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://sbogche048vp:9087/Servicios/TarjetasCredito.svc</Value>
+      <Value Profile="(Default)">http://localhost:51647/Servicios/TarjetasCredito.svc</Value>
     </Setting>
   </Settings>
 </SettingsFile>
