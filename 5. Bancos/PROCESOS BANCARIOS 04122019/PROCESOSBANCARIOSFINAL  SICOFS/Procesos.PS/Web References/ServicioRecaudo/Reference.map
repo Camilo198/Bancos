@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Results>
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048vp:9087/Servicios/Recaudo.svc?xsd=xsd1" filename="Recaudo.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048vp:9087/Servicios/Recaudo.svc?xsd=xsd2" filename="Recaudo0.xsd" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://sbogche048vp:9087/Servicios/Recaudo.svc?wsdl" filename="Recaudo.wsdl" />
-    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048vp:9087/Servicios/Recaudo.svc?xsd=xsd0" filename="Recaudo1.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048v:8087/Servicios/Recaudo.svc?xsd=xsd0" filename="Recaudo.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048v:8087/Servicios/Recaudo.svc?xsd=xsd1" filename="Recaudo0.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="http://sbogche048v:8087/Servicios/Recaudo.svc?xsd=xsd2" filename="Recaudo1.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://sbogche048v:8087/Servicios/Recaudo.svc?wsdl" filename="Recaudo.wsdl" />
   </Results>
 </DiscoveryClientResultsFile>

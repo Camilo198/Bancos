@@ -34,7 +34,7 @@ namespace Procesos.PS
         LogLN log = new LogLN(); // Logs de error
 
         private System.Windows.Forms.Timer tempCierra;
-        private int contador = 12;
+        private int contador = 5;
         private bool btnProcesos_Clicked = false;
 
         public Form1()
@@ -635,7 +635,7 @@ namespace Procesos.PS
         {
             if (btnProcesos_Clicked)
             {
-                contador = 12;
+                contador = 5;
             }
             else
             {

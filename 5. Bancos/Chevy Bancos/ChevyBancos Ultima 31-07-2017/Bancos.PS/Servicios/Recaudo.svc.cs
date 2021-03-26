@@ -899,7 +899,7 @@ namespace Bancos.PS.Servicios
             {
 
                 if (objEst.pNombreCampo == "Forma de pago")
-                    j = "";
+                    j = String.Empty;
 
                 valor = String.Empty;
                 valor = armarCampoBanco(objEst, evaluarCampo(objEst, Linea.Substring(inicio, objEst.pLongitud.Value).Trim()));
@@ -1241,12 +1241,30 @@ namespace Bancos.PS.Servicios
 
         private String convertirNumero(String numero, int decimales)
         {
-
+            String reemplazado = "";
+            long numero_reem = 0;
+            long res = 0;
+            long dec = 0;
             String[] numeros = numero.Split(',');
+
             if (!numero.Contains(","))
-                return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem);
+                dec = (long)Math.Pow(10, decimales);
+                res = numero_reem * dec;
+
+                return res.ToString();
+            }
             else
-                return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem);
+                dec = (long)Math.Pow(10, decimales - numeros[1].Length);
+                res = numero_reem * dec;
+
+                return res.ToString();
+            }
 
         }
 

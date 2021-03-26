@@ -33,8 +33,6 @@ namespace Procesos.PS.ServicioBancos {
         
         private System.Threading.SendOrPostCallback PagosTarjetaOperationCompleted;
         
-        private System.Threading.SendOrPostCallback ProcesarPagosSinSubirOperationCompleted;
-        
         private bool useDefaultCredentialsSetExplicitly;
         
         /// <remarks/>
@@ -78,9 +76,6 @@ namespace Procesos.PS.ServicioBancos {
         
         /// <remarks/>
         public event PagosTarjetaCompletedEventHandler PagosTarjetaCompleted;
-        
-        /// <remarks/>
-        public event ProcesarPagosSinSubirCompletedEventHandler ProcesarPagosSinSubirCompleted;
         
         /// <remarks/>
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/IWBancos/LecturaPagos", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
@@ -157,38 +152,6 @@ namespace Procesos.PS.ServicioBancos {
         }
         
         /// <remarks/>
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/IWBancos/ProcesarPagosSinSubir", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        [return: System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string ProcesarPagosSinSubir([System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string usuario, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string password) {
-            object[] results = this.Invoke("ProcesarPagosSinSubir", new object[] {
-                        usuario,
-                        password});
-            return ((string)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void ProcesarPagosSinSubirAsync(string usuario, string password) {
-            this.ProcesarPagosSinSubirAsync(usuario, password, null);
-        }
-        
-        /// <remarks/>
-        public void ProcesarPagosSinSubirAsync(string usuario, string password, object userState) {
-            if ((this.ProcesarPagosSinSubirOperationCompleted == null)) {
-                this.ProcesarPagosSinSubirOperationCompleted = new System.Threading.SendOrPostCallback(this.OnProcesarPagosSinSubirOperationCompleted);
-            }
-            this.InvokeAsync("ProcesarPagosSinSubir", new object[] {
-                        usuario,
-                        password}, this.ProcesarPagosSinSubirOperationCompleted, userState);
-        }
-        
-        private void OnProcesarPagosSinSubirOperationCompleted(object arg) {
-            if ((this.ProcesarPagosSinSubirCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.ProcesarPagosSinSubirCompleted(this, new ProcesarPagosSinSubirCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
         public new void CancelAsync(object userState) {
             base.CancelAsync(userState);
         }
@@ -246,32 +209,6 @@ namespace Procesos.PS.ServicioBancos {
         private object[] results;
         
         internal PagosTarjetaCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public string Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
-    public delegate void ProcesarPagosSinSubirCompletedEventHandler(object sender, ProcesarPagosSinSubirCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class ProcesarPagosSinSubirCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal ProcesarPagosSinSubirCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
                 base(exception, cancelled, userState) {
             this.results = results;
         }

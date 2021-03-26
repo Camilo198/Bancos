@@ -76,6 +76,7 @@ namespace Procesos.PS.Procesos
                     TipoCuenta = bank.pTipoCuenta;
                     NumCuenta = bank.pNumCuenta;
 
+                    
                     mensaje = CorrerTarjetaCredito(NombreCuenta, IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaProcesado,
                                                 CorreosControl, Remitente, CodigoBanco, NumCuenta,
                                                 TipoCuenta, RutaSalidaEpicor, TipoProceso);
@@ -105,6 +106,7 @@ namespace Procesos.PS.Procesos
                     {
                         foreach (System.IO.FileInfo archivos in fileNames)
                         {
+                            
                             mensaje = ProcesoPagos.PagosTarjeta("usuario", "Pasword", RutaProcesado, archivos.Name);
                             //RespuestaProceso.Add("Proceso Pagos TC: " + mensaje);
                         }

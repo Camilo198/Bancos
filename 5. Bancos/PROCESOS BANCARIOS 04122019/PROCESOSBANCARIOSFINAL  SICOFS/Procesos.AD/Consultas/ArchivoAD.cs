@@ -103,7 +103,7 @@ namespace Procesos.AD.Consultas
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return (ex.Message);
             }
         }
     }

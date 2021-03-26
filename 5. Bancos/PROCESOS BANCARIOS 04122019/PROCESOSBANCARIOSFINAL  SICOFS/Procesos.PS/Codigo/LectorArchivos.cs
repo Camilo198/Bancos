@@ -36,7 +36,7 @@ namespace Procesos.PS.Codigo
             }
             catch
             {
-                throw new Exception();
+                return listaLineas;
             }
             return listaLineas;
         }
@@ -77,7 +77,7 @@ namespace Procesos.PS.Codigo
                 }
                 catch
                 {
-                    throw new Exception();
+                    return lista;
                 }
             }
             try
@@ -88,7 +88,7 @@ namespace Procesos.PS.Codigo
             }
             catch
             {
-                throw new Exception();
+                return lista;
             }
             return lista;
         }
@@ -105,7 +105,7 @@ namespace Procesos.PS.Codigo
                 }
                 catch
                 {
-                    throw new Exception();
+                    return lista;
                 }
             }
             try
@@ -114,7 +114,7 @@ namespace Procesos.PS.Codigo
             }
             catch
             {
-                throw new Exception();
+                return lista;
             }
             return lista;
         }

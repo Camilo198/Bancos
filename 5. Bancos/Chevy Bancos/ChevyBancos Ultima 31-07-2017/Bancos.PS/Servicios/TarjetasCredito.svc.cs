@@ -76,7 +76,7 @@ namespace Bancos.PS.Servicios
                                               String CodigoBanco, String NumCuenta, String TipoCuenta,
                                               String Usuario, String RutaProcesado, String TipoProceso)
         {
-
+            string formato = String.Empty;
             TipoProcesoXCuenta = TipoProceso;
 
             switch (TipoCuenta)
@@ -233,12 +233,12 @@ namespace Bancos.PS.Servicios
                                         //tomamos los valores de las celdas para el datatable
                                         if (sl.GetCellValueAsString(i, j) != null)
                                         {
-                                            var formato = sl.GetCellStyle(i, j).FormatCode;
+                                            formato = sl.GetCellStyle(i, j).FormatCode;
                                             val = sl.GetCellValueAsString(i, j);
                                             esEntero = int.TryParse(val, out pivote);
                                             esDecimal = decimal.TryParse(val, out pivoted);
 
-                                            if ((formato.Contains("m/d/yyyy") || formato.Contains("d/mm/yyyy") || formato.Contains("m/d/yy") || formato.Contains("h:mm")) && (esEntero || esDecimal))
+                                            if ((formato.Contains("m/d/yyyy") || formato.Contains("d/mm/yyyy") || formato.Contains("m/d/yy") || formato.Contains("h:mm") || formato.Contains("dd\\-mmm\\-yyyy")) && (esEntero || esDecimal))
                                             {
                                                 val = sl.GetCellValueAsDateTime(i, j).ToString("d", new CultureInfo("es-CO"));
                                             }
@@ -519,7 +519,7 @@ namespace Bancos.PS.Servicios
 
                 if (errores > 0)
                 {
-                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en "+ listaArchivos.Count.ToString() + " archivos procesados " + err_log );
+                    throw new Exception("Proceso " + tipoArchivo + "Con errores: " + errores.ToString() + " en " + listaArchivos.Count.ToString() + " archivos procesados " + err_log);
                 }
                 else
                 {
@@ -741,7 +741,7 @@ namespace Bancos.PS.Servicios
 
                     //Aqui MRT
                     string Valor_ = lineaDatos[i].ToString();
-                    string aqui = "";
+                    
                     decimal ValorD = 0;
                     if (objAso.pTipoDato == "DE")
                     {
@@ -899,15 +899,17 @@ namespace Bancos.PS.Servicios
         private Dictionary<Int32, String> valorCampo(String Linea, List<Bancos.EN.Tablas.EstructuraArchivo> ListaDeEstructuraArchivoBanco)
         {
             Dictionary<Int32, String> asignacion = new Dictionary<Int32, String>();
+            Bancos.EN.Tablas.EstructuraArchivo objEst_ax = null;
+            Int32 inicio = 0;
             try
             {
                 asignacion.Add(0, "3DT");
-                Int32 inicio = 0;
                 String valor = String.Empty;
                 //aqui
                 string j = "";
                 foreach (Bancos.EN.Tablas.EstructuraArchivo objEst in ListaDeEstructuraArchivoBanco)
                 {
+                    objEst_ax = objEst;
                     if (objEst.pNombreCampo == "Código Autorización")
                         j = "";
                     valor = String.Empty;
@@ -919,7 +921,7 @@ namespace Bancos.PS.Servicios
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.ToString());
+                throw new Exception(ex.ToString() + "\n " + Linea.Substring(inicio, objEst_ax.pLongitud.Value).Trim());
             }
 
         }
@@ -1223,12 +1225,29 @@ namespace Bancos.PS.Servicios
 
         private String convertirNumero(String numero, int decimales)
         {
-
+            String reemplazado = "";
+            long numero_reem = 0;
+            long res = 0;
+            long dec = 0;
             String[] numeros = numero.Split(',');
             if (!numero.Contains(","))
-                return (Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales)).ToString();
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem);
+                dec = (long)Math.Pow(10, decimales);
+                res = numero_reem * dec;
+
+                return res.ToString();
+            }
             else
-                return Convert.ToInt64((Convert.ToInt64(numero.Replace(",", "")) * Math.Pow(10, decimales - numeros[1].Length))).ToString();
+            {
+                reemplazado = numero.Replace(",", "");
+                Int64.TryParse(numero, out numero_reem);
+                dec = (long)Math.Pow(10, decimales - numeros[1].Length);
+                res = numero_reem * dec;
+
+                return res.ToString();
+            }
 
         }
 
