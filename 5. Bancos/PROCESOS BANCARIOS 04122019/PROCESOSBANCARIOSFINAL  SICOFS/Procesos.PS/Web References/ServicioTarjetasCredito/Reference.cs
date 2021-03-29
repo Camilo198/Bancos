@@ -76,9 +76,9 @@ namespace Procesos.PS.ServicioTarjetasCredito {
         /// <remarks/>
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/ITarjetasCredito/ServicioTarjetasCredito", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
         [return: System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string ServicioTarjetasCredito([System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string NombreCuenta, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string IdCuentaBanco, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string IdCuentaBancoEpicor, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaEntrada, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaSalida, [System.Xml.Serialization.XmlArrayAttribute(IsNullable=true)] [System.Xml.Serialization.XmlArrayItemAttribute(Namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays")] object[] CorreosControl, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string Remitente, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string CodigoTransito, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string NumCuenta, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string TipoCuenta, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string Usuario, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaProcesado, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string TipoProceso) {
+        public string ServicioTarjetasCredito([System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string NombreBanco, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string IdCuentaBanco, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string IdCuentaBancoEpicor, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaEntrada, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaSalida, [System.Xml.Serialization.XmlArrayAttribute(IsNullable=true)] [System.Xml.Serialization.XmlArrayItemAttribute(Namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays")] object[] CorreosControl, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string Remitente, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string CodigoTransito, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string NumCuenta, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string TipoCuenta, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string Usuario, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string RutaProcesado, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] string TipoProceso) {
             object[] results = this.Invoke("ServicioTarjetasCredito", new object[] {
-                        NombreCuenta,
+                        NombreBanco,
                         IdCuentaBanco,
                         IdCuentaBancoEpicor,
                         RutaEntrada,
@@ -95,17 +95,17 @@ namespace Procesos.PS.ServicioTarjetasCredito {
         }
         
         /// <remarks/>
-        public void ServicioTarjetasCreditoAsync(string NombreCuenta, string IdCuentaBanco, string IdCuentaBancoEpicor, string RutaEntrada, string RutaSalida, object[] CorreosControl, string Remitente, string CodigoTransito, string NumCuenta, string TipoCuenta, string Usuario, string RutaProcesado, string TipoProceso) {
-            this.ServicioTarjetasCreditoAsync(NombreCuenta, IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaSalida, CorreosControl, Remitente, CodigoTransito, NumCuenta, TipoCuenta, Usuario, RutaProcesado, TipoProceso, null);
+        public void ServicioTarjetasCreditoAsync(string NombreBanco, string IdCuentaBanco, string IdCuentaBancoEpicor, string RutaEntrada, string RutaSalida, object[] CorreosControl, string Remitente, string CodigoTransito, string NumCuenta, string TipoCuenta, string Usuario, string RutaProcesado, string TipoProceso) {
+            this.ServicioTarjetasCreditoAsync(NombreBanco, IdCuentaBanco, IdCuentaBancoEpicor, RutaEntrada, RutaSalida, CorreosControl, Remitente, CodigoTransito, NumCuenta, TipoCuenta, Usuario, RutaProcesado, TipoProceso, null);
         }
         
         /// <remarks/>
-        public void ServicioTarjetasCreditoAsync(string NombreCuenta, string IdCuentaBanco, string IdCuentaBancoEpicor, string RutaEntrada, string RutaSalida, object[] CorreosControl, string Remitente, string CodigoTransito, string NumCuenta, string TipoCuenta, string Usuario, string RutaProcesado, string TipoProceso, object userState) {
+        public void ServicioTarjetasCreditoAsync(string NombreBanco, string IdCuentaBanco, string IdCuentaBancoEpicor, string RutaEntrada, string RutaSalida, object[] CorreosControl, string Remitente, string CodigoTransito, string NumCuenta, string TipoCuenta, string Usuario, string RutaProcesado, string TipoProceso, object userState) {
             if ((this.ServicioTarjetasCreditoOperationCompleted == null)) {
                 this.ServicioTarjetasCreditoOperationCompleted = new System.Threading.SendOrPostCallback(this.OnServicioTarjetasCreditoOperationCompleted);
             }
             this.InvokeAsync("ServicioTarjetasCredito", new object[] {
-                        NombreCuenta,
+                        NombreBanco,
                         IdCuentaBanco,
                         IdCuentaBancoEpicor,
                         RutaEntrada,

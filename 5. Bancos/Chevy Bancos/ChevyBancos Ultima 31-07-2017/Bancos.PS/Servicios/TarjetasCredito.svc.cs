@@ -1233,7 +1233,7 @@ namespace Bancos.PS.Servicios
             if (!numero.Contains(","))
             {
                 reemplazado = numero.Replace(",", "");
-                Int64.TryParse(numero, out numero_reem);
+                Int64.TryParse(reemplazado, out numero_reem);
                 dec = (long)Math.Pow(10, decimales);
                 res = numero_reem * dec;
 
@@ -1242,7 +1242,7 @@ namespace Bancos.PS.Servicios
             else
             {
                 reemplazado = numero.Replace(",", "");
-                Int64.TryParse(numero, out numero_reem);
+                Int64.TryParse(reemplazado, out numero_reem);
                 dec = (long)Math.Pow(10, decimales - numeros[1].Length);
                 res = numero_reem * dec;
 
