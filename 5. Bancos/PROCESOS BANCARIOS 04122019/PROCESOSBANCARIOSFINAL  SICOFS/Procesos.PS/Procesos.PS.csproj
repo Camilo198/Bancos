@@ -33,7 +33,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -293,10 +293,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioAsoBancaria_AsoBancaria</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://localhost:8092/Servicios/TarjetasCredito.svc%3fwsdl">
+    <WebReferenceUrl Include="http://localhost:51647/Servicios/TarjetasCredito.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioTarjetaCredito\</RelPath>
-      <UpdateFromURL>http://localhost:8092/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://localhost:51647/Servicios/TarjetasCredito.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>
@@ -337,10 +337,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioMoverArchivosFTP_moverArchivosFTP</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://localhost:8090/WsBancos.svc%3fwsdl">
+    <WebReferenceUrl Include="http://localhost:8082/WsBancos.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioBancos\</RelPath>
-      <UpdateFromURL>http://localhost:8090/WsBancos.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://localhost:8082/WsBancos.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

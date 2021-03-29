@@ -261,6 +261,7 @@ namespace Bancos.PS.Servicios
                         {
                             lineasArchivo = objLector.leerArchivoTarjetas(archivo);
                         }
+
                     }
                     #endregion
 
@@ -410,7 +411,10 @@ namespace Bancos.PS.Servicios
                    // objLector.borrarArchivo(archivo);
 
                     System.Threading.Thread.Sleep(1000);
-                    File.Move(archivo, RutaSalida+nombre);
+                    string fecha = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+                      DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + "_";
+
+                    File.Move(archivo, RutaSalida+fecha+nombre);
                 }
 
                 return "Proceso " + tipoArchivo + " ejecutado con exito!!";
@@ -809,11 +813,14 @@ namespace Bancos.PS.Servicios
         {
 
             //CUANDO EL OBJETO REQUIERE TRANSFORMACION BUSCA UN CODIGO EN UNA TABLA PRECARGADA
-            if (objEA.pRequiereCambio == true)
+            if (objEA.pRequiereCambio == true && tablaE.Rows.Count > 0)
             {
                 return obtenerEquivalencia(objEA, Convert.ToString(valor), true);//RETORNA
             }
-
+            if (objEA.pRequiereCambio == true && valor.Contains("0000/00/00")) // SAU FECHA DE CODENSA
+            {
+                valor = DateTime.Now.ToString(objEA.pFormatoFecha);
+            }
             return valor;
         }
 

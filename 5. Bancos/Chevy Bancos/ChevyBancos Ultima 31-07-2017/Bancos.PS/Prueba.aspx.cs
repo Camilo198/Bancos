@@ -16,13 +16,13 @@ namespace Bancos.PS
             ArrayList arrMail = new ArrayList();
             TarjetasCredito tc = new TarjetasCredito();
 
-            string msg = tc.ServicioTarjetasCredito("TCR", "14", "00015",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Recibidos\\",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Procesados\\",
-                arrMail, "steven.aguilar@chevyplan.com.co",
-                "00", "45", "00", "TAREA PROGRAMADA",
-                "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Historico\\",
-                "TCR1");
+            //string msg = tc.ServicioTarjetasCredito("TCR", "14", "00015",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Recibidos\\",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Procesados\\",
+            //    arrMail, "steven.aguilar@chevyplan.com.co",
+            //    "00", "45", "00", "TAREA PROGRAMADA",
+            //    "\\\\sbogche016v\\ArchPlanos\\PAGOS\\Fiducia1\\TC\\Bancolombia\\Historico\\",
+            //    "TCR1");
         }
     }
 }
