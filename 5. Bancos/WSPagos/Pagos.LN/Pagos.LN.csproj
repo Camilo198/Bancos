@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F78D3E33-2EED-4E17-87BC-1D6A96A6AE33}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pagos.LN</RootNamespace>
+    <AssemblyName>Pagos.LN</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MicroFocus.COBOL.Runtime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0412c5e0b2aaa8f0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Librerias\MicroFocus.COBOL.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet">
+      <HintPath>..\WsPagos\Librerias\Renci.SshNet.dll</HintPath>
+    </Reference>
+    <Reference Include="SSHConect">
+      <HintPath>Librerias\SSHConect.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Consulta\AfilLN.cs" />
+    <Compile Include="Consulta\ArchivoLN.cs" />
+    <Compile Include="Consulta\CierreLN.cs" />
+    <Compile Include="Consulta\FechaUsuraLN.cs" />
+    <Compile Include="Consulta\PagosErradosLN.cs" />
+    <Compile Include="Consulta\PagosInconsistentesLN.cs" />
+    <Compile Include="Consulta\PagosLN.cs" />
+    <Compile Include="Consulta\PagosTarjetaLN.cs" />
+    <Compile Include="Consulta\ParaLN.cs" />
+    <Compile Include="Consulta\ParametrosLN.cs" />
+    <Compile Include="Consulta\RecaudoLN.cs" />
+    <Compile Include="Consulta\RptPagosLN.cs" />
+    <Compile Include="Consulta\TiemposLN.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Servicios\IWcfUtilidades.cs" />
+    <Compile Include="Servicios\WcfUtilidades.cs" />
+    <Compile Include="Web References\wsenviocorreos\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pagos.AD\Pagos.AD.csproj">
+      <Project>{23063804-2608-4bf8-9b7c-50f093813c56}</Project>
+      <Name>Pagos.AD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pagos.EN\Pagos.EN.csproj">
+      <Project>{19e1ce6f-6af0-422b-a423-a35521cee294}</Project>
+      <Name>Pagos.EN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\wsenviocorreos\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\wsenviocorreos\service.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://wsenviocorreos.chevyplan.col/service.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\wsenviocorreos\</RelPath>
+      <UpdateFromURL>http://wsenviocorreos.chevyplan.col/service.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Pagos_LN_wsenviocorreos_Service</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\wsenviocorreos\service.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Librerias\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,3347 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.ServiceModel.Web;
+using System.Text;
+using System.Configuration;
+using Pagos.LN;
+using Pagos.EN;
+using Pagos.LN.Consulta;
+using Pagos.EN.Tablas;
+//using Ionic.Zip;
+using System.Globalization;
+using System.Data;
+using Renci.SshNet;
+using SSH;
+using System.Collections;
+
+/// <summary>
+/// Desarrollado por: Nicolas Larrotta
+/// Fecha ultima modificacion: 19/10/2018
+/// Observaciones: Se incluye Fiducia 3
+///
+///  Desarrollado por: Nicolas Larrotta
+/// Fecha ultima modificacion: 24/01/2019
+/// Observaciones: Se incluye control de pagos para Fiducia
+/// Palabra clave : FIDCON
+/// </summary>
+/// 
+/// Desarrollado por: Nicolas Larrotta
+/// Fecha ultima modificacion: 04/02/2019
+/// Observaciones: Pagos Automaticos
+/// Palabra clave : PAGOS
+/// </summary>
+/// 
+/// Desarrollado por: Nicolas Larrotta
+/// Fecha ultima modificacion: 04/02/2019
+/// Observaciones: Identificación Primeras Inversiones
+/// Palabra clave : PAGOPI
+/// </summary>
+/// 
+/// Desarrollado por: Nicolas Larrotta
+/// Fecha ultima modificacion: 04/02/2019
+/// Observaciones: Pagos Automaticos
+/// Palabra clave : /*PAGOS*/
+/// </summary>
+/// /// Desarrollado por: Duvan Ramírez
+/// Fecha ultima modificacion: 19/07/2019
+/// Observaciones: Correcion PAGLOS REPETIDOS
+/// Palabra clave : /*PAGREP*/
+/// </summary>
+/// 
+/// Desarrollo por Duvan Ramirez
+/// Fecha ultima modificacion: 6/09/2019
+/// Observaciones: Segunda parte para bancos
+/// Palabra clave : /*VALFEC*/
+/// </summary> 
+
+
+
+
+
+namespace WebServiceBancos
+{
+    public class WsBancos : IWBancos
+    {
+        #region DECLARACION VARIABLES
+        ServMetodosSICO.ServMetodosSICO smsico = new ServMetodosSICO.ServMetodosSICO();
+        static StreamWriter RegistrosProcesados, ArchivoSico;
+        /*PAQUETE DE PAGOS II */
+        List<string> Lista_RegistrosProcesados;
+        List<string> Lista_ArchivoSico;
+        List<string> Lista_ArchivoVisaMAstercardSICO;
+        List<string> Lista_ArchivoAmexSICO;
+        List<string> Lista_DinnersSICO;
+        /*PAQUETE DE PAGOS II */
+        string DigitoVerificacion, FormaPago, FechaRecaudo, calculodigito, Referencia, linea, exporasico, FecParSico;
+        string RutaEpicor, RutaProceso, partefija, GuardaInconsistencia, Sucursal, informacion;
+        string NombreBanco, CodBanco, FechaSico, Correo, RutaOrigen, RutaDestino, franquicia, tipomovimiento, HoraArchivo, MinutosArchivo;
+        Pagos.LN.WcfUtilidades Util = new Pagos.LN.WcfUtilidades();
+        String CarpetaBanco = "";
+        string fecha = "_" + DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+        DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+        string fecha_otroArc = DateTime.Now.Day.ToString().PadLeft(2, '0') + DateTime.Now.Month.ToString().PadLeft(2, '0') + DateTime.Now.Year.ToString() + "_" +
+        DateTime.Now.Hour.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + "_" + DateTime.Now.Second.ToString().PadLeft(2, '0');
+        string encabezado = "";
+        String EstadoContrato = "";
+        int CantArchivoOrigen = 0;
+        int CountSico = 0;
+        int Valor = 0;
+        string RutaSico = ConfigurationManager.AppSettings["RutaFTP"].ToString();
+        string UsuFTP = ConfigurationManager.AppSettings["UserFTP"].ToString();
+        string PassFTP = ConfigurationManager.AppSettings["PassFTP"].ToString();
+        string UsuFTPSystem = ConfigurationManager.AppSettings["LoginSystem"].ToString();
+        string PassFTPSystem = ConfigurationManager.AppSettings["passwordSystem"].ToString();
+        string Repositorio = ConfigurationManager.AppSettings["Repositorio"].ToString();
+
+        string grupo, numero, nivel;
+        bool validacion;
+        bool validacionCupo;
+        bool ExisteRegstro = false;
+
+        AfilLN objConsultaAfil = new AfilLN();
+
+
+        DataTable DtAfilCupo = new DataTable();
+        DataTable DtAfilCont = new DataTable();
+        DataTable DtContBlanco = new DataTable();
+        DataTable DtLupa = new DataTable();
+        DataTable DtCupo = new DataTable();
+        int ControlaHora = 0;
+        int ControlaMinutos = 0;
+        string NombreArchivoSico;
+        SSHConect Conexion = new SSHConect();  /*PAGOS*/
+
+
+        /*FIDCON*/
+        String ContratoValida = String.Empty;
+        String LupaFiducia = String.Empty;
+        /*PAGOPI*/
+        int npagosguardadosPI = 0;
+        #endregion
+
+        /*PAGREP*/
+        RecaudoLN objRecaudo = new RecaudoLN();
+        bool registroDuplicado = false;
+        string pagosConError = "";
+
+        /*Pagos Online Tarjeta Credito*/
+        ArrayList registrosPagosTarjeta = new ArrayList();
+        static StreamWriter ArchivoVisaMAstercardSICO, ArchivoAmexSICO, ArchivoDinnersSICO;
+        String CodBancoVisaMarterCardSICO = "029";
+        String CodBancoAmexSICO = "042";
+        String CodBancoDinnersSico = "041";
+        String CodBancoVisaMarterCardVentas = "043";
+        String CodBancoAmexVentas = "045";
+        String CodBancoDinnersVentas = "044";
+        String CodBancoPSE = "66";
+        String NombreArchivoVisaMAstercardSICO = "";
+        String NombreArchivoAmexSICO = "";
+        String NombreArchivoDinnersSICO = "";
+        int CountVisaMarterCard = 0;
+        int CountAmex = 0;
+        int CountDinners = 0;
+        int CountEfectivo = 0;
+        int sumaVisaMastercard = 0;
+        int sumaDinners = 0;
+        int sumaAmex = 0;
+        int sumaEfectivo = 0;
+        String ultimoCodigoBancoOnline;
+        DateTime horaBanco;
+        DateTime horaSistema;
+        TimeSpan sleep;
+
+        DateTime FeModificacion;
+
+        String error_mensaje;
+
+        String parteFijaAbstracta = "";
+        string parteFijaOriginal = "";
+        System.IO.StreamReader sr = null;
+        string respu = "";
+        // SAU: Paquete de pagos II: Ajuste a lectura de archivo, a log, adicion de operacion en webservice
+        ArchivoEN archivoLinea = new ArchivoEN();
+        ArchNoAPSICOEN archNoAPSICOEN = new ArchNoAPSICOEN();
+        ParametrosEN parametrosEN = new ParametrosEN();
+        ArchivoLN archivoLN = new ArchivoLN();
+        ParametrosLN parametrosLN = new ParametrosLN();
+        /// <summary>
+        /// Metodo que consulta la referencia cupo en SICO
+        /// </summary>
+        public bool ExisteCupo(string cupo)
+        {
+            DtAfilCupo.Clear();
+            if (Convert.ToString(cupo).Length >= 8) //Toma grupos en formacion y definitivos
+            {
+                if (Convert.ToString(cupo).Length == 9)
+                {
+                    grupo = cupo.Substring(0, 4);
+                    numero = cupo.Substring(4, 3);
+                    nivel = cupo.Substring(7, 2);
+                }
+                else if (Convert.ToString(cupo).Length == 8)
+                {
+                    grupo = cupo.Substring(0, 3);
+                    numero = cupo.Substring(3, 3);
+                    nivel = cupo.Substring(6, 2);
+                }
+                else
+                {
+                    return false;
+                }
+
+                DtAfilCupo = objConsultaAfil.consultarExistenciaCupo(grupo,
+                                                         numero,
+                                                         nivel);
+
+                if (DtAfilCupo.Rows.Count > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Metodo que consulta la referencia contrato en SICO
+        /// </summary>
+        public bool ExisteContrato(string contrato)
+        {
+            DtContBlanco.Clear();
+            DtAfilCont.Clear();
+
+            if (Convert.ToString(contrato).Length == 6 || Convert.ToString(contrato).Length == 7)
+            {
+                DtContBlanco = objConsultaAfil.consultarExistenciaContratoBlanco(contrato);  //Busca en CONT
+
+                if (DtContBlanco.Rows.Count > 0)
+                {
+                    EstadoContrato = "B"; //Estado blanco
+                    return true;
+                }
+                else
+                {
+                    DtAfilCont = objConsultaAfil.consultarExistenciaContrato(contrato);
+
+                    if (DtAfilCont.Rows.Count > 0)
+                    {
+                        EstadoContrato = "P"; //Estado procesado
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public DataTable ConsultarLUPA(String Codigo)
+        {
+            DtLupa.Clear();
+            return DtLupa = objConsultaAfil.consultarLugarPago(Codigo);
+        }
+
+        public DataTable ConsultarCupo(String contrato)
+        {
+            DtCupo.Clear();
+            return DtCupo = objConsultaAfil.consultarCupo(contrato);
+        }
+
+        /// <summary>
+        /// Mètodo que procesa el recaudo diario de Pagos
+        /// </summary>
+        /// <param name="Usuario">Usuario el cual aun no se utiliza, que controlara los permisos para utilizar el metodo</param>
+        /// <param name="Password">Password el cual aun no se utiliza, que controlara los permisos para utilizar el metodo</param>
+        /// <param name="RutaArchivo">Ruta donde se encuentra el archivo que se procesara</param>
+        /// <param name="NombreArchivo">Nombre del archivo que se procesara</param>
+        /// <param name="PagosOnline">Indetificador "S" o "N" que identifica si es pago online</param>
+        /// <returns></returns>
+        public string LecturaPagos(string Usuario, string Password, string RutaArchivo, string NombreArchivo, string PagosOnline)
+        {
+            String mensaje = string.Empty;
+            try
+            {
+                archivoLinea.fechaProceso = DateTime.Now;
+                var listaArchivo = archivoLN.almacenaLineasArchivoLN(RutaArchivo, NombreArchivo, PagosOnline, archivoLinea, out mensaje);
+
+                if (listaArchivo == null)
+                {
+                    return mensaje;
+                }
+
+                string hora = DateTime.Now.Hour.ToString().PadLeft(2, '0') + DateTime.Now.Minute.ToString().PadLeft(2, '0') + DateTime.Now.Second.ToString().PadLeft(2, '0') + ".txt";
+
+                //try // 04 / 01 / 2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (sr != null)
+                //    {
+                //        sr.Close();
+                //    }
+                //    return "Excepción no hay Pagos Online para procesar";
+                //}
+
+                PagosInconsistentesLN objInsertPagosIn = new PagosInconsistentesLN();
+                CierreLN ConsultaExis = new CierreLN();
+                PagosLN PagoValdLN = new PagosLN();
+                ParaLN ObjParaLn = new ParaLN();
+                ObjetoTablas ValdObjetos = new ObjetoTablas();
+                List<string[,]> ConsultaCodigoBanco = new List<string[,]>();
+                DataSet CodigoArchivos = new DataSet();
+                DataSet Cupos = new DataSet();
+
+                String mes = DateTime.Now.ToString("MMMM").ToUpper();
+                String año = DateTime.Now.Year.ToString();
+                String Directorio = String.Empty;
+                String Fiducia = String.Empty;
+
+                String[] RangoCont = RutaArchivo.ToString().Split('\\');
+                DataTable parametro = new DataTable(); //VALFEC
+
+                Fiducia = "F1";
+                Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
+
+                String resQueryLog = "";
+
+                int nregistrosprocesados = 0;
+                int nreferenciadesconocida = 0;
+                int ncupos = 0;
+                int nregistrosexistentes = 0;
+                int suma = 0;
+                int notascredito = 0;
+                int contnoinversion = 0;
+                int notasdebito = 0;
+                int nreferenciaerrada = 0;
+                int npagosguardados = 0;
+                int totnotascredito = 0;
+                int totnotasdebito = 0;
+                int totnreferenciaerrada = 0;
+                int contadordelineas = 0;
+
+                if (!Directory.Exists(Directorio))
+                {
+                    System.IO.Directory.CreateDirectory(Directorio);
+                }
+
+                /// <summary>
+                /// Trae el lote maximo que existe y lo aumenta en 1
+                /// </summary>
+                List<string[,]> ListPagos = PagoValdLN.ConsultaLoteMaximo("ConsultaMaxLotePagos");
+                int LoteMaximo = 0;
+                if (ListPagos != null)
+                {
+                    if (ListPagos.Count > 0)
+                    {
+                        string[,] ArregloLote = ListPagos[0];
+                        LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                        LoteMaximo++;
+                    }
+                    else
+                    {
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+                        if (this.FechaRecaudo == null)
+                        {
+                            this.FechaRecaudo = DateTime.Now.ToString();
+                        }
+                        if (parteFijaAbstracta == "")
+                        {
+                            parteFijaAbstracta = NombreArchivo;
+                        }
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        return error_mensaje;
+                    }
+                }
+                else
+                {
+                    RptPagosLN pagosLN = new RptPagosLN();
+                    error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+                    if (this.FechaRecaudo == null)
+                    {
+                        this.FechaRecaudo = DateTime.Now.ToString();
+                    }
+                    if (parteFijaAbstracta == "")
+                    {
+                        parteFijaAbstracta = NombreArchivo;
+                    }
+                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
+                    return error_mensaje;
+
+                }
+                //PAGREP
+                //buscar en la base de datos antes de empezar a recorrerlo 
+                #region LECTURA DE ARCHIVO
+                //Lee el archivo mientras existan lineas
+                //while (sr.EndOfStream == false)  //04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                foreach (var item in listaArchivo)
+                {
+                    //linea = sr.ReadLine(); //04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    linea = item;
+                    archivoLinea.numLinea++;
+
+                    contnoinversion = 0;
+                    notascredito = 0;
+                    notasdebito = 0;
+                    nreferenciaerrada = 0;
+                    npagosguardadosPI = 0; /*PAGOPI*/
+
+
+                    if (Convert.ToInt32(linea.Substring(0, 2)) == 01)// Obtener fecha recaudo SAU
+                    {
+                        // Fecha de creacion y modificacion del archivo  SAU
+                        //FeCreacion = File.GetCreationTime(RutaArchivo + NombreArchivo);
+                        FeModificacion = File.GetLastWriteTime(RutaArchivo + NombreArchivo);
+                        // Fecha de recaudo para insertar en la tbl format date
+                        FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
+                        FechaSico = linea.Substring(14, 6);
+                        HoraArchivo = linea.Substring(48, 2);
+                        MinutosArchivo = linea.Substring(50, 2);
+                        ControlaHora = Convert.ToInt32(HoraArchivo);
+                        ControlaMinutos = Convert.ToInt32(MinutosArchivo);
+
+                        /*VALFEC*/
+                        /*Aca vamos a validar que la fecha del dia se la fecha del archivo*/
+                        try
+                        {
+                            parametro = ObjParaLn.consultarParametro();
+                        }
+                        catch (Exception e)
+                        {
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "Error en conexión a SICO " + RutaArchivo + NombreArchivo + e.ToString();
+                            pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return error_mensaje;
+                        }
+
+
+                        if (parametro.Rows.Count > 0)
+                        {
+
+                            DataRow row = parametro.Rows[0];
+                            FecParSico = row["ParaAnoPro"].ToString() + "/" + row["ParaMesPro"].ToString().PadLeft(2, '0');
+
+                            if (!FechaRecaudo.Substring(0, 7).Equals(FecParSico))
+                            {
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
+                                if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(FecParSico))
+                                {
+                                    File.Delete(RutaArchivo + NombreArchivo);
+                                    archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                                    return " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE SICO : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico;
+                                }
+
+                                error_mensaje = "NO COINCIDE LA FECHA : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + FecParSico + " " + RutaArchivo + NombreArchivo;
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, "");
+                                archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                                return error_mensaje;
+                            }
+                        }
+
+
+
+                        if (PagosOnline == "S")
+                            partefija = NombreArchivo; //Nombre del archivo del banco para pagos PSE
+                        else
+                            partefija = NombreArchivo.TrimStart('0'); //Nombre del archivo del banco para recaudo
+
+                        #region NOMBRE ARCHIVOS
+                        CodigoArchivos = PagoValdLN.ConsultaArchivo(Fiducia, "S");
+
+                        if (CodigoArchivos.Tables["TablaBanPagos"].Rows.Count > 0)
+                        {
+                            for (int i = 0; i < CodigoArchivos.Tables["TablaBanPagos"].Rows.Count; i++)
+                            {
+                                if (NombreArchivo.Contains(CodigoArchivos.Tables["TablaBanPagos"].Rows[i]["ParteFija"].ToString()))
+                                {
+                                    ConsultaCodigoBanco = PagoValdLN.ValidaCodigoBanco(PagosOnline, CodigoArchivos.Tables["TablaBanPagos"].Rows[i]["ParteFija"].ToString(),
+                                                                                       Fiducia, "ConsultaLugarPago");
+                                    if (ConsultaCodigoBanco.Count > 0)
+                                    {
+                                        string[,] ArregloCodigo = ConsultaCodigoBanco[0];
+                                        CodBanco = ArregloCodigo[0, 1].ToString();
+                                        NombreBanco = ArregloCodigo[1, 1].ToString();
+                                        RutaEpicor = ArregloCodigo[2, 1].ToString();
+                                        RutaProceso = ArregloCodigo[3, 1].ToString();
+                                        parteFijaAbstracta = CodigoArchivos.Tables["TablaBanPagos"].Rows[i]["ParteFija"].ToString();
+                                        parteFijaOriginal = parteFijaAbstracta;
+                                    }
+                                    else
+                                    {
+                                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                        //{
+                                        //    sr.Close();
+                                        //}
+                                        RptPagosLN pagosLN = new RptPagosLN();
+                                        error_mensaje = "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO" + RutaArchivo + NombreArchivo;
+                                        pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                        archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                                        return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO";
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
+                        }
+                        //--------------
+                        #region SAU Fecha usura
+                        // 
+                        //FechaUsuraLN usura = new FechaUsuraLN(); SAU 05/01/2020 SE CAMBIA POR QUE SE LEE DE TABLA PARAMETRICA BAN_PARAMETROS
+                        parametrosEN.NombreParametro = "FECHA_USURA";
+                        parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                        List<ParametrosEN> parametroUsura = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+
+                        if (parametroUsura.Count > 0)
+                        {
+                            String fechaFilaUsura = parametroUsura[0].ValorParametro;
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            // Fecha en formato año mes
+                            if (!FechaRecaudo.Substring(0, 7).Equals(fechaFilaUsura))
+                            {
+
+                                if (DateTime.Parse(FechaRecaudo.Substring(0, 7)) < DateTime.Parse(fechaFilaUsura))
+                                {
+                                    File.Delete(RutaArchivo + NombreArchivo);
+                                    error_mensaje = " ARCHIVO ELIMINADO PORQUE NO ESTA DENTRO DEL PERIODO ACTIVO DE LA FECHA DE USURA : "
+                                        + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+
+                                    archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+
+                                    pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                    //{
+                                    //    sr.Close();
+                                    //}
+                                    if (ArchivoSico != null)
+                                    {
+                                        ArchivoSico.Close();
+                                    }
+                                    if (ArchivoVisaMAstercardSICO != null)
+                                    {
+                                        ArchivoVisaMAstercardSICO.Close();
+                                    }
+                                    if (ArchivoAmexSICO != null)
+                                    {
+                                        ArchivoAmexSICO.Close();
+                                    }
+                                    if (ArchivoDinnersSICO != null)
+                                    {
+                                        ArchivoDinnersSICO.Close();
+                                    }
+                                    if (RegistrosProcesados != null)
+                                    {
+                                        RegistrosProcesados.Close();
+                                    }
+                                    return error_mensaje;
+                                }
+
+                                error_mensaje = "LA FECHA DE USURA NO SE ENCUENTRA EN EL MES ACTUAL : " + FechaRecaudo.Substring(0, 7) + ", CON LA DEL  PARAMETRO :" + fechaFilaUsura;
+
+                                pagosLN.insertaLogErroresLN(error_mensaje, DateTime.Now.ToString(), 0, parteFijaAbstracta);
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
+                                if (ArchivoSico != null)
+                                {
+                                    ArchivoSico.Close();
+                                }
+                                if (ArchivoVisaMAstercardSICO != null)
+                                {
+                                    ArchivoVisaMAstercardSICO.Close();
+                                }
+                                if (ArchivoAmexSICO != null)
+                                {
+                                    ArchivoAmexSICO.Close();
+                                }
+                                if (ArchivoDinnersSICO != null)
+                                {
+                                    ArchivoDinnersSICO.Close();
+                                }
+                                if (RegistrosProcesados != null)
+                                {
+                                    RegistrosProcesados.Close();
+                                }
+                                return error_mensaje;
+                            }
+                        }
+                        #endregion
+                        #region Hora de aplicacion CMUÑOZ
+                        TiemposLN tln = new TiemposLN();
+                        ObjetoTablas objt = new ObjetoTablas();
+                        objt.pCodBanco = this.CodBanco;
+                        IList<ObjetoTablas> listaHorasBancos = tln.ConsultarHoraAplicacionBancoLN(objt);
+                        // Validacion Hora Banco 
+                        if (listaHorasBancos.Count > 0)
+                        {
+                            this.horaSistema = Convert.ToDateTime(DateTime.Now.ToString("HH:mm"));
+                            this.horaBanco = Convert.ToDateTime(listaHorasBancos[0].pHoraBancoAplicacion);
+
+                            if (horaSistema < horaBanco)
+                            {
+                                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                                //{
+                                //    sr.Close();
+                                //}
+
+                                return " ARCHIVO EN ESPERA PORQUE EL BANCO " + this.CodBanco + " AUN NO ES SU HORA DE APLICACION, SE APLICARA A LAS " + listaHorasBancos[0].pHoraBancoAplicacion;
+                            }
+                        }
+                        //    
+                        //------
+                        #endregion
+                        List<string[,]> res = objRecaudo.consultarDisponibilidad(CodBanco, partefija);/*DisponibilidadArchivos*/
+
+                        if (res.Count > 0)
+                        {
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "NO HAY DISPONIBILIDAD DE EJECUCION PARA ESTE BANCO"
+                                + CodBanco + " " + this.FechaRecaudo + RutaArchivo + NombreArchivo;
+                            //pagosLN.insertaLogErroresLN(error_mensaje,this.FechaRecaudo, Convert.ToInt32(CodBanco), parteFijaAbstracta);
+                            // Mueve el archivo para evitar la interrupcion en la ejecucion
+                            ////RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            ////RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                            ////System.IO.File.Move(RutaOrigen, RutaDestino);
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return error_mensaje; /*DisponibilidadArchivos*/
+                        }
+
+                        string resp = objRecaudo.updateDisponibilidad(CodBanco, partefija, "1");
+
+                        if (!resp.Equals("1"))
+                        {
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            RptPagosLN pagosLN = new RptPagosLN();
+                            error_mensaje = "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD " + this.CodBanco + " " + RutaArchivo + NombreArchivo;
+                            pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
+                            return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD";
+                        }
+
+
+
+                        #endregion
+
+                        if (ConsultaCodigoBanco.Count == 0)
+                        {
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
+                        }
+
+                        if (NombreBanco == String.Empty)
+                        {
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            return "OCURRIO UN ERROR CON EL NOMBRE DEL ARCHIVO"; /*PAGOS*/
+                        }
+
+
+
+
+                        //Valida si ya existe 
+                        /*PAGREP*/
+                        //Consultamos si ya se encuentra ese pago 
+                        ValdObjetos.pFecPago = FechaRecaudo.Trim() + " " + HoraArchivo + ":" + MinutosArchivo;
+                        ValdObjetos.pParteFija = partefija;
+                        List<string[,]> listRecaudo = objRecaudo.ValidaExisteRecaudo(ValdObjetos, "pa_Ban_Verifica_Recaudos");
+
+                        if (listRecaudo.Count != 0)
+                        {
+                            insertarRecaudo = false;
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            if (ArchivoSico != null)
+                            {
+                                ArchivoSico.Close();
+                            }
+                            if (ArchivoVisaMAstercardSICO != null)
+                            {
+                                ArchivoVisaMAstercardSICO.Close();
+                            }
+                            if (ArchivoAmexSICO != null)
+                            {
+                                ArchivoAmexSICO.Close();
+                            }
+                            if (ArchivoDinnersSICO != null)
+                            {
+                                ArchivoDinnersSICO.Close();
+                            }
+                            if (RegistrosProcesados != null)
+                            {
+                                RegistrosProcesados.Close();
+                            }
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
+                            //File.Delete(RutaArchivo + NombreArchivo); SAU SE COMENTA PARA QUE LO DEJE EN PROCESADOS Y NO LO BORRE
+
+                            objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");// habilita de nuevo la disponibilidad
+                            //registroDuplicado = true;
+                            //pagosConError += ValdObjetos.pCodBanco + " " + ValdObjetos.pFecPago + " " + ValdObjetos.pContrato + " " + ValdObjetos.pValPago + " . \n ";
+                            archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                            return "EL ARCHIVO YA SE ENCUENTRA PROCESADO"; /*REGREP*/
+                        }
+                        else
+                        {
+                            insertarRecaudo = true;
+                        }
+
+
+                        CarpetaBanco = Directorio + NombreBanco.Replace(" ", "") + "\\";
+
+
+                        if (!Directory.Exists(CarpetaBanco))
+                        {
+                            System.IO.Directory.CreateDirectory(CarpetaBanco);
+                        }
+
+                        /* PAQUETE DE PAGOS II AJUSTE EN ESCRITURA DE ARCHIVO                         
+                         */
+                        Lista_RegistrosProcesados = new List<string>();
+                        Lista_ArchivoSico = new List<string>();
+                        Lista_ArchivoVisaMAstercardSICO = new List<string>();
+                        Lista_ArchivoAmexSICO = new List<string>();
+                        Lista_DinnersSICO = new List<string>();
+                        /*
+                        */
+
+                        //RegistrosProcesados = new StreamWriter(CarpetaBanco + NombreBanco + fecha + ".txt", false, Encoding.GetEncoding(1252));
+                        //if (!NombreArchivo.Contains("Acreedores"))
+                        //{
+                        //    ArchivoSico = new StreamWriter(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                        //    ArchivoVisaMAstercardSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                        //    ArchivoAmexSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                        //    ArchivoDinnersSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                        //}
+
+
+                        DataTable DtCodLupa = ConsultarLUPA(CodBanco);
+                        if (DtCodLupa.Rows.Count > 0)
+                        {
+                            DataRow rowlupa = DtCodLupa.Rows[0];
+                            LupaFiducia = rowlupa["LupaFlagFiller"].ToString();
+                        }
+                        else
+                        {
+                            return "OCURRIO UN ERROR AL CONSULTAR LUPA";
+                        }
+
+                    }
+                    else
+                    {
+                        if (Convert.ToInt32(linea.Substring(0, 2)) == 06)
+                        {
+                            contadordelineas++;
+
+
+                            Referencia = linea.Substring(2, 47).TrimStart('0').Replace(" ", "").Replace("-", "");
+
+                            DigitoVerificacion = linea.Substring(49, 1);
+
+                            FormaPago = linea.Substring(66, 2) == "02" ? "CHEQUE" : "EFECTIVO";
+                            Sucursal = linea.Substring(83, 4);
+                            Valor = Convert.ToInt32(linea.Substring(52, 10));
+                            tipomovimiento = linea.Substring(97, 2);
+
+                            if (tipomovimiento != "ND")
+                            {
+                                suma = Valor + suma;
+                            }
+                            if (Referencia == "")
+                                Referencia = "0";
+
+                            //Pago Tarjeta
+                            ValdObjetos.pNumAutorizacion = linea.Substring(74, 6);
+                            if (ValdObjetos.pNumAutorizacion != "000000" && PagosOnline == "S")
+                            {
+                                ValdObjetos.pCodBanco = linea.Substring(80, 3);
+                                ValdObjetos.pFecPago = FechaRecaudo.Trim() + " " + HoraArchivo + ":" + MinutosArchivo;
+                                ValdObjetos.pValPago = linea.Substring(50, 12);
+                                ValdObjetos.pForPago = "TARJETA";
+                                ValdObjetos.pContrato = Convert.ToString(Referencia);
+                                ValdObjetos.pEstado = "V";
+                                ValdObjetos.pUsuProceso = "AUTOMATICO";
+                                ValdObjetos.pContAnterior = "0";
+                                ValdObjetos.pValComision = 0;
+                                ValdObjetos.pValRetFuente = 0;
+                                ValdObjetos.pValRetIva = 0;
+                                ValdObjetos.pValRetIca = 0;
+                                ValdObjetos.pNumAutorizacion = linea.Substring(74, 6);
+                                ValdObjetos.pHoraPago = "0";
+                                ValdObjetos.pNumLote = Convert.ToString(LoteMaximo.ToString());
+                                ValdObjetos.pLegalizado = "N";
+                                ValdObjetos.pPagOficina = linea.Substring(83, 4);
+                                ValdObjetos.pNomArchivo = NombreArchivo;
+                                ValdObjetos.pFecPagoBancos = FechaRecaudo.Trim();
+                                FormaPago = "TARJETA";
+                            }
+                            //------
+                            else
+                            {
+                                ValdObjetos.pCodBanco = CodBanco;
+                                ValdObjetos.pFecPago = FechaRecaudo.Trim() + " " + HoraArchivo + ":" + MinutosArchivo;
+                                ValdObjetos.pValPago = linea.Substring(50, 12);
+                                ValdObjetos.pForPago = FormaPago;
+                                ValdObjetos.pContrato = Convert.ToString(Referencia);
+                                ValdObjetos.pEstado = "V";
+                                ValdObjetos.pUsuProceso = "AUTOMATICO";
+                                ValdObjetos.pContAnterior = "0";
+                                ValdObjetos.pValComision = 0;
+                                ValdObjetos.pValRetFuente = 0;
+                                ValdObjetos.pValRetIva = 0;
+                                ValdObjetos.pValRetIca = 0;
+                                ValdObjetos.pNumAutorizacion = "0";
+                                ValdObjetos.pHoraPago = "0";
+                                ValdObjetos.pNumLote = Convert.ToString(LoteMaximo.ToString());
+                                ValdObjetos.pLegalizado = "S";
+                                ValdObjetos.pPagOficina = linea.Substring(83, 4);
+                                ValdObjetos.pNomArchivo = NombreArchivo;
+                                ValdObjetos.pFecPagoBancos = FechaRecaudo.Trim();
+                            }
+
+                            if (tipomovimiento != "ND")
+                            {
+                                if (ValdObjetos.pCodBanco == CodBancoVisaMarterCardVentas)
+                                {
+                                    sumaVisaMastercard = sumaVisaMastercard + Valor;
+                                }
+                                else if (ValdObjetos.pCodBanco == CodBancoDinnersVentas)
+                                {
+                                    sumaDinners = sumaDinners + Valor;
+                                }
+                                else if (ValdObjetos.pCodBanco == CodBancoAmexVentas)
+                                {
+                                    sumaAmex = sumaAmex + Valor;
+                                }
+                                else
+                                {
+                                    sumaEfectivo = sumaEfectivo + Valor;
+                                }
+                            }
+
+
+                            if (insertarRecaudo)
+                            {
+                                if (Convert.ToString(Referencia).Length == 6 || Convert.ToString(Referencia).Length == 7)
+                                {
+                                    DataTable DtCupoCon = ConsultarCupo(Referencia);
+                                    if (DtCupoCon.Rows.Count > 0)
+                                    {
+                                        DataRow rowlupa = DtCupoCon.Rows[0];
+                                        ValdObjetos.pReferenciaPago = rowlupa["AfilGrupo"].ToString() + rowlupa["AfilNroAf"].ToString().PadLeft(3, '0') + rowlupa["AfilNivAf"].ToString().PadLeft(2, '0');
+
+                                    }
+                                    else
+                                    {
+                                        ValdObjetos.pReferenciaPago = Convert.ToString(Referencia);
+                                    }
+                                }
+                                else
+                                {
+                                    ValdObjetos.pReferenciaPago = Convert.ToString(Referencia);
+                                }
+                                /// <summary>
+                                /// Se encarga de evaluar si es de una fiducia errada y si lo es lo guarda en una tabla de Pagos Errados
+                                /// </summary>
+                                #region CONTROL FIDUCIAS
+                                /*FIDCON*/
+                                ExisteRegstro = false;
+                                if (Convert.ToString(Referencia).Length >= 8)
+                                {
+                                    validacionCupo = ExisteCupo(Referencia);
+
+                                    if (validacionCupo)
+                                    {
+                                        DataRow row = DtAfilCupo.Rows[0];
+                                        ContratoValida = row["AfilNroCon"].ToString();
+                                        ValdObjetos.pContrato = ContratoValida; // SAGUILAR PAQUETE DE PAGOS II
+                                        ExisteRegstro = true;
+                                    }
+                                }
+                                else
+                                {
+                                    validacion = ExisteContrato(Referencia);
+
+                                    if (validacion)
+                                    {
+                                        ContratoValida = Referencia;
+                                        ValdObjetos.pContrato = ContratoValida; // SAGUILAR PAQUETE DE PAGOS II
+                                        ExisteRegstro = true;
+                                    }
+                                }
+
+
+                                //Se comentarea porque ya no se utilizaa la fiducia 3
+                                //if (ExisteRegstro)
+                                //{
+                                //    ObjetoTablas objParaResul = new ObjetoTablas();
+                                //    objParaResul = listaParametro[0];
+                                //    String[] RangoContrato = objParaResul.pValor.ToString().Split('-');
+                                //    int fiduciaerrada = 0;
+
+                                //    switch (LupaFiducia.Trim())
+                                //    {
+                                //        case "1":
+                                //            if (Convert.ToInt32(ContratoValida) >= Convert.ToInt32(RangoContrato[0].ToString()) && Convert.ToInt32(ContratoValida) <= Convert.ToInt32(RangoContrato[1].ToString()))
+                                //            {
+                                //                fiduciaerrada++;
+                                //            }
+                                //            break;
+                                //        case "3":
+                                //            if (Convert.ToInt32(ContratoValida) < Convert.ToInt32(RangoContrato[0].ToString()) || Convert.ToInt32(ContratoValida) > Convert.ToInt32(RangoContrato[1].ToString()))
+                                //            {
+                                //                fiduciaerrada++;
+                                //            }
+                                //            break;
+                                //        default:
+                                //            break;
+                                //    }
+
+                                //    if (fiduciaerrada > 0)
+                                //    {
+
+                                //        ObjetoTablas objParaErrados = new ObjetoTablas();
+                                //        objParaErrados.pProcesoErr = "PA";
+                                //        objParaErrados.pReferenciaErr = ContratoValida;
+                                //        objParaErrados.pCodBancoErr = ValdObjetos.pCodBanco;
+                                //        objParaErrados.pValorPagoErr = ValdObjetos.pValPago;
+                                //        objParaErrados.pFechaErr = Convert.ToDateTime(ValdObjetos.pFecPago).ToString("dd/MM/yyyy");
+                                //        objParaErrados.pForPagoErr = ValdObjetos.pForPago;
+                                //        objParaErrados.pUsuarioProcesoErr = "AUTOMATICO";
+
+
+                                //        List<string[,]> ConsultPagosErrados = new PagosErradosLN().ValidaExistePagoErrado(objParaErrados, "ConsultaExistePagoErrado");
+
+                                //        if (ConsultPagosErrados.Count == 0)
+                                //        {
+                                //            string GuardaPagoErrado = new PagosErradosLN().InsertPagosErrados(objParaErrados, "InsertPagosErrados");
+                                //        }
+
+                                //    }
+                                //}
+
+
+
+                                #endregion
+
+                                // SAU
+                                /* Consultar si existe un banco con esa fecha de pago
+                                 * si existe, retornar cantidad de pagos que tiene, cant_pagos = query SP
+                                Si no existe Insert a tabla cod banco, fecha de pago, fecha proceso por SP(get date)
+                                // SAU Monto insertado
+                            // Efectivo 66 - VisaMaster 29 - Diners 41 - Amex 42
+                                */
+                                RptPagosEN pagosEN = new RptPagosEN();
+
+                                pagosEN.fechaModificacionArch = FeModificacion;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+
+                                IList<RptPagosEN> arrPagos = null;
+
+                                //PAGO TARJETA
+                                if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                {
+                                    ValdObjetos.pCodBanco = linea.Substring(83, 4);
+                                    string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
+
+                                    pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
+                                    pagosEN.fechaPago = this.FechaRecaudo;
+
+                                    if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoVisaMarterCardSICO))
+                                    {
+                                        pagosEN.valorMontoArchivo = sumaVisaMastercard;
+                                        parteFijaAbstracta = "0001x_";
+                                    }
+                                    else if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoDinnersSico))
+                                    {
+                                        pagosEN.valorMontoArchivo = sumaDinners;
+                                        parteFijaAbstracta = "0001x_";
+                                    }
+                                    else if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoAmexSICO))
+                                    {
+                                        pagosEN.valorMontoArchivo = sumaAmex;
+                                        parteFijaAbstracta = "0001x_";
+                                    }
+                                    else
+                                    {
+                                        pagosEN.valorMontoArchivo = sumaEfectivo;
+                                        parteFijaAbstracta = parteFijaOriginal;
+                                    }
+                                    pagosEN.parteFija = parteFijaAbstracta;
+
+                                    arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
+                                    if (arrPagos.Count > 0) //Si existe
+                                    {
+                                        try
+                                        {
+                                            int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
+                                            if (result == 0)
+                                            {
+                                                error_mensaje = "Error en la actualización Monto Archivo banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+                                                error_mensaje = String.Empty;
+                                            }
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(e.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
+                                            if (resultado == 0)
+                                            {
+                                                error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+                                                error_mensaje = String.Empty;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
+                                        }
+                                    }
+
+                                    ValdObjetos.pCodBanco = linea.Substring(80, 3);
+                                    if (respu.Substring(0, 1) == "0")
+                                    {
+                                        return "ERROR INSERTANDO RECAUDO " + respu;
+                                    }
+
+                                }
+                                //-----
+                                else
+                                {
+                                    string respu = objRecaudo.insertaRecaudo(ValdObjetos, "pa_Ban_inserta_Recaudo");
+
+                                    pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
+                                    pagosEN.fechaPago = this.FechaRecaudo;
+                                    pagosEN.parteFija = parteFijaAbstracta;
+                                    if (Convert.ToInt32(pagosEN.codigoBanco) == Convert.ToInt32(CodBancoPSE))
+                                    {
+                                        pagosEN.parteFija = parteFijaOriginal;
+                                    }
+                                    pagosEN.valorMontoArchivo = sumaEfectivo;
+
+                                    arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
+                                    if (arrPagos.Count > 0) //Si existe
+                                    {
+                                        try
+                                        {
+                                            int result = Convert.ToInt32(pagosLN.actualizarBancoCantPagosRecaudoLN(pagosEN));
+                                            if (result == 0)
+                                            {
+                                                error_mensaje = "Error en la actualización Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+                                                error_mensaje = String.Empty;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            int resultado = Convert.ToInt32(pagosLN.insertarBancoFechaLN(pagosEN));
+                                            if (resultado == 0)
+                                            {
+                                                error_mensaje = "Error en la inserción Monto Archivo banco: banco: " +
+                                                    pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+
+                                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                if (resQueryLog == "1")
+                                                {
+                                                    pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                else
+                                                {
+                                                    pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                                }
+                                                resQueryLog = String.Empty;
+                                                error_mensaje = String.Empty;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            if (resQueryLog == "1")
+                                            {
+                                                pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            else
+                                            {
+                                                pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                            }
+                                            resQueryLog = String.Empty;
+                                        }
+                                    }
+
+                                    if (respu.Substring(0, 1) == "0")
+                                    {
+                                        return "ERROR INSERTANDO RECAUDO " + respu;
+                                    }
+                                }
+                            }
+
+                            /// <summary>
+                            /// Si el codigo de verificación calculado es diferente al del plano, lo inserta en la tabla 
+                            /// Pagos Inconsistentes y lo guarda en un archivo
+                            /// </summary>
+                            calculodigito = Util.calculoDigito(Convert.ToString(Referencia));
+
+                            if (NombreBanco.Contains("DAVIVIENDA") && tipomovimiento == "NC")
+                            {
+                                if (Convert.ToString(Referencia).Length >= 6 || Referencia == "0")
+                                {
+                                    validacion = ExisteContrato(Referencia);
+
+                                    validacionCupo = ExisteCupo(Referencia);
+
+                                    if (validacion == true || validacionCupo == true)
+                                    {
+                                        contnoinversion = 0;
+                                    }
+                                    else
+                                    {
+                                        if (encabezado == "")
+                                        {
+                                            //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                            Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+
+                                            encabezado = "S";
+                                        }
+                                        //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " NOTA CREDITO");
+                                        Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " NOTA CREDITO");
+
+                                        CrearArchivoSico(NombreArchivo);
+
+                                        nregistrosprocesados++;
+                                        notascredito++;
+                                        contnoinversion++;
+                                    }
+                                }
+                            }
+
+                            /// <summary>
+                            ///  //Valida si es nota debito para indetificarlo como referencia nota debito
+                            /// </summary>
+                            if (NombreBanco.Contains("DAVIVIENDA") && tipomovimiento == "ND")
+                            {
+                                if (encabezado == "")
+                                {
+                                    //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                    Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+
+                                    encabezado = "S";
+                                }
+                                //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " NOTA DEBITO");
+
+                                Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " NOTA DEBITO");
+
+                                CrearArchivoSico(NombreArchivo);
+
+                                nregistrosprocesados++;
+                                notasdebito++;
+                                contnoinversion++;
+                            }
+
+                            if (NombreBanco.Contains("DAVIVIENDA"))
+                            {
+                                if (tipomovimiento == "DE")
+                                {
+                                    if (calculodigito != DigitoVerificacion)
+                                    {
+                                        List<string[,]> ConsultaPagoIncon = objInsertPagosIn.ValidaExistePagoInconsistente(ValdObjetos, "ConsultaExisPagoIncon");
+                                        if (ConsultaPagoIncon.Count == 0)
+                                        {
+                                            GuardaInconsistencia = objInsertPagosIn.PagosIncon(ValdObjetos, "InsertPagosInconsistentes");
+                                        }
+                                        if (encabezado == "")
+                                        {
+                                            //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                            Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                            encabezado = "S";
+                                        }
+                                        //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
+
+                                        Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
+
+
+                                        CrearArchivoSico(NombreArchivo);
+
+                                        nregistrosprocesados++;
+                                        nreferenciaerrada++;
+                                        contnoinversion++;
+                                    }
+                                }
+                            }
+
+                            if (!NombreBanco.Contains("DAVIVIENDA"))
+                            {
+                                if (calculodigito != DigitoVerificacion)
+                                {
+                                    List<string[,]> ConsultaPagoIncon = objInsertPagosIn.ValidaExistePagoInconsistente(ValdObjetos, "ConsultaExisPagoIncon");
+                                    if (ConsultaPagoIncon.Count == 0)
+                                    {
+                                        GuardaInconsistencia = objInsertPagosIn.PagosIncon(ValdObjetos, "InsertPagosInconsistentes");
+                                    }
+                                    if (encabezado == "")
+                                    {
+                                        //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                        Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                        encabezado = "S";
+                                    }
+                                    //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
+
+                                    Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA ERRADA");
+
+                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                    {
+                                        CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                    }
+                                    else
+                                    {
+                                        CrearArchivoSico(NombreArchivo);
+                                    }
+                                    nregistrosprocesados++;
+                                    nreferenciaerrada++;
+                                    contnoinversion++;
+                                }
+                            }
+
+                            /// <summary>
+                            /// Valida referencias desconocidas
+                            /// </summary>
+                            /// 
+                            if (nreferenciaerrada == 0)
+                            {
+                                if (Convert.ToString(Referencia).Length >= 8)
+                                {
+                                    validacionCupo = ExisteCupo(Referencia);
+
+                                    if (validacionCupo == true)
+                                    {
+                                        contnoinversion = 0;
+                                    }
+                                    else
+                                    {
+                                        if (notascredito == 0 && notasdebito == 0)
+                                        {
+                                            List<string[,]> ConsultaPagoIncon = objInsertPagosIn.ValidaExistePagoInconsistente(ValdObjetos, "ConsultaExisPagoIncon");
+                                            if (ConsultaPagoIncon.Count == 0)
+                                            {
+                                                GuardaInconsistencia = objInsertPagosIn.PagosIncon(ValdObjetos, "InsertPagosInconsistentes");
+                                            }
+
+                                            if (encabezado == "")
+                                            {
+                                                //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                encabezado = "S";
+                                            }
+                                            //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
+                                            Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
+
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
+
+                                            nregistrosprocesados++;
+                                            nreferenciadesconocida++;
+                                            contnoinversion++;
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            /// <summary>
+                            /// Entra a esta rutina si es un contrato y no presenta ninguna novedad
+                            /// </summary>
+                            /// 
+
+                            if (contnoinversion == 0)
+                            {
+                                DigitoVerificacion = linea.Substring(49, 1);
+
+                                if (Convert.ToString(Referencia).Length >= 8) //Valida si es un cupo y no un contrato
+                                {
+                                    if (encabezado == "")
+                                    {
+                                        //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                        Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                        encabezado = "S";
+                                    }
+                                    //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
+                                    Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
+                                    //PAGO TARJETA
+                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                    {
+                                        string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagosCuotas");
+                                        CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                        // contadorPagoCuotas++;
+                                    }
+                                    //----------
+                                    else
+                                    {
+                                        CrearArchivoSico(NombreArchivo);
+                                    }
+
+                                    nregistrosprocesados++;
+                                    ncupos++;
+                                }
+                                else  //Valida si es un contrato
+                                {
+                                    validacion = ExisteContrato(Referencia);
+                                    if (validacion == true)
+                                    {
+                                        if (EstadoContrato == "B")
+                                        {
+                                            List<string[,]> VentaProcesada = ConsultaExis.ValidaExisteCierre(ValdObjetos, "ConsultaVentaProcesada");
+
+                                            if (VentaProcesada.Count > 0)
+                                            {
+                                                if (encabezado == "")
+                                                {
+                                                    //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                    Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                    encabezado = "S";
+                                                }
+                                                //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA PROCESADA");
+                                                Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA PROCESADA");
+
+                                                if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                {
+                                                    string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagosCuotas");
+                                                    CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                    // contadorPagoCuotas++;
+                                                }
+                                                //----------
+                                                else
+                                                {
+                                                    CrearArchivoSico(NombreArchivo);
+                                                }
+
+                                                nregistrosprocesados++;
+                                                nregistrosexistentes++;
+                                            }
+                                            else
+                                            {
+                                                /// <summary>
+                                                /// Si el estado del contrato es diferente de Vigente, lo guarda en un archivo 
+                                                /// y pasa al otro contrato, si no valida en la tabla Pagos
+                                                /// </summary>
+                                                List<string[,]> ConsultaCierre = ConsultaExis.ValidaExisteCierre(ValdObjetos, "ConsultaExisteCierre");
+
+                                                if (ConsultaCierre.Count > 0)
+                                                {
+                                                    if (encabezado == "")
+                                                    {
+                                                        //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                        Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                        encabezado = "S";
+                                                    }
+                                                    //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA NO VIGENTE");
+                                                    Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " VENTA NO VIGENTE");
+
+                                                    if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                    {
+                                                        CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                    }
+                                                    else
+                                                    {
+                                                        CrearArchivoSico(NombreArchivo);
+                                                    }
+
+                                                    nregistrosprocesados++;
+                                                    nregistrosexistentes++;
+                                                }
+                                                else
+                                                {
+                                                    /// <summary>
+                                                    /// Valida en la tabla Pagos si el pago existe, si es asi lo guarda en un archivo, 
+                                                    /// si no lo inserta en esta misma tabla y lo guarda en un archivo con el resumen de los                        pagos
+                                                    /// </summary>
+
+                                                    List<string[,]> ConsultPagos = PagoValdLN.ValidaExistePago(ValdObjetos, "ConsultaExistePago");
+
+                                                    if (ConsultPagos.Count > 0)
+                                                    {
+                                                        if (encabezado == "")
+                                                        {
+                                                            //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                            Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                            encabezado = "S";
+                                                        }
+                                                        //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO YA EXISTE");
+                                                        Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO YA EXISTE");
+
+                                                        // SAU 6/10/2020 Pagos online a cuotas
+                                                        if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                        {
+                                                            CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                        }
+                                                        else
+                                                        {
+                                                            CrearArchivoSico(NombreArchivo);
+                                                        }
+                                                        // SAU 6/10/2020 Pagos online a cuotas
+                                                        nregistrosprocesados++;
+                                                        nregistrosexistentes++;
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        string GuardaRegistrosPago = PagoValdLN.IUDPago(ValdObjetos, "InsertPagos");
+                                                        if (GuardaRegistrosPago.Substring(0, 1) != "0")
+                                                        {
+                                                            if (encabezado == "")
+                                                            {
+                                                                //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                                Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                                encabezado = "S";
+                                                            }
+                                                            //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A PRIMERA INVERSIÓN");
+                                                            Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A PRIMERA INVERSIÓN");
+
+                                                            nregistrosprocesados++;
+                                                            npagosguardados++;
+                                                            /*PAGOPI*/
+                                                            npagosguardadosPI++;
+                                                            // SAU 6/10/2020 Pagos online
+                                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                                            {
+                                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                                            }
+                                                            else
+                                                            {
+                                                                CrearArchivoSico(NombreArchivo);
+                                                            }
+                                                            // SAU 6/10/2020 Pagos online
+                                                        }
+                                                        else
+                                                        {
+                                                            if (encabezado == "")
+                                                            {
+                                                                //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                                Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                                encabezado = "S";
+                                                            }
+                                                            //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " OCURRIO UN ERROR AL GUARDAR");
+                                                            Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " OCURRIO UN ERROR AL GUARDAR");
+                                                            nregistrosprocesados++;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (encabezado == "")
+                                            {
+                                                //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                encabezado = "S";
+                                            }
+                                            //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
+                                            Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " PAGO A CUOTA");
+                                            // SAU 13/10/2020 
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
+
+                                            nregistrosprocesados++;
+                                            ncupos++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (notascredito == 0)
+                                        {
+                                            List<string[,]> ConsultaPagoIncon = objInsertPagosIn.ValidaExistePagoInconsistente(ValdObjetos, "ConsultaExisPagoIncon");
+                                            if (ConsultaPagoIncon.Count == 0)
+                                            {
+                                                GuardaInconsistencia = objInsertPagosIn.PagosIncon(ValdObjetos, "InsertPagosInconsistentes");
+                                            }
+
+                                            if (encabezado == "")
+                                            {
+                                                //RegistrosProcesados.WriteLine("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                Lista_RegistrosProcesados.Add("REFERENCIA".PadRight(13, ' ') + "VALOR".PadRight(10, ' ') + "FECHA PAGO".PadRight(11, ' ') + " OBSERVACION");
+                                                encabezado = "S";
+                                            }
+                                            //RegistrosProcesados.WriteLine(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
+                                            Lista_RegistrosProcesados.Add(Convert.ToString(Referencia).PadLeft(10, '0') + "-" + DigitoVerificacion + " $" + Convert.ToString(Valor).PadRight(9, ' ') + FechaRecaudo.Replace("/", "").PadRight(11, ' ') + " REFERENCIA DESCONOCIDA");
+
+                                            if (ValdObjetos.pNumAutorizacion != "0" && PagosOnline == "S")
+                                            {
+                                                CrearArchivoSicoTarjeta(NombreArchivo, ValdObjetos.pCodBanco);
+                                            }
+                                            else
+                                            {
+                                                CrearArchivoSico(NombreArchivo);
+                                            }
+
+                                            nregistrosprocesados++;
+                                            nreferenciadesconocida++;
+                                            contnoinversion++;
+                                        }
+                                    }
+                                }
+                            }
+                            // Eliminar linea de lista
+                            archivoLN.EliminarLineasPagoLN(archivoLinea, "P");
+                        }
+
+                    }
+                    /*
+                     *   String CodBancoVisaMarterCardSICO = "029";
+                    String CodBancoAmexSICO = "042";
+                    String CodBancoDinnersSico = "041";
+                    String CodBancoVisaMarterCardVentas = "043";
+                    String CodBancoAmexVentas = "045";
+                    String CodBancoDinnersVentas = "044";
+                     * SAU PAGOS 09 */
+                    if (Convert.ToInt32(linea.Substring(0, 2)) == 09)
+                    {
+                        RptPagosEN pagosEN = new RptPagosEN();
+
+                        RptPagosLN pagosLN = new RptPagosLN();
+
+                        IList<RptPagosEN> arrPagos = null;
+
+                        CantArchivoOrigen = 0;
+                        CantArchivoOrigen = Convert.ToInt32(linea.Substring(3, 8));
+
+                        pagosEN.fechaPago = this.FechaRecaudo;
+                        pagosEN.codigoBanco = Convert.ToInt32(ValdObjetos.pCodBanco);
+                        pagosEN.fechaModificacionArch = FeModificacion;
+                        pagosEN.cantPagosArchivo = CantArchivoOrigen;
+
+                        if (pagosEN.codigoBanco == Convert.ToInt32(CodBancoVisaMarterCardVentas) || pagosEN.codigoBanco == Convert.ToInt32(CodBancoDinnersVentas)
+                            || pagosEN.codigoBanco == Convert.ToInt32(CodBancoAmexVentas))
+                        {
+                            pagosEN.codigoBanco = Convert.ToInt32(CodBancoPSE);
+                            parteFijaAbstracta = "0001x_";
+                        }
+                        pagosEN.parteFija = parteFijaAbstracta;
+
+                        if (pagosEN.codigoBanco == Convert.ToInt32(CodBancoPSE))
+                        {
+                            // Monto archivo, SP sin parámetros UPDATE
+                            pagosEN.parteFija = "0001x_";
+                            try
+                            {
+                                int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
+                                if (result == 0)
+                                {
+                                    error_mensaje = "Error en la actualización Codigo PSE banco: " + pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+
+                                    resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    if (resQueryLog == "1")
+                                    {
+                                        pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    else
+                                    {
+                                        pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    resQueryLog = String.Empty;
+                                    error_mensaje = String.Empty;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                }
+                                resQueryLog = String.Empty;
+                            }
+
+                        }
+                        else
+                        {
+                            pagosEN.codigoBanco = Convert.ToInt32(this.CodBanco);
+                            pagosEN.fechaPago = this.FechaRecaudo;
+                            pagosEN.cantPagosArchivo = CantArchivoOrigen;
+
+                            arrPagos = pagosLN.ConsultarBancoFechaLN(pagosEN);
+
+                            if (arrPagos.Count > 0) //Si existe
+                            {
+                                try
+                                {
+                                    int result = Convert.ToInt32(pagosLN.actualizarCantPagosArchPSELN(pagosEN));
+                                    if (result == 0)
+                                    {
+                                        error_mensaje = "Error en la actualización cantidad pagos Arch Origen banco: " + pagosEN.codigoBanco + " " + pagosEN.fechaPago;
+
+                                        resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        if (resQueryLog == "1")
+                                        {
+                                            pagosLN.actualizaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        }
+                                        else
+                                        {
+                                            pagosLN.insertaLogErroresLN(error_mensaje, pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                        }
+                                        resQueryLog = String.Empty;
+                                        error_mensaje = string.Empty;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    resQueryLog = pagosLN.consultaLogErroresLN("", pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    if (resQueryLog == "1")
+                                    {
+                                        pagosLN.actualizaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    else
+                                    {
+                                        pagosLN.insertaLogErroresLN(ex.Message.ToString(), pagosEN.fechaPago, pagosEN.codigoBanco, parteFijaAbstracta);
+                                    }
+                                    resQueryLog = String.Empty;
+                                }
+                            }
+                        }
+                        // Limpiar la tabla de lineas de lo restante ya que se leyó exitosamente
+                        // Eliminar linea de lista
+                        archivoLN.EliminarLineasPagoLN(archivoLinea, "T");
+                        break;
+                    }
+
+                    totnotascredito = notascredito + totnotascredito;
+                    totnotasdebito = notasdebito + totnotasdebito;
+                    totnreferenciaerrada = nreferenciaerrada + totnreferenciaerrada;
+                }
+
+                //CIERRE DEL WHILE
+                //CAMBIAR CONTADOR DE RECUADOS AHORA CONSULTAMOS  
+                List<string[,]> listRecaudo2 = objRecaudo.ConsultarRegistrosIngresados(ValdObjetos, "pa_Ban_Cuenta_Recaudos");
+                if (CantArchivoOrigen != Convert.ToInt16(listRecaudo2[0][0, 1]))
+                {
+
+                    Correo = Util.EnvioMail(" ", "Proceso Fallido" + NombreBanco, "Buen día, \n\n" +
+                              "La cantidad de registros procesados no coincide con la cantidad que dice el archivo plano.",
+                             ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                             ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
+                    if (ArchivoSico != null)
+                    {
+                        ArchivoSico.Close();
+                    }
+                    if (ArchivoVisaMAstercardSICO != null)
+                    {
+                        ArchivoVisaMAstercardSICO.Close();
+                    }
+                    if (ArchivoAmexSICO != null)
+                    {
+                        ArchivoAmexSICO.Close();
+                    }
+                    if (ArchivoDinnersSICO != null)
+                    {
+                        ArchivoDinnersSICO.Close();
+                    }
+                    if (RegistrosProcesados != null)
+                    {
+                        RegistrosProcesados.Close();
+                    }
+                    return "PROCESO FINALIZADO INCONSISTENCIA DE DATOS";
+                }
+
+                /// <summary>
+                /// Convierte en formato numero el valor total de los registros procesados
+                /// </summary>
+                double valor = Convert.ToDouble(suma);
+                string resultsuma = Convert.ToString(suma);
+                resultsuma = valor.ToString("0,0", CultureInfo.InvariantCulture);
+                resultsuma = String.Format(CultureInfo.InvariantCulture, "{0:0,0}", valor);
+
+                //RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
+                Lista_RegistrosProcesados.Add("TOTAL VALOR: $" + resultsuma);
+                //RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
+                Lista_RegistrosProcesados.Add("TOTAL REGISTROS: " + nregistrosprocesados);
+                //Cerrar la escritura de los archivos
+                /* PAQUETE DE PAGOS II SE LEEN LAS LISTAS DE REGISTROS PARA EVITAR EXCEPCION POR ARCHIVO CERRADO CUANDO ES MUY GRANDE
+                 * SE ABREN, ESCRIBEN EN LOS RESPECTIVOS ARCHIVOS Y SE CIERRAN      */
+
+                RegistrosProcesados = new StreamWriter(CarpetaBanco + NombreBanco + fecha + ".txt", false, Encoding.GetEncoding(1252));
+                if (!NombreArchivo.Contains("Acreedores"))
+                {
+                    ArchivoSico = new StreamWriter(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                    ArchivoVisaMAstercardSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                    ArchivoAmexSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                    ArchivoDinnersSICO = new StreamWriter(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha, false, Encoding.GetEncoding(1252));
+                }
+
+                if (RegistrosProcesados != null)
+                {
+                    foreach (var item in Lista_RegistrosProcesados)
+                    {
+                        RegistrosProcesados.WriteLine(item);
+                    }
+                    RegistrosProcesados.Close();
+                }
+                if (!NombreArchivo.Contains("Acreedores"))
+                {
+                    if (ArchivoSico != null)
+                    {
+                        foreach (var lineSico in Lista_ArchivoSico)
+                        {
+                            ArchivoSico.WriteLine(lineSico);
+                        }
+                        ArchivoSico.Close();
+                    }
+                    if (ArchivoVisaMAstercardSICO != null)
+                    {
+                        foreach (var lineVisaMaster in Lista_ArchivoVisaMAstercardSICO)
+                        {
+                            ArchivoVisaMAstercardSICO.WriteLine(lineVisaMaster);
+                        }
+                        ArchivoVisaMAstercardSICO.Close();
+                    }
+                    if (ArchivoAmexSICO != null)
+                    {
+                        foreach (var lineAmex in Lista_ArchivoAmexSICO)
+                        {
+                            ArchivoAmexSICO.WriteLine(lineAmex);
+                        }
+                        ArchivoAmexSICO.Close();
+                    }
+                    if (ArchivoDinnersSICO != null)
+                    {
+                        foreach (var lineDinners in Lista_DinnersSICO)
+                        {
+                            ArchivoDinnersSICO.WriteLine(lineDinners);
+                        }
+                        ArchivoDinnersSICO.Close();
+                    }
+
+                }
+                /* PAQUETE DE PAGOS II SE LEEN LAS LISTAS DE REGISTROS, SE ESCRIBEN EN LOS RESPECTIVOS ARCHIVOS Y SE CIERRAN       */
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
+
+                #endregion
+
+                NombreArchivoSico = CodBanco.PadLeft(3, '0') + FechaRecaudo.Replace("/", "").Substring(2, 6) + hora;
+                NombreArchivoVisaMAstercardSICO = CodBancoVisaMarterCardSICO.PadLeft(3, '0') + FechaRecaudo.Replace("/", "").Substring(2, 6) + hora;
+                NombreArchivoAmexSICO = CodBancoAmexSICO.PadLeft(3, '0') + FechaRecaudo.Replace("/", "").Substring(2, 6) + hora;
+                NombreArchivoDinnersSICO = CodBancoDinnersSico.PadLeft(3, '0') + FechaRecaudo.Replace("/", "").Substring(2, 6) + hora;
+
+                if (!NombreArchivo.Contains("Acreedores"))
+                {
+                    if (tipomovimiento != null)
+                    {
+                        if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                        {
+                            File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+
+                            /// <summary>
+                            ///Si el proceso continuo correctamente,  mueve  el archivo de recibidos de la ruta origen a la ruta de procesados
+                            /// </summary>
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
+
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Copiar a la ruta de epicor
+                            /// </summary>
+                            //Pagos Efectivo Contadores
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoSico);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] lines = File.ReadAllLines(RutaDestino);
+
+                            CountEfectivo = 0;
+                            foreach (string line in lines)
+                            {
+                                CountEfectivo++;
+                            }
+
+                            if (CountEfectivo == 0)
+                            {
+                                File.Delete(RutaDestino);
+
+                            }
+
+                            //PAgos Tarjeta Contadores
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoVisaMAstercardSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+                            //Visa y MasterCards
+                            string[] linesVisaMaster = File.ReadAllLines(RutaDestino);
+
+                            CountVisaMarterCard = 0;
+                            foreach (string line in linesVisaMaster)
+                            {
+                                CountVisaMarterCard++;
+                            }
+
+                            if (CountVisaMarterCard == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+
+                            //Amex
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoAmexSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] linesAmex = File.ReadAllLines(RutaDestino);
+
+                            CountAmex = 0;
+                            foreach (string line in linesAmex)
+                            {
+                                CountAmex++;
+                            }
+
+                            if (CountAmex == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+                            //Dinners
+                            RutaOrigen = System.IO.Path.Combine(CarpetaBanco, "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoDinnersSICO);
+                            System.IO.File.Copy(RutaOrigen, RutaDestino, true);
+
+                            string[] linesDinners = File.ReadAllLines(RutaDestino);
+
+                            CountDinners = 0;
+                            foreach (string line in linesDinners)
+                            {
+                                CountDinners++;
+                            }
+
+                            if (CountDinners == 0)
+                            {
+                                File.Delete(RutaDestino);
+                            }
+                            //Elimina los archivos de Cache
+                            File.Delete(CarpetaBanco + "Pagos" + CodBanco.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoVisaMarterCardSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoAmexSICO.PadLeft(3, '0') + fecha);
+                            File.Delete(CarpetaBanco + "Pagos" + CodBancoDinnersSico.PadLeft(3, '0') + fecha);
+
+                            CountSico = 0;
+                            CountSico = CountEfectivo + CountAmex + CountDinners + CountVisaMarterCard;
+                            /// <summary>
+                            ///Si el proceso continuo correctamente, lo mueve de la ruta origen a la ruta de procesados
+                            /// </summary>
+                            RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                            RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+                            //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                            //{
+                            //    sr.Close();
+                            //}
+                            System.IO.File.Move(RutaOrigen, RutaDestino);
+                        }
+                    }
+                    else  // No hay línea 06
+                    {
+                        //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                        //{
+                        //    sr.Close();
+                        //}
+                        if (ArchivoSico != null)
+                        {
+                            ArchivoSico.Close();
+                        }
+                        if (ArchivoVisaMAstercardSICO != null)
+                        {
+                            ArchivoVisaMAstercardSICO.Close();
+                        }
+                        if (ArchivoAmexSICO != null)
+                        {
+                            ArchivoAmexSICO.Close();
+                        }
+                        if (ArchivoDinnersSICO != null)
+                        {
+                            ArchivoDinnersSICO.Close();
+                        }
+                        if (RegistrosProcesados != null)
+                        {
+                            RegistrosProcesados.Close();
+                        }
+                        RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                        RutaDestino = System.IO.Path.Combine(RutaProceso + NombreArchivo + fecha);
+
+                        System.IO.File.Move(RutaOrigen, RutaDestino);
+                        // Guardar en log
+                        String respue2 = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
+                        error_mensaje = "Linea 06 inexistente en archivo";
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, 0, "");
+
+                        return error_mensaje;
+                    }
+
+                }
+                else
+                {
+                    // <summary>
+                    ///Si el proceso continuo correctamente, lo mueve de la ruta origen a la ruta de procesados para Acreedores
+                    /// </summary>
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                }
+
+                if (!NombreArchivo.Contains("Acreedores"))
+                {
+                    if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                    {
+                    }
+                    else
+                    {
+                        ///Valdia si el archivo del banco tiene la mismca cantidad que el archivo creado para SICO
+                        if (CantArchivoOrigen != CountSico)
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL CREAR EL ARCHIVO DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
+                              "Se presento un error al crear el archivo a SICO. Por favor validar.",
+                             ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                             ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                            return "OCURRIO UN ERROR AL CREAR EL ARCHIVO DE SICO DEL BANCO";
+                        }
+                    }
+                }
+
+                if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                {
+                    List<System.IO.FileInfo> listaArch = new List<System.IO.FileInfo>();
+                    System.IO.FileInfo[] fileNames;
+                    String archi = "";
+
+                    System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(RutaProceso); // SAU ANTES RutaArchivo 29.10.2020
+                    fileNames = dirInfo.GetFiles("*.*");
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        if (fileNames[i].Name.Contains(NombreArchivo) && fileNames[i].Name.Contains("Recaudo_") && fileNames[i].Name.Contains(".txt"))
+                        {
+                            listaArch.Add(fileNames[i]);
+                        }
+
+                    }
+
+                    dirInfo = new System.IO.DirectoryInfo(RutaArchivo);
+                    fileNames = dirInfo.GetFiles("*.*");
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        if (fileNames[i].Name.Contains(NombreArchivo) && fileNames[i].Name.Contains("Recaudo_") && fileNames[i].Name.Contains(".txt"))
+                        {
+                            listaArch.Add(fileNames[i]);
+                        }
+                    }
+
+                    fileNames = listaArch.ToArray();
+
+                    foreach (System.IO.FileInfo archivos in fileNames)
+                    {
+                        archi = archivos.Name;
+                        if (archi.Contains(NombreArchivo))
+                        {
+
+                            RutaOrigen = System.IO.Path.Combine(archivos.DirectoryName, archi);
+                            RutaDestino = System.IO.Path.Combine(RutaEpicor, NombreArchivoSico);
+                            System.IO.File.Move(archivos.FullName, RutaDestino);
+                            //File.Delete(RutaArchivo + archi);
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK")
+                            {
+                                informacion = "Nombre archivo para SICO: " + NombreArchivoSico + " \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+
+                                //string comando = NombreComando + NombrePrograma + " " + NombreArchivoSico;
+
+                                parametrosEN.NombreParametro = "APLICACION_SICO";
+                                parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                if (listaParamSico != null)
+                                {
+                                    if (listaParamSico.Count > 0)
+                                    {
+                                        String Aplicar = listaParamSico[0].ValorParametro;
+                                        if (Aplicar == "SI")
+                                        {
+                                            smsico.Proappaau(NombreArchivoSico);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        smsico.Proappaau(NombreArchivoSico);
+                                    }
+                                }
+                                else
+                                {
+                                    smsico.Proappaau(NombreArchivoSico);
+                                }
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoSico, UsuFTPSystem, PassFTPSystem,
+                                                            Convert.ToInt32(this.CodBanco), this.FechaRecaudo, FeModificacion, parteFijaOriginal);
+                            }
+                            else
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO AL FTP DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar.",
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(this.CodBanco);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaOriginal;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoSico;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
+                            }
+                        }
+                    }
+                }
+
+                if (!NombreArchivo.Contains("Acreedores"))
+                {
+                    /// <summary>
+                    /// Exportar archivo al ftp de SICO
+                    /// </summary>
+                    if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC")) { }
+                    else
+                    {
+                        TiemposLN tln = new TiemposLN();
+                        ObjetoTablas objt = new ObjetoTablas();
+                        objt.pCodBanco = this.CodBanco;
+                        IList<ObjetoTablas> listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+
+                        if (listaSleepBancos.Count > 0)
+                        {
+                            this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                            System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                        }
+
+                        if (CountEfectivo > 0)
+                        {
+                            // Pagos Efectivo
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoSico, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK")
+                            {
+                                informacion = "Nombre archivo Efectivo + Cheques para SICO: " + NombreArchivoSico + ". \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+                                try
+                                {
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                smsico.Proappaau(NombreArchivoSico);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            smsico.Proappaau(NombreArchivoSico);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        smsico.Proappaau(NombreArchivoSico);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBanco + "\n\n",
+                                          "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                         ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                         ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                                }
+                                ultimoCodigoBancoOnline = CodBanco;
+                                objt.pCodBanco = ultimoCodigoBancoOnline;
+                                listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                                if (listaSleepBancos.Count > 0)
+                                {
+                                    this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                    System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                                }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                // Para pruebas
+                                pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoSico, UsuFTPSystem, PassFTPSystem,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaOriginal);
+                            }
+                            else
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar. " + exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoSico + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBanco);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaOriginal;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoSico;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
+                            }
+                        }
+
+                        if (CountVisaMarterCard > 0)
+                        {
+
+                            objt.pCodBanco = this.CodBancoVisaMarterCardSICO; ;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
+
+                            //Pagos Tarjeta
+                            //Visa y MAster Card
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoVisaMAstercardSICO, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK")
+                            {
+                                informacion = informacion + "Nombre archivo Tarjeta Visa + MAstercard para SICO : " + NombreArchivoVisaMAstercardSICO + ". \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+
+                                try
+                                {
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                smsico.Proappaau(NombreArchivoVisaMAstercardSICO);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            smsico.Proappaau(NombreArchivoVisaMAstercardSICO);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        smsico.Proappaau(NombreArchivoVisaMAstercardSICO);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBancoVisaMarterCardSICO + "\n\n",
+                                          "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                         ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                         ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                                }
+                                ultimoCodigoBancoOnline = CodBancoVisaMarterCardSICO;
+                                objt.pCodBanco = ultimoCodigoBancoOnline;
+                                listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                                if (listaSleepBancos.Count > 0)
+                                {
+                                    this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                    System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                                }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoVisaMAstercardSICO, UsuFTPSystem, PassFTPSystem,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaAbstracta);
+                            }
+                            else
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoVisaMAstercardSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoVisaMAstercardSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoVisaMarterCardSICO);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoVisaMAstercardSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
+                            }
+                        }
+                        if (CountDinners > 0)
+                        {
+                            objt.pCodBanco = this.CodBancoDinnersSico;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
+                            //Dinners
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoDinnersSICO, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK")
+                            {
+                                informacion = informacion + "Nombre archivo Tarjeta Dinners para SICO: " + NombreArchivoDinnersSICO + ". \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+                                try
+                                {
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                smsico.Proappaau(NombreArchivoDinnersSICO);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            smsico.Proappaau(NombreArchivoDinnersSICO);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        smsico.Proappaau(NombreArchivoDinnersSICO);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBancoDinnersSico + "\n\n",
+                                          "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                         ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                         ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                                }
+                                ultimoCodigoBancoOnline = CodBancoDinnersSico;
+                                objt.pCodBanco = ultimoCodigoBancoOnline;
+                                listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                                if (listaSleepBancos.Count > 0)
+                                {
+                                    this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                    System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                                }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoDinnersSICO, UsuFTPSystem, PassFTPSystem,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaAbstracta);
+                            }
+                            else
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoDinnersSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoDinnersSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoDinnersSico);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoDinnersSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
+                            }
+                        }
+                        if (CountAmex > 0)
+                        {
+                            objt.pCodBanco = this.CodBancoAmexSICO;
+                            listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                            if (listaSleepBancos.Count > 0)
+                            {
+                                this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosAntes));
+                                System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                            }
+                            //Amex
+                            exporasico = Util.UploadFTP(RutaEpicor + NombreArchivoAmexSICO, RutaSico, UsuFTP, PassFTP);
+                            if (exporasico == "OK")
+                            {
+                                informacion = informacion + "Nombre archivo Tarjeta Amex para SICO: " + NombreArchivoAmexSICO + ". \n";
+                                /*PAGOS*/
+                                //Se encarga de aplicar directamente en SICO
+                                try
+                                {
+                                    parametrosEN.NombreParametro = "APLICACION_SICO";
+                                    parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                                    List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                                    if (listaParamSico != null)
+                                    {
+                                        if (listaParamSico.Count > 0)
+                                        {
+                                            String Aplicar = listaParamSico[0].ValorParametro;
+                                            if (Aplicar == "SI")
+                                            {
+                                                smsico.Proappaau(NombreArchivoAmexSICO);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            smsico.Proappaau(NombreArchivoAmexSICO);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        smsico.Proappaau(NombreArchivoAmexSICO);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + CodBancoAmexSICO + "\n\n",
+                                          "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                         ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                         ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                                }
+                                ultimoCodigoBancoOnline = CodBancoAmexSICO;
+                                objt.pCodBanco = ultimoCodigoBancoOnline;
+                                listaSleepBancos = tln.ConsultarSleepAplicacionBancoLN(objt);
+                                if (listaSleepBancos.Count > 0)
+                                {
+                                    this.sleep = TimeSpan.FromMinutes(Convert.ToDouble(listaSleepBancos[0].pSleepMinutosDespues));
+                                    System.Threading.Thread.Sleep(sleep);//n minutos para que no se aplique a las 00:00
+                                }
+                                //Almacena pagos consistentes e inconsistentes de SICO                                
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoAmexSICO, UsuFTPSystem, PassFTPSystem,
+                                                            Convert.ToInt32(objt.pCodBanco), this.FechaRecaudo, FeModificacion, parteFijaAbstracta);
+
+                            }
+                            else
+                            {
+                                Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoAmexSICO + " AL FTP DE SICO DEL BANCO" + NombreBanco, "Buen día, \n\n" +
+                                  "Se presento un error al crear el archivo a SICO. Por favor validar." + exporasico,
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                                String msg_err = "OCURRIO UN ERROR AL ENVIAR EL ARCHIVO " + NombreArchivoAmexSICO + " AL FTP DE SICO DEL BANCO " + NombreBanco + " " + exporasico;
+
+                                RptPagosLN pagosLN = new RptPagosLN();
+                                resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                if (resQueryLog == "1")
+                                {
+                                    pagosLN.actualizaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                else
+                                {
+                                    pagosLN.insertaLogErroresLN(msg_err, this.FechaRecaudo, Convert.ToInt32(objt.pCodBanco), parteFijaOriginal);
+                                }
+                                resQueryLog = String.Empty;
+
+                                archNoAPSICOEN.codBanco = Convert.ToInt32(CodBancoAmexSICO);
+                                archNoAPSICOEN.fechaRecaudo = this.FechaRecaudo;
+                                archNoAPSICOEN.fechaModificacion = FeModificacion;
+                                archNoAPSICOEN.parteFija = parteFijaAbstracta;
+                                archNoAPSICOEN.rutaArchivo = RutaEpicor;
+                                archNoAPSICOEN.nombreArchivo = NombreArchivoAmexSICO;
+
+                                archivoLN.InsertarArchNoAplicadosSICOLN(archNoAPSICOEN, "I");
+                            }
+                        }
+                    }
+                }
+
+                if (CountAmex > 0 || CountDinners > 0 || CountVisaMarterCard > 0)
+                {
+                    Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                    "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
+                    + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
+                    + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
+                    "1. Pagos aplicados a primera inversión: " + npagosguardados + " registros. \n" +
+                    "2. Cupos para pagos a cuotas: " + ncupos + " registros. \n" +
+                    "3. Referencias ya existentes en ventas: " + nregistrosexistentes + " registros. \n" +
+                    "4. Referencias erradas: " + totnreferenciaerrada + " registros. \n" +
+                    "5. Referencias notas debito: " + totnotasdebito + " registros. \n" +
+                    "6. Referencias notas credito: " + totnotascredito + " registros. \n" +
+                    "7. Referencias desconocidas: " + nreferenciadesconocida + " registros. \n" +
+                    "8. Pagos en Efectivo: " + CountEfectivo + " registros. \n" +
+                    "9. Pagos en Visa + Mastercard: " + CountVisaMarterCard + " registros. \n" +
+                    "10. Pagos en Dinners: " + CountDinners + " registros. \n" +
+                    "11. Pagos en Amex: " + CountAmex + " registros. \n" +
+                    "12. Total Pagos: " + CountSico + " registros. \n" +
+                    "13. Total Valor Efectivo y Chekes PSE $ " + sumaEfectivo + ". \n" +
+                    "14. Total Valor Tarjetas Visa y MasterCard $ " + sumaVisaMastercard + ". \n" +
+                    "15. Total Valor Tarjeta Dinners $ " + sumaDinners + ". \n" +
+                    "16. Total Valor Tarjeta Amex $ " + sumaAmex + ". \n" +
+                    "Total Valor $ " + resultsuma + ". \n" +
+                    "Total registros procesados: " + nregistrosprocesados + " registros. \n" +
+                    informacion +
+                    "Número de lote: " + LoteMaximo + ".\n\n" +
+                    "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
+                    "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
+                    "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
+                    "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
+                    "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+                }
+
+                else
+                {
+                    Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+               "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
+               + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
+               + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
+               "1. Pagos aplicados a primera inversión: " + npagosguardados + " registros. \n" +
+               "2. Cupos para pagos a cuotas: " + ncupos + " registros. \n" +
+               "3. Referencias ya existentes en ventas: " + nregistrosexistentes + " registros. \n" +
+               "4. Referencias erradas: " + totnreferenciaerrada + " registros. \n" +
+               "5. Referencias notas debito: " + totnotasdebito + " registros. \n" +
+               "6. Referencias notas credito: " + totnotascredito + " registros. \n" +
+               "7. Referencias desconocidas: " + nreferenciadesconocida + " registros. \n" +
+               "8. Total Pagos: " + CountSico + " registros. \n" +
+               "Total Valor $ " + resultsuma + ". \n" +
+               "Total registros procesados: " + nregistrosprocesados + " registros. \n" +
+               informacion +
+               "Número de lote: " + LoteMaximo + ".\n\n" +
+               "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
+               "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
+               "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
+               "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
+               "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+
+                }
+                string respue = objRecaudo.updateDisponibilidad(CodBanco, partefija, "0");
+                if (!respue.Equals("1"))
+                {
+                    //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                    //{
+                    //    sr.Close();
+                    //}
+                    return "NO SE ACTUALIZO EL CAMPO DE DISPONIBILIDAD AL FINALZAR EL PROCESO";
+                }
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
+                return "PROCESO REALIZADO CON EXITO";
+
+            }
+            catch (Exception ex)
+            {
+
+                RptPagosLN pagosLN = new RptPagosLN();
+                //if (sr != null) 04/01/2021 SAU: Se comenta toda la lectura de archivo por la nueva forma de leerlo
+                //{
+                //    sr.Close();
+                //}
+                if (ArchivoSico != null)
+                {
+                    ArchivoSico.Close();
+                }
+                if (ArchivoVisaMAstercardSICO != null)
+                {
+                    ArchivoVisaMAstercardSICO.Close();
+                }
+                if (ArchivoAmexSICO != null)
+                {
+                    ArchivoAmexSICO.Close();
+                }
+                if (ArchivoDinnersSICO != null)
+                {
+                    ArchivoDinnersSICO.Close();
+                }
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
+                error_mensaje = "General " + RutaArchivo + NombreArchivo + ex.ToString();
+                if (this.FechaRecaudo == null)
+                {
+                    this.FechaRecaudo = DateTime.Now.ToString();
+                }
+                if (parteFijaAbstracta == "")
+                {
+                    parteFijaAbstracta = NombreArchivo;
+                }
+                String resQueryLog = pagosLN.consultaLogErroresLN("", this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                if (resQueryLog == "1")
+                {
+                    pagosLN.actualizaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                }
+                else
+                {
+                    pagosLN.insertaLogErroresLN(error_mensaje, this.FechaRecaudo, Convert.ToInt32(this.CodBanco), parteFijaAbstracta);
+                }
+                resQueryLog = String.Empty;
+
+                return ex.ToString();
+            }
+        }
+
+
+        /// <summary>
+        /// Metodo que procesa los pagos aplicados por tarjeta de credito
+        /// </summary>
+        /// <param name="Usuario">Usuario el cual aun no se utiliza, que controlara los permisos para utilizar el metodo</param>
+        /// <param name="Password">Password el cual aun no se utiliza, que controlara los permisos para utilizar el metodo</param>
+        /// <param name="RutaArchivo">Ruta donde se encuentra el archivo que se procesara</param>
+        /// <param name="NombreArchivo">Nombre del archivo que se procesara</param>
+        /// <returns></returns>
+        public string PagosTarjeta(string usuario, string password, string RutaArchivo, string NombreArchivo)
+        {
+            bool flag_06 = false;
+            bool flag_01 = false;
+            try
+            {
+                if (NombreArchivo.Contains(".xls") || NombreArchivo.Contains(".xlsx") || NombreArchivo.Contains(".csv"))
+                {
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaFin = RutaArchivo;
+                    rutaFin = rutaFin.Replace("Procesados", "Historico");
+                    if (!Directory.Exists(rutaFin))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaFin);
+                    }
+                    RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
+
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return "Archivo con formato diferente al admitido movido";
+                }
+
+                int TipoOperacion;
+                System.IO.StreamReader sr = new System.IO.StreamReader(RutaArchivo + NombreArchivo);
+                PagosTarjetaLN ConsultaPagosTarjeta = new PagosTarjetaLN();
+                PagosLN PagoValdLN = new PagosLN();
+                ObjetoTablas ValdObjetos = new ObjetoTablas();
+                List<string[,]> ConsultaCodigoBanco = new List<string[,]>();
+
+                String mes = DateTime.Now.ToString("MMMM").ToUpper();
+                String año = DateTime.Now.Year.ToString();
+                String Directorio = String.Empty;
+                String Fiducia = String.Empty;
+
+                String[] RangoCont = RutaArchivo.ToString().Split('\\');
+
+                switch (RangoCont[5].ToString())
+                {
+                    case "Fiducia1":
+                        Fiducia = "F1";
+                        Directorio = Repositorio + @"\Fiducia1\Procesos\" + año + "\\" + mes + "\\";
+                        break;
+                    case "Fiducia3":
+                        Fiducia = "F3";
+                        Directorio = Repositorio + @"\Fiducia3\Procesos\" + año + "\\" + mes + "\\";
+                        break;
+                    default:
+                        break;
+                }
+
+                int nregistrosprocesados = 0;
+                int suma = 0;
+                int nregistrosexistentes = 0;
+                int npagosguardados = 0;
+                int error = 0;
+
+                if (!Directory.Exists(Directorio))
+                {
+                    System.IO.Directory.CreateDirectory(Directorio);
+                }
+
+                /// <summary>
+                /// Trae el lote maximo que existe y lo aumenta en 1
+                /// </summary>
+                int LoteMaximo = 0;
+                List<string[,]> ListPagos = PagoValdLN.ConsultaLoteMaximo("ConsultaMaxLotePagosTarjeta");
+                if (ListPagos != null)
+                {
+                    if (ListPagos.Count > 0)
+                    {
+                        string[,] ArregloLote = ListPagos[0];
+                        LoteMaximo = Convert.ToInt32(ArregloLote[0, 1].ToString());
+                        LoteMaximo++;
+                    }
+                    else
+                    {
+                        error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+
+                        if (sr != null)
+                        {
+                            sr.Close();
+                        }
+                        if (RegistrosProcesados != null)
+                        {
+                            RegistrosProcesados.Close();
+                        }
+                        return error_mensaje;
+                    }
+                }
+                else
+                {
+                    error_mensaje = "Error en consulta lote máximo en pagos : " + RutaArchivo + NombreArchivo;
+
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
+                    if (RegistrosProcesados != null)
+                    {
+                        RegistrosProcesados.Close();
+                    }
+                    return error_mensaje;
+                }
+
+                #region LECTURA DE ARCHIVO
+
+                while (sr.EndOfStream == false)
+                {
+                    string linea = sr.ReadLine();
+
+                    if (Convert.ToInt32(linea.Substring(0, 2)) == 01)
+                    {
+                        flag_01 = true;
+
+                        FechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
+                        FechaSico = linea.Substring(14, 6);
+                        partefija = NombreArchivo.Replace(".txt", "");
+                        partefija = partefija.Substring(0, 6);
+
+                        ConsultaCodigoBanco = ConsultaPagosTarjeta.ValidaCodigoBanco(partefija, Fiducia, "ConsultaLugarPagoTarjeta");
+
+                        string[,] ArregloCodigo = ConsultaCodigoBanco[0];
+                        CodBanco = ArregloCodigo[0, 1].ToString();
+                        NombreBanco = ArregloCodigo[2, 1].ToString();
+                        RutaEpicor = ArregloCodigo[4, 1].ToString();
+
+                        CarpetaBanco = Directorio + "\\" + "PAGOSTARJETA" + "\\" + NombreBanco.Replace(" ", "") + "\\";
+
+                        if (!Directory.Exists(CarpetaBanco))
+                        {
+                            System.IO.Directory.CreateDirectory(CarpetaBanco);
+                        }
+
+                        RegistrosProcesados = new StreamWriter(CarpetaBanco + NombreBanco + fecha + ".txt", false, Encoding.GetEncoding(1252));
+                        //////DateTime fecreacionarch = 
+                    }
+                    else
+                    {
+                        if (Convert.ToInt32(linea.Substring(0, 2)) == 06)
+                        {
+                            flag_06 = true;
+
+                            franquicia = linea.Substring(159, 20);
+                            Valor = Convert.ToInt32(linea.Substring(427, 12));
+                            ValdObjetos.pCodBanco = CodBanco;
+                            ValdObjetos.pValVenta = Convert.ToInt32(linea.Substring(50, 12));
+                            ValdObjetos.pNumAutorizacion = linea.Substring(74, 12).TrimStart('0');
+                            ValdObjetos.pNumAutorizacion = ValdObjetos.pNumAutorizacion.Trim();
+                            ValdObjetos.pCodUnico = Convert.ToInt32(linea.Substring(179, 20));
+                            ValdObjetos.pCuenta = linea.Substring(199, 20);
+                            ValdObjetos.pFecVale = linea.Substring(241, 4) + "/" + linea.Substring(245, 2) + "/" + linea.Substring(247, 2);
+                            ValdObjetos.pFecProceso = linea.Substring(271, 4) + "/" + linea.Substring(275, 2) + "/" + linea.Substring(277, 2);
+                            ValdObjetos.pFecAbono = linea.Substring(301, 4) + "/" + linea.Substring(305, 2) + "/" + linea.Substring(307, 2);
+                            ValdObjetos.pNumTarjeta = linea.Substring(309, 30).TrimStart('0');
+                            ValdObjetos.pHora = linea.Substring(339, 30).TrimStart('0');
+                            ValdObjetos.pComprobante = linea.Substring(369, 11).TrimStart('0');
+                            ValdObjetos.pTerminal = linea.Substring(384, 15);
+                            ValdObjetos.pValIva = Convert.ToInt32(linea.Substring(399, 12));
+                            ValdObjetos.pValPropina = Convert.ToInt32(linea.Substring(413, 12));
+                            ValdObjetos.pValTotal = Valor;
+                            ValdObjetos.pTipTarjeta = linea.Substring(455, 30);
+                            ValdObjetos.pPlazo = linea.Substring(485, 3);
+                            ValdObjetos.pPorComision = linea.Substring(488, 8);
+                            TipoOperacion = Convert.ToInt32(linea.Substring(68, 6));
+
+                            ValdObjetos.pNumLote = Convert.ToString(LoteMaximo.ToString());
+
+
+                            if (ConfigurationManager.AppSettings["CodBanco"].ToString().Contains("," + Convert.ToInt32(CodBanco) + ","))
+                            {
+
+                                if (Convert.ToInt32(linea.Substring(157, 2)) > 0)
+                                    ValdObjetos.pValRetFuente = Convert.ToInt32(linea.Substring(145, 14));
+                                else
+                                    ValdObjetos.pValRetFuente = Convert.ToInt32(linea.Substring(145, 12));
+
+                                if (Convert.ToInt32(linea.Substring(115, 2)) > 0)
+                                    ValdObjetos.pValComision = Convert.ToInt32(linea.Substring(103, 14));
+                                else
+                                    ValdObjetos.pValComision = Convert.ToInt32(linea.Substring(103, 12));
+
+                                if (Convert.ToInt32(linea.Substring(129, 2)) > 0)
+                                    ValdObjetos.pValRetIva = Convert.ToInt32(linea.Substring(117, 14));
+                                else
+                                    ValdObjetos.pValRetIva = Convert.ToInt32(linea.Substring(117, 12));
+
+                                if (Convert.ToInt32(linea.Substring(143, 2)) > 0)
+                                    ValdObjetos.pValRetIca = Convert.ToInt32(linea.Substring(131, 14));
+                                else
+                                    ValdObjetos.pValRetIca = Convert.ToInt32(linea.Substring(131, 12));
+
+                                if (Convert.ToInt32(linea.Substring(453, 2)) > 0)
+                                    ValdObjetos.pValAbono = Convert.ToInt32(linea.Substring(441, 14));
+                                else
+                                    ValdObjetos.pValAbono = Convert.ToInt32(linea.Substring(441, 12));
+                            }
+                            else
+                            {
+                                ValdObjetos.pValRetFuente = Convert.ToInt32(linea.Substring(145, 12));
+                                ValdObjetos.pValComision = Convert.ToInt32(linea.Substring(103, 12));
+                                ValdObjetos.pValRetIva = Convert.ToInt32(linea.Substring(117, 12));
+                                ValdObjetos.pValRetIca = Convert.ToInt32(linea.Substring(131, 12));
+                                ValdObjetos.pValAbono = Convert.ToInt32(linea.Substring(441, 12));
+                            }
+
+
+                            if (CodBanco == "43") //Tarjeta Occidente
+                            {
+                                switch (ValdObjetos.pNumTarjeta.Substring(0, 1))
+                                {
+                                    case "4":
+                                        ValdObjetos.pFranquicia = "VNS";
+                                        break;
+                                    case "5":
+                                        ValdObjetos.pFranquicia = "MNS";
+                                        break;
+                                    case "6":
+                                        ValdObjetos.pFranquicia = "MNS";
+                                        break;
+                                    default:
+                                        ValdObjetos.pFranquicia = "TARJETA OCCIDENTE";
+                                        break;
+                                }
+
+                                if (TipoOperacion != 0)
+                                    ValdObjetos.pLegalizado = "R";
+                                else
+                                    ValdObjetos.pLegalizado = "N";
+                            }
+                            else
+                            {
+                                ValdObjetos.pLegalizado = "N";
+                                if (franquicia == " ".PadLeft(20, ' '))
+                                    ValdObjetos.pFranquicia = NombreBanco;
+                                else
+                                    ValdObjetos.pFranquicia = franquicia.TrimEnd();
+                            }
+
+                            suma = Valor + suma;
+
+                            /// <summary>
+                            /// Valida si la referencia existe en pagos tarjeta y si no la inserta en la tabla pagos tarjeta
+                            /// </summary>
+                            List<string[,]> ConsultaTarjeta = ConsultaPagosTarjeta.ValidaExistePagoTarjeta(ValdObjetos, "ConsultaExistePagoTarjeta");
+
+                            if (ConsultaTarjeta.Count > 0)
+                            {
+                                if (encabezado == "")
+                                {
+                                    RegistrosProcesados.WriteLine("BANCO".PadRight(7, ' ') + "AUTORIZACION".PadRight(15, ' ') + "VALOR".PadRight(16, ' ') + "FRANQUICIA".PadRight(20, ' ') + "FECHA".PadRight(11, ' ') + "OBSERVACIÓN");
+                                    encabezado = "S";
+                                }
+                                RegistrosProcesados.WriteLine(CodBanco.PadRight(7, ' ') + ValdObjetos.pNumAutorizacion.PadRight(14, ' ') + " $" + Convert.ToString(Valor).PadRight(15, ' ') + ValdObjetos.pFranquicia.PadRight(20, ' ') + ValdObjetos.pFecVale.Replace("/", "") + "   REGISTRO YA EXISTE EN VENTAS");
+                                nregistrosprocesados++;
+                                nregistrosexistentes++;
+                            }
+                            else
+                            {
+                                string GuardaRegistrosPago = ConsultaPagosTarjeta.IUDPagosTarjeta(ValdObjetos, "InsertPagosTarjeta");
+                                if (GuardaRegistrosPago.Substring(0, 1) != "0")
+                                {
+                                    if (encabezado == "")
+                                    {
+                                        RegistrosProcesados.WriteLine("BANCO".PadRight(7, ' ') + "AUTORIZACION".PadRight(15, ' ') + "VALOR".PadRight(16, ' ') + "FRANQUICIA".PadRight(20, ' ') + "FECHA".PadRight(11, ' ') + "OBSERVACIÓN");
+                                        encabezado = "S";
+                                    }
+
+                                    RegistrosProcesados.WriteLine(CodBanco.PadRight(7, ' ') + ValdObjetos.pNumAutorizacion.PadRight(14, ' ') + " $" + Convert.ToString(Valor).PadRight(15, ' ') + ValdObjetos.pFranquicia.PadRight(20, ' ') + ValdObjetos.pFecVale.Replace("/", "") + "   SE GUARDO CORRECTAMENTE EN VENTAS");
+                                    nregistrosprocesados++;
+                                    npagosguardados++;
+                                }
+                                else
+                                {
+                                    RegistrosProcesados.WriteLine(CodBanco.PadRight(7, ' ') + ValdObjetos.pNumAutorizacion.PadRight(14, ' ') + " $" + Convert.ToString(Valor).PadRight(15, ' ') + ValdObjetos.pFranquicia.PadRight(20, ' ') + ValdObjetos.pFecVale.Replace("/", "") + "   OCURRIO UN ERROR AL GUARDAR");
+                                    error++;
+                                }
+
+                            }
+                        }
+                    }
+                }
+                if (!flag_01 || !flag_06) // Si no hay lineas de pago lo excluye
+                {
+                    RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                    String rutaFin = RutaArchivo;
+                    rutaFin = rutaFin.Replace("Procesados", "Historico");
+                    if (!Directory.Exists(rutaFin))
+                    {
+                        System.IO.Directory.CreateDirectory(rutaFin);
+                    }
+                    if (sr != null)
+                    {
+                        sr.Close();
+                    }
+                    if (RegistrosProcesados != null)
+                    {
+                        RegistrosProcesados.Close();
+                    }
+                    RutaDestino = System.IO.Path.Combine(rutaFin + fecha_otroArc + NombreArchivo);
+
+                    System.IO.File.Move(RutaOrigen, RutaDestino);
+                    return "Archivo con otra estructura movido";
+                }
+
+                /// <summary>
+                /// Convierte en formato numero el valor total de los registros procesados
+                /// </summary>
+                double valor = Convert.ToDouble(suma);
+                string resultsuma = Convert.ToString(suma);
+                resultsuma = valor.ToString("0,0", CultureInfo.InvariantCulture);
+                resultsuma = String.Format(CultureInfo.InvariantCulture, "{0:0,0}", valor);
+                if (RegistrosProcesados.BaseStream != null)
+                {
+                    RegistrosProcesados.WriteLine("TOTAL VALOR: $" + resultsuma);
+                    RegistrosProcesados.WriteLine("TOTAL REGISTROS: " + nregistrosprocesados);
+                }
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
+                if (sr != null)
+                {
+                    sr.Close();
+                }
+
+                string legalizados = (PagoValdLN.Legalizacionpagos("UpdateLegalizaciones"));
+                String legalizados2 = (PagoValdLN.Legalizacionpagos("UpdateLegalizacionesPagoCuota"));
+
+                int legalizacionFinal = Convert.ToInt32(legalizados) + Convert.ToInt32(legalizados2);
+
+                #endregion
+
+
+                /// <summary>
+                ///Si el proceso continuo correctamente, lo mueve de la ruta origen a la ruta de procesados
+                /// </summary>
+                RutaOrigen = System.IO.Path.Combine(RutaArchivo + NombreArchivo);
+                RutaDestino = System.IO.Path.Combine(RutaEpicor + NombreArchivo + fecha);
+                System.IO.File.Move(RutaOrigen, RutaDestino);
+
+                /// <summary>
+                /// Envio de correo electronico
+                /// </summary>
+                Correo = Util.EnvioMail(" ", "PAGOS MASIVOS DEL BANCO " + NombreBanco, "Buen día, \n\n" +
+                "A continuación se envia un detallado de los pagos procesados a traves del banco " + NombreBanco + " generado el "
+                + DateTime.Now.Day.ToString() + "/" + DateTime.Now.Month.ToString().PadLeft(2, '0') + "/" + DateTime.Now.Year.ToString() + " a las "
+                + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0') + ":" + DateTime.Now.Second.ToString().PadLeft(2, '0') + " \n\n" +
+                "1. Registros nuevos a tarjeta de credito: " + npagosguardados + " registros. \n" +
+                "2. Registros existentes en ventas: " + nregistrosexistentes + " registros. \n" +
+                "3. Registros legalizados: " + legalizacionFinal + " registros. \n" +
+                "4. Errores presentados: " + error + " registros. \n\n" +
+                "Total Valor $ " + resultsuma + "\n\n" +
+                "Total registros procesados: " + nregistrosprocesados + " registros. \n\n" +
+                "Número de lote: " + LoteMaximo + ".\n\n" +
+                "El archivo de resultados lo encontrara en la ruta: " + CarpetaBanco + ". \n\n" +
+                "La información contenida en este E-mail es confidencial y solo puede ser utilizada por el individuo o la compania " +
+                "a la cual esta dirigido. Si no es el receptor autorizado, cualquier retención, difusión, distribución o copia" +
+                "de este mensaje es prohibida y será sancionada por la ley. Si por error recibe este mensaje, " +
+                "favor reenviarlo al remitente y borrar el mensaje recibido inmediatamente.", ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(), ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                return "PROCESO REALIZADO CON EXITO";
+            }
+            catch (Exception ex)
+            {
+                if (RegistrosProcesados != null)
+                {
+                    RegistrosProcesados.Close();
+                }
+                if (sr != null)
+                {
+                    sr.Close();
+                }
+                return ex.Message;
+            }
+        }
+
+        /// <summary>
+        /// Metodo que crea el archivo de SICO con la estructura Davivienda
+        /// </summary>
+        public void CrearArchivoSico(string NombreArchivo)
+        {
+
+            if (ControlaHora >= 23)
+            {
+                ControlaHora = 1;
+                if (ControlaMinutos >= 59)
+                {
+                    ControlaMinutos = 1;
+                }
+            }
+            else
+            {
+                ControlaHora++;
+                ControlaMinutos++;
+            }
+
+
+            tipomovimiento = linea.Substring(97, 2);
+
+
+            if (!NombreArchivo.Contains("Acreedores"))
+            {
+                if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                {
+                }
+                else
+                {
+                    /*PAGOPI*/
+                    if (npagosguardadosPI > 0)
+                    {
+                        if (FormaPago == "EFECTIVO")
+                        {
+                            //ArchivoSico.WriteLine(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            Lista_ArchivoSico.Add(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                        }
+                        else
+                        {
+                            //ArchivoSico.WriteLine(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "00" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            Lista_ArchivoSico.Add(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "00" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                        }
+
+                    }
+                    else
+                    {
+                        if (FormaPago == "EFECTIVO")
+                        {
+                            //ArchivoSico.WriteLine(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            Lista_ArchivoSico.Add(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                        }
+                        else
+                        {
+                            //ArchivoSico.WriteLine(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "00" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            Lista_ArchivoSico.Add(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "00" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                        }
+
+                    }
+
+
+
+                }
+            }
+        }
+
+        public void CrearArchivoSicoTarjeta(string NombreArchivo, String pCodBanco)
+        {
+
+            if (ControlaHora >= 23)
+            {
+                ControlaHora = 1;
+                if (ControlaMinutos >= 59)
+                {
+                    ControlaMinutos = 1;
+                }
+            }
+            else
+            {
+                ControlaHora++;
+                ControlaMinutos++;
+            }
+
+
+            tipomovimiento = linea.Substring(97, 2);
+
+
+            if (!NombreArchivo.Contains("Acreedores"))
+            {
+                if (tipomovimiento.Contains("DE") || tipomovimiento.Contains("ND") || tipomovimiento.Contains("NC"))
+                {
+                }
+                else
+                {
+                    if (pCodBanco == CodBancoVisaMarterCardVentas)
+                    {
+                        /*PAGOPI*/
+                        if (npagosguardadosPI > 0)
+                        {
+
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoVisaMAstercardSICO.WriteLine(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_ArchivoVisaMAstercardSICO.Add(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            }
+
+
+                        }
+                        else
+                        {
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoVisaMAstercardSICO.WriteLine(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_ArchivoVisaMAstercardSICO.Add(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            }
+
+                        }
+                    }
+
+                    else if (pCodBanco == CodBancoAmexVentas)
+                    {
+                        /*PAGOPI*/
+                        if (npagosguardadosPI > 0)
+                        {
+
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoAmexSICO.WriteLine(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_ArchivoAmexSICO.Add(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+
+                            }
+
+                        }
+                        else
+                        {
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoAmexSICO.WriteLine(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_ArchivoAmexSICO.Add(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            }
+
+                        }
+                    }
+
+                    else if (pCodBanco == CodBancoDinnersVentas)
+                    {
+                        /*PAGOPI*/
+                        if (npagosguardadosPI > 0)
+                        {
+
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoDinnersSICO.WriteLine(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_DinnersSICO.Add(FechaSico + "P" + Sucursal.PadLeft(9, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            }
+
+                        }
+                        else
+                        {
+                            if (FormaPago == "TARJETA")
+                            {
+                                //ArchivoDinnersSICO.WriteLine(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                                Lista_DinnersSICO.Add(FechaSico + Sucursal.PadLeft(10, '0') + "DE" + Convert.ToString(Valor).PadLeft(10, '0') + "".PadRight(12, '0') + "".PadRight(7, '0') + Convert.ToString(Referencia).PadLeft(10, '0') + DigitoVerificacion + Convert.ToString(ControlaHora).PadLeft(2, '0') + Convert.ToString(ControlaMinutos).PadLeft(2, '0') + "000000");
+                            }
+
+                        }
+                    }
+
+
+                }
+            }
+        }
+        public bool insertarRecaudo { get; set; }
+        public string ProcesarPagosSinSubir(string usuario, string password)
+        {
+            List<ArchNoAPSICOEN> listaArchivos = new List<ArchNoAPSICOEN>();
+            int contador = 0;
+            try
+            {
+                //String comando;
+
+                archNoAPSICOEN.codBanco = 0;
+                archNoAPSICOEN.fechaRecaudo = DateTime.Now.ToString();
+                archNoAPSICOEN.fechaModificacion = DateTime.Now;
+                archNoAPSICOEN.parteFija = "";
+                archNoAPSICOEN.rutaArchivo = "";
+                archNoAPSICOEN.nombreArchivo = "";
+
+                listaArchivos = archivoLN.ConsultarArchNoAplicadosSICOLN(archNoAPSICOEN, "C").ToList();
+                // Ordena por fecha
+                listaArchivos.Sort(delegate (ArchNoAPSICOEN x, ArchNoAPSICOEN y)
+                {
+                    if (x.fechaModificacion == null && y.fechaModificacion == null) return 0;
+                    else if (x.fechaModificacion == null) return -1;
+                    else if (y.fechaModificacion == null) return 1;
+                    else return x.fechaModificacion.CompareTo(y.fechaModificacion);
+                });
+
+                foreach (var item in listaArchivos)
+                {
+                    exporasico = Util.UploadFTP(item.rutaArchivo + item.nombreArchivo, RutaSico, UsuFTP, PassFTP);
+                    if (exporasico == "OK")
+                    {
+                        informacion = informacion + "Nombre archivo para SICO: " + item.nombreArchivo + ". \n";
+                        /*PAGOS*/
+                        //Se encarga de aplicar directamente en SICO
+                        //comando = NombreComando + NombrePrograma + " " + item.nombreArchivo;
+                        try
+                        {
+                            //Conexion.conecta_Server(ServidorSico, UsuarioSico, PasswordSico, comando);
+                            parametrosEN.NombreParametro = "APLICACION_SICO";
+                            parametrosEN.Tipo = parametrosEN.Descripcion = parametrosEN.Descripcion = parametrosEN.ValorParametro = "";
+                            List<ParametrosEN> listaParamSico = parametrosLN.ConsultarParametrosLN(parametrosEN).ToList();
+                            if (listaParamSico != null)
+                            {
+                                if (listaParamSico.Count > 0)
+                                {
+                                    String Aplicar = listaParamSico[0].ValorParametro;
+                                    if (Aplicar == "SI")
+                                    {
+                                        smsico.Proappaau(item.nombreArchivo);
+                                    }
+
+                                }
+                                else
+                                {
+                                    smsico.Proappaau(item.nombreArchivo);
+                                }
+                            }
+                            else
+                            {
+                                smsico.Proappaau(item.nombreArchivo);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Correo = Util.EnvioMail(" ", "OCURRIO UN ERROR AL Aplicar Los Pagos en Sico en la Libreria SSHConect " + item.codBanco + "\n\n",
+                                  "Se presento un error al aplicar los pagos en la libreria de Sico. Por favor validar." + ex.ToString(),
+                                 ConfigurationManager.AppSettings["CorreoTo"].ToString(), ConfigurationManager.AppSettings["CorreoFrom"].ToString(),
+                                 ConfigurationManager.AppSettings["CorreoCC"].ToString());
+
+                        }
+                        //Almacena pagos consistentes e inconsistentes de SICO                                
+                        RptPagosLN pagosLN = new RptPagosLN();
+                        pagosLN.almacenaRegistroSicoLN(Util, NombreArchivoSico, UsuFTPSystem, PassFTPSystem,
+                                                            item.codBanco, item.fechaRecaudo, item.fechaModificacion, item.parteFija);
+
+                        archivoLN.EliminarArchNoAplicadosSICOLN(item, "D");
+
+                    }
+                    else
+                    {
+                        contador++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+
+            if (contador == 0)
+            {
+                return "PROCESO REALIZADO EXITOSAMENTE";
+            }
+            else
+            {
+                return "No se procesaron " + contador + " de" + listaArchivos.Count + " Archivos";
+            }
+
+        }
+
+    }
+}
