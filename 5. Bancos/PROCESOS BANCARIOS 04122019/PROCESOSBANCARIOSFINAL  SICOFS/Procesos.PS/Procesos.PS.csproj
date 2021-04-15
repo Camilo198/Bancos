@@ -273,7 +273,6 @@
     <Content Include="MarcaVisual\Iconos\Pause.png" />
     <Content Include="MarcaVisual\Iconos\Play.png" />
     <None Include="Web References\wsenviocorreos\service.disco" />
-    <None Include="Web References\ServicioPagosOnline\PagosOnline.disco" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -304,10 +303,10 @@
       <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
       <CachedSettingsPropName>Procesos_PS_ServicioTarjetaCredito_TarjetasCredito</CachedSettingsPropName>
     </WebReferenceUrl>
-    <WebReferenceUrl Include="http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl">
+    <WebReferenceUrl Include="http://localhost:51647/Servicios/PagosOnline.svc%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\ServicioPagosOnline\</RelPath>
-      <UpdateFromURL>http://sbogche010f/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://localhost:51647/Servicios/PagosOnline.svc%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

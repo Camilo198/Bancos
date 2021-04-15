@@ -206,8 +206,7 @@ namespace Bancos.PS.Servicios
                          CorreosNoti[0] = "marina.ramirez@Chevyplan.com.co";
 // Cambiar al pasar a produccion
                         //CorreosNoti[0] = "cristian.munoz@Chevyplan.com.co";
-                            Correo.enviarNotificaciones(Directorio, CorreosNoti , nombreArchivo, Remitente,
-                                                     registrosLote, tipoArchivo);
+                            //Correo.enviarNotificaciones(Directorio, CorreosNoti , nombreArchivo, Remitente,                                                     registrosLote, tipoArchivo);
 
                         ciclo = ciclo + Convert.ToInt16(LimitesSuperior[i]);
 
