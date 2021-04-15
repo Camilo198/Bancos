@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Procesos.PS.Codigo
 {
@@ -123,14 +124,42 @@ namespace Procesos.PS.Codigo
             List<ArchivoEN> lista_ax = new List<ArchivoEN>();
             IList<ArchivoEN> lista_BD = new List<ArchivoEN>();
             IList<ArchivoEN> lista_eliminados = new List<ArchivoEN>();
+            String fechaRecaudo = String.Empty;
+            DateTime fechaArchivo;
+            bool flag_01 = false;
 
             foreach (var item in archivo)
             {
-                lista_ax.Add(new ArchivoEN()
+                if (File.Exists(item))
                 {
-                    Fecha = File.GetCreationTime(item), //.ToString("yyyy-MM-dd")
-                    RutaArchivo = item
-                });
+                    foreach (var linea in File.ReadLines(item))
+                    {
+                        if (linea.Substring(0, 2) == "01")
+                        {
+                            fechaRecaudo = linea.Substring(12, 4) + "/" + linea.Substring(16, 2) + "/" + linea.Substring(18, 2);
+                            flag_01 = true;
+                            break;
+                        }
+
+                    }
+
+                    if (flag_01)
+                    {
+                        fechaArchivo = DateTime.ParseExact(fechaRecaudo, "yyyy/MM/dd", CultureInfo.CurrentCulture);
+                    }
+                    else
+                    {
+                        fechaArchivo = File.GetCreationTime(item);
+                    }
+                    lista_ax.Add(new ArchivoEN()
+                    {
+                        Fecha = fechaArchivo,
+                        RutaArchivo = item
+                    });
+
+                    flag_01 = false;
+                }
+
             }
 
             archivo.Clear();
@@ -149,7 +178,7 @@ namespace Procesos.PS.Codigo
             archivoEN.RutaArchivo = "";
 
             lista_BD = archivoLN.consultarArchivoBolsaLN(archivoEN);
-                
+
             if (lista_BD.Count > 0)
             {
                 lista_eliminados = lista_BD.Where(x => !lista_ax.Any(y => x.RutaArchivo == y.RutaArchivo)).ToList();

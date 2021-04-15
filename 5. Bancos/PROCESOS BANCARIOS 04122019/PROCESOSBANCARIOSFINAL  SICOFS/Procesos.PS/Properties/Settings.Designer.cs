@@ -36,7 +36,7 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche016v/Bancos/Servicios/Recaudo.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8092/Servicios/Recaudo.svc")]
         public string Procesos_PS_ServicioRecaudo_Recaudo {
             get {
                 return ((string)(this["Procesos_PS_ServicioRecaudo_Recaudo"]));
@@ -66,7 +66,7 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://sbogche010f/Bancos/Servicios/PagosOnline.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8092/Servicios/PagosOnline.svc")]
         public string Procesos_PS_ServicioPagosOnline_PagosOnline {
             get {
                 return ((string)(this["Procesos_PS_ServicioPagosOnline_PagosOnline"]));
@@ -86,7 +86,7 @@ namespace Procesos.PS.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8082/WsBancos.svc")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9085/WsBancos.svc")]
         public string Procesos_PS_ServicioBancos_WsBancos {
             get {
                 return ((string)(this["Procesos_PS_ServicioBancos_WsBancos"]));
