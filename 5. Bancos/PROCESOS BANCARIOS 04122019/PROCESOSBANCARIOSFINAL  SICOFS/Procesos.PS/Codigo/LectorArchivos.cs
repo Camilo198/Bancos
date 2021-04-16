@@ -124,12 +124,34 @@ namespace Procesos.PS.Codigo
             List<ArchivoEN> lista_ax = new List<ArchivoEN>();
             IList<ArchivoEN> lista_BD = new List<ArchivoEN>();
             IList<ArchivoEN> lista_eliminados = new List<ArchivoEN>();
+
+            ArchivoEN archivoEN = new ArchivoEN();
+            ArchivoLN archivoLN = new ArchivoLN();
+            archivoEN.Fecha = DateTime.Now;
+            archivoEN.RutaArchivo = "";
+
             String fechaRecaudo = String.Empty;
             DateTime fechaArchivo;
             bool flag_01 = false;
 
+            lista_BD = archivoLN.consultarArchivoBolsaLN(archivoEN);
+
             foreach (var item in archivo)
             {
+                var lista_piv = lista_BD.FirstOrDefault(c => c.RutaArchivo == item);
+                if (lista_piv != null)
+                {
+                    lista_ax.Add(lista_piv);
+                    continue;
+                }
+                //foreach (var archivoBD in lista_BD)
+                //{
+                //    if (item == archivoBD.RutaArchivo)
+                //    {
+                //        continue;
+                //    }
+                //lista_BD.Find(item);
+
                 if (File.Exists(item))
                 {
                     foreach (var linea in File.ReadLines(item))
@@ -158,6 +180,7 @@ namespace Procesos.PS.Codigo
                     });
 
                     flag_01 = false;
+                    ////}
                 }
 
             }
@@ -171,11 +194,6 @@ namespace Procesos.PS.Codigo
                 else if (y.Fecha == null) return 1;
                 else return x.Fecha.CompareTo(y.Fecha);
             });
-
-            ArchivoEN archivoEN = new ArchivoEN();
-            ArchivoLN archivoLN = new ArchivoLN();
-            archivoEN.Fecha = DateTime.Now;
-            archivoEN.RutaArchivo = "";
 
             lista_BD = archivoLN.consultarArchivoBolsaLN(archivoEN);
 
